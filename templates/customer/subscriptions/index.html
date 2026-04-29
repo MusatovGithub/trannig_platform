@@ -1,0 +1,444 @@
+{% extends  'base.html' %}
+{% load static %}
+{% load attendance_filters %}
+{% block title %} <title>Абонементы</title> {% endblock %}
+
+{% block content %}
+  
+<div class="container-fluid mw-100">
+    <div class="card card-body py-3">
+      <div class="row align-items-center">
+        <div class="col-12">
+          <div class="d-sm-flex align-items-center justify-space-between">
+            <h4 class="mb-4 mb-sm-0 card-title">Абонементы</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="card-body p-0">
+        <img src="{% static 'dash/images/backgrounds/profilebg.jpg' %}" alt="matdash-img" class="img-fluid">
+        <div class="row align-items-center">
+          <div class="col-lg-12 mt-n3 order-lg-2 order-1">
+            <div class="mt-n5">
+              <div class="d-flex align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center justify-content-center round-110">
+                  <div class="border border-4 border-white d-flex align-items-center justify-content-center rounded-circle overflow-hidden round-100">
+                    {% if custumer.photo and custumer.photo.url %}
+                        <img src="{{ custumer.photo.url }}" calt="matdash-img" class="w-100 h-100" />
+                    {% else %}
+                        <img src="{% static 'dash/images/profile/1.png' %}" alt="matdash-img" class="w-100 h-100" />
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="text-center">
+                <h5 class="mb-0">{{custumer.full_name}}</h5>
+                <p class="mb-0">{{custumer.phone}}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <ul class="nav nav-pills user-profile-tab justify-content-end mt-2 bg-primary-subtle rounded-2 rounded-top-0" id="pills-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_detaile' custumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-profile-tab">
+              <i class="ti ti-user-circle fs-5"></i>
+              <span class="d-none d-md-block">Профиль</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_subscriptions' custumer.id  %}" class="nav-link active hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-file-description fs-5"></i>
+              <span class="d-none d-md-block">Абонементы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment_history' custumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-receipt fs-5"></i>
+              <span class="d-none d-md-block">Платежи</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_docs_all' custumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-friends-tab">
+              <i class="ti ti-file-check fs-5"></i>
+              <span class="d-none d-md-block">Документы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_representatives_all' custumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-friends fs-5"></i>
+              <span class="d-none d-md-block">Представители</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment' custumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-history fs-5"></i>
+              <span class="d-none d-md-block">История посещений</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="table-responsive mb-4 border rounded-1">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+                        <tr>
+                          <th>
+                            №
+                          </th>
+                          <th>Группы</th>
+                          <th>Количество занятий</th>
+                          <th>Количество
+                            <br>оставшихся занятий
+                          </th>
+                          <th>Период действия</th>
+                          <th>Статус</th>
+                          <th>Стоимость</th>
+                          <th>Оплачено</th>
+                          <th>Действия</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in subscription %}
+                        <tr>
+                          <td>{{forloop.counter}}</td>
+                          <td>
+                            {% for group in item.groups.all %}
+                              <p class="mb-0 fw-normal">
+                                {{ group.name }}    
+                              </p>
+                              {% endfor %}
+                          </td>
+                          <td>
+                            {% if item.number_classes == None %}
+                              <p class="mb-0 fw-normal">Безлимитный</p>
+                            {% else %}
+                              <p class="mb-0 fw-normal">{{item.number_classes}}</p>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if item.remained == None %}
+                              <p class="mb-0 fw-normal">Безлимитный</p>
+                            {% else %}
+                              <p class="mb-0 fw-normal">{{item.count_of_trainnig_left}}</p>
+                            {% endif %}
+                          </td>
+                          <td>
+                            <p class="mb-0 fw-normal">
+                              <p>начало: {{item.start_date}}</p>
+                              <p>окончания: {{item.end_date}}</p>
+                            </p>
+                          </td>
+                          <td>
+                            {% if item.is_blok %}
+                              <p class="mb-2 fw-normal">Закрыт</p>
+                              <form action="{% url 'customer:open_subscription' item.id %}" method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-open-subscription">
+                                  <i class="ti ti-lock-open me-1"></i>
+                                  Открыть
+                                </button>
+                              </form>
+                            {% else %}
+                              <p class="mb-0 fw-normal">Активен</p>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if item.is_free == True %}
+                              <p class="mb-0 fw-normal">Бесплатно</p>
+                            {% else %}
+                              <p class="mb-0 fw-normal">{{item.total_cost}}</p>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if item.attendance_status == 'paid' %}
+                              <p class="mb-0 fw-normal">Оплачено</p>
+                            {% elif item.attendance_status == 'unpaid' %}
+                              <p class="mb-0 fw-normal">Не оплачено</p>
+                              <div class="payment-info">
+                                <p class="mb-0 payment-label">
+                                  <i class="ti ti-alert-triangle payment-warning-icon"></i>
+                                  К доплате: <span class="remaining-amount">{{item.remaining_amount}}</span>
+                                </p>
+                              </div>
+                            {% endif %}
+                            {% if item.attendance_status == 'none' %}
+                              <p class="mb-0 fw-normal">Бесплатно</p>
+                            {% endif %}
+                          </td>
+                          <td>
+                            <div class="row">
+                              <div class="col-md-3">
+                                  <a type="button" class="btn btn-sm btn-primary"  data-bs-toggle="modal" data-bs-target="#bs-example-modal-xlg{{item.id}}">
+                                    <i class="ti ti-eye fs-5"></i>
+                                  </a>
+                                  <a href="{% url 'customer:custumer_subscriptions_detele' custumer.id item.id %}" class="btn btn-sm btn-danger btn-delete-client">
+                                    <i class="ti ti-trash fs-5"></i>
+                                  </a>
+                                  <a  class="btn btn-sm btn-primary" href="{% url 'customer:custumer_subscriptions_update' custumer.id item.id %}">
+                                    <i class="ti ti-edit fs-5"></i>
+                                  </a>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                </table>
+              </div>
+            <a class="btn btn-primary" href="{% url 'customer:custumer_subscriptions_add' custumer.id %}">
+                <i class="ti ti-plus fs-5"></i> 
+                Выдать абонемент
+            </a>
+            <a class="btn btn-danger" href="{% url 'customer:customer_list' %}">
+                <i class="ti ti-arrow-back fs-5"></i> Назад
+            </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Модальные окна для детального просмотра абонементов -->
+{% for item in subscription %}
+<div class="modal fade" id="bs-example-modal-xlg{{ item.id }}" tabindex="-1" aria-labelledby="subscriptionDetailModalLabel{{ item.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="subscriptionDetailModalLabel{{ item.id }}">
+          <i class="ti ti-file-description me-2"></i>
+          Детальная информация об абонементе #{{ item.id }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <!-- Левая колонка - основная информация -->
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="ti ti-info-circle me-2"></i>Основная информация</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>ID абонемента:</strong></div>
+                  <div class="col-sm-8">
+                    <span class="badge bg-primary fs-6">#{{ item.id }}</span>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Клиент:</strong></div>
+                  <div class="col-sm-8">
+                    <div class="d-flex align-items-center">
+                      {% if custumer.photo and custumer.photo.url %}
+                        <img src="{{ custumer.photo.url }}" class="rounded-circle me-2" width="30" height="30" alt="Фото клиента" />
+                      {% else %}
+                        <img src="{% static 'dash/images/profile/1.png' %}" class="rounded-circle me-2" width="30" height="30" alt="Фото клиента" />
+                      {% endif %}
+                      <span>{{ custumer.full_name }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Тип абонемента:</strong></div>
+                  <div class="col-sm-8">
+                    {% if item.unlimited %}
+                      <span class="badge bg-success fs-6">Безлимитный</span>
+                    {% else %}
+                      <span class="badge bg-info fs-6">Ограниченный</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Количество занятий:</strong></div>
+                  <div class="col-sm-8">
+                    {% if item.number_classes == None %}
+                      <span class="text-success fw-bold">Безлимитный</span>
+                    {% else %}
+                      <span class="fw-bold">{{ item.number_classes }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Осталось занятий:</strong></div>
+                  <div class="col-sm-8">
+                    {% if item.remained == None %}
+                      <span class="text-success fw-bold">Безлимитный</span>
+                    {% else %}
+                      <span class="fw-bold text-primary">{{ item.count_of_trainnig_left }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Статус оплаты:</strong></div>
+                  <div class="col-sm-8">
+                    {% if item.attendance_status == 'paid' %}
+                      <span class="badge bg-success fs-6">Оплачено</span>
+                    {% elif item.attendance_status == 'unpaid' %}
+                      <span class="badge bg-danger fs-6">Не оплачено</span>
+                    {% elif item.attendance_status == 'none' %}
+                      <span class="badge bg-secondary fs-6">Бесплатно</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Правая колонка - финансовая информация -->
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="ti ti-currency-dollar me-2"></i>Финансовая информация</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Стоимость:</strong></div>
+                  <div class="col-sm-8">
+                    {% if item.is_free %}
+                      <span class="badge bg-success fs-6">Бесплатно</span>
+                    {% else %}
+                      <span class="fw-bold text-success fs-5">{{ item.total_cost|default:"Не указана" }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+                {% if item.attendance_status == 'unpaid' and item.remaining_amount %}
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>К доплате:</strong></div>
+                  <div class="col-sm-8">
+                    <span class="fw-bold text-danger fs-5">{{ item.remaining_amount }}</span>
+                  </div>
+                </div>
+                {% endif %}
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Период действия:</strong></div>
+                  <div class="col-sm-8">
+                    <div class="d-flex flex-column">
+                      <small class="text-muted">Начало:</small>
+                      <span class="fw-bold">{{ item.start_date|default:"Не указана" }}</span>
+                      <small class="text-muted mt-1">Окончание:</small>
+                      <span class="fw-bold">{{ item.end_date|default:"Не указана" }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Выдал:</strong></div>
+                  <div class="col-sm-8">
+                    <span class="fw-bold">{{ item.owner|default:"Не указан" }}</span>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-4"><strong>Дата создания:</strong></div>
+                  <div class="col-sm-8">
+                    <span class="fw-bold">{{ item.created_at|default:"Не указана" }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Группы -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="ti ti-users me-2"></i>Группы</h6>
+              </div>
+              <div class="card-body">
+                {% if item.groups.all %}
+                  <div class="row">
+                    {% for group in item.groups.all %}
+                    <div class="col-md-6 col-lg-4 mb-2">
+                      <div class="d-flex align-items-center p-2 border rounded">
+                        <i class="ti ti-users text-primary me-2"></i>
+                        <a href="{% url 'groups_custumer:groups_detail' group.id %}" class="fw-bold">{{ group.name }}</a>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="text-muted mb-0">Абонемент не привязан ни к одной группе</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- История посещений -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0"><i class="ti ti-history me-2"></i>История посещений</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Дата</th>
+                        <th>Группа</th>
+                        <th>Оценка</th>
+                        <th>Комментарий</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Здесь должна быть логика для отображения посещений -->
+                      {% if  not attendance %}
+                        <tr>
+                          <td colspan="5" class="text-center text-muted">
+                            <i class="ti ti-info-circle me-2"></i>
+                            История посещений будет отображаться здесь
+                          </td>
+                        </tr>
+                      {% endif %}
+                      {% for atten in attendance %}
+                        <tr>
+                          <td>{{atten.date}}</td>
+                          <td>
+                            <a href="{% url 'groups_custumer:groups_detail' atten.gr_class.groups_id.id %}">{{atten.gr_class}}</a>
+                          </td>
+                          <td class="text-center">
+                            {% with score=atten.attendance_status|attendance_score_display %}
+                              {% if score %}
+                                <span class="attendance-score-badge score-{{score}}">{{score}}</span>
+                              {% else %}
+                                <span class="text-muted">-</span>
+                              {% endif %}
+                            {% endwith %}
+                          </td>
+                          <td>{{atten.comment}}</td>
+                        </tr>
+                      {% endfor %}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="{% url 'customer:custumer_subscriptions_update' custumer.id item.id %}" class="btn btn-warning">
+          <i class="ti ti-edit me-1"></i> Редактировать
+        </a>
+        <a href="{% url 'customer:custumer_subscriptions_detele' custumer.id item.id %}" class="btn btn-danger">
+          <i class="ti ti-trash me-1"></i> Удалить
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="ti ti-x me-1"></i> Закрыть
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

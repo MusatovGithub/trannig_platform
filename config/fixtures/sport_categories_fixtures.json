@@ -1,0 +1,76 @@
+[
+  {"model": "custumer.sportcategory", "pk": 10, "fields": {"name": "Мастер спорта международного класса", "level": 10, "description": "Мастер спорта международного класса"}},
+  {"model": "custumer.sportcategory", "pk": 9, "fields": {"name": "Мастер спорта", "level": 9, "description": "Мастер спорта"}},
+  {
+    "model": "custumer.sportcategory",
+    "pk": 1,
+    "fields": {
+      "name": "Кандидат в мастера спорта",
+      "level": 8,
+      "description": "Кандидат в мастера спорта"
+    }
+  },
+  {
+    "model": "custumer.sportcategory",
+    "pk": 2,
+    "fields": {
+      "name": "1 разряд",
+      "level": 7,
+      "description": "1 разряд"
+    }
+  },
+  {
+    "model": "custumer.sportcategory",
+    "pk": 3,
+    "fields": {
+      "name": "2 разряд",
+      "level": 6,
+      "description": "2 разряд"
+    }
+  },
+  {
+    "model": "custumer.sportcategory",
+    "pk": 4,
+    "fields": {
+      "name": "3 разряд",
+      "level": 5,
+      "description": "3 разряд"
+    }
+  },
+  {
+    "model": "custumer.sportcategory",
+    "pk": 5,
+    "fields": {
+      "name": "1 юношеский разряд",
+      "level": 4,
+      "description": "1 юношеский разряд"
+    }
+  },
+  {
+    "model": "custumer.sportcategory",
+    "pk": 6,
+    "fields": {
+      "name": "2 юношеский разряд",
+      "level": 3,
+      "description": "2 юношеский разряд"
+    }
+  },
+  {
+    "model": "custumer.sportcategory",
+    "pk": 7,
+    "fields": {
+      "name": "3 юношеский разряд",
+      "level": 2,
+      "description": "3 юношеский разряд"
+    }
+  },
+  {
+    "model": "custumer.sportcategory",
+    "pk": 8,
+    "fields": {
+      "name": "Без разряда",
+      "level": 1,
+      "description": "Без разряда"
+    }
+  }
+]

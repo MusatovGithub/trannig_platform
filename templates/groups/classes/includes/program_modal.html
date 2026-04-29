@@ -1,0 +1,86 @@
+{% comment %}
+  Включаемый шаблон модального окна программы занятия
+  
+  Параметры:
+  - modal_id (обязательный) - уникальный ID модального окна
+  - class_object (обязательный) - объект занятия (item или entry.gr_class)
+  - modal_title (опционально) - заголовок модального окна, по умолчанию "Программа занятия"
+  - show_edit_button (опционально) - показывать ли кнопку редактирования, по умолчанию False
+  - edit_url (опционально) - URL для редактирования программы
+  - header_class (опционально) - дополнительные классы для header, по умолчанию "d-flex align-items-center"
+  - header_style (опционально) - дополнительные стили для header (например, для градиента)
+  - title_tag (опционально) - тег для заголовка (h4, h5), по умолчанию "h4"
+  - close_button_class (опционально) - класс для кнопки закрытия, по умолчанию "btn-close"
+  - footer_class (опционально) - дополнительные классы для footer
+  - footer_button_class (опционально) - класс для кнопки закрытия в footer, по умолчанию "btn bg-danger-subtle text-danger waves-effect text-start"
+  - table_class (опционально) - дополнительные классы для таблицы, по умолчанию "text-nowrap mb-0 align-middle"
+  - table_wrapper_class (опционально) - классы для обёртки таблицы, по умолчанию "table-responsive mb-4 border rounded-1"
+  - empty_message (опционально) - сообщение когда программа пустая, по умолчанию "Программа не добавлена"
+  - distance_column_title (опционально) - заголовок колонки дистанции, по умолчанию "Дистанция"
+  - item_id (опционально) - ID элемента для формирования уникального ID модального окна
+  - edit_url_id (опционально) - ID для генерации URL редактирования через {% url %}
+{% endcomment %}
+
+{% if item_id %}
+<div class="modal fade program-modal" id="{{ modal_id }}{{ item_id }}" tabindex="-1" aria-labelledby="{{ modal_id }}{{ item_id }}Label" aria-hidden="true">
+{% else %}
+<div class="modal fade program-modal" id="{{ modal_id }}" tabindex="-1" aria-labelledby="{{ modal_id }}Label" aria-hidden="true">
+{% endif %}
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable modal-fullscreen-md-down">
+    <div class="modal-content">
+      <div class="modal-header {% if header_class %}{{ header_class }}{% else %}d-flex align-items-center{% endif %}" {% if header_style %}style="{{ header_style }}"{% endif %}>
+        <{{ title_tag|default:"h4" }} class="modal-title" id="{% if item_id %}{{ modal_id }}{{ item_id }}{% else %}{{ modal_id }}{% endif %}Label">
+          {{ modal_title|default:"Программа занятия" }}
+        </{{ title_tag|default:"h4" }}>
+        <button type="button" class="{{ close_button_class|default:"btn-close" }}" data-bs-dismiss="modal" aria-label="{% if close_button_class == "btn-close btn-close-white" %}Закрыть{% else %}Close{% endif %}"></button>
+      </div>
+      <div class="modal-body p-0">
+        {% if class_object.classes.all %}
+          <div class="{{ table_wrapper_class|default:"table-responsive mb-4 border rounded-1" }}">
+            <table class="table {{ table_class|default:"text-nowrap mb-0 align-middle" }}{% if 'program-table' not in table_class|default:"" %} program-table{% endif %}">
+              <thead class="table">
+                <tr>
+                  <th>№</th>
+                  <th>Этапы</th>
+                  <th>{% if distance_column_title %}{{ distance_column_title }}{% else %}Дистанция{% endif %}</th>
+                  <th>Стиль</th>
+                  <th>Комментарии</th>
+                  <th>Отдых</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in class_object.classes.all %}
+                  <tr>
+                    <td>
+                      <span class="badge bg-primary">{{ forloop.counter }}</span>
+                    </td>
+                    <td><span class="fw-semibold">{{ i.stages }}</span></td>
+                    <td><span class="badge bg-info text-dark">{{ i.distance }} м</span></td>
+                    <td>{{ i.style|default:"—" }}</td>
+                    <td class="text-muted comments-cell">{{ i.comments|default:"—" }}</td>
+                    <td><span class="badge bg-warning text-dark">{{ i.rest|default:"—" }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if show_edit_button %}
+            {% if edit_url %}
+              <a href="{{ edit_url }}" class="btn btn-sm btn-primary"><i class="ti ti-edit fs-5"></i></a>
+            {% elif edit_url_id %}
+              <a href="{% url 'group_classe:classes_programm_update' edit_url_id %}" class="btn btn-sm btn-primary"><i class="ti ti-edit fs-5"></i></a>
+            {% endif %}
+          {% endif %}
+        {% else %}
+          <div class="text-center text-muted py-4">{{ empty_message|default:"Программа не добавлена" }}</div>
+        {% endif %}
+      </div>
+      <div class="modal-footer{% if footer_class %} {{ footer_class }}{% endif %}">
+        <button type="button" class="{{ footer_button_class|default:"btn bg-danger-subtle text-danger waves-effect text-start" }}" data-bs-dismiss="modal">
+          Закрыть
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

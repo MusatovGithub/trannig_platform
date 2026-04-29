@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+# Миграции и сбор статики (admin, Jazzmin, vendor в STATIC_ROOT — из пакетов;
+# каталоги static_cdn/admin, jazzmin, vendor в git не коммитим)
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
+
+# Запуск gunicorn
+exec gunicorn config.wsgi:application \
+    --bind 0.0.0.0:8000 \
+    --workers 4 \
+    --threads 4 \
+    --timeout 60 \
+    --log-level info \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --preload

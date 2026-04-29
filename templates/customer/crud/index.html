@@ -1,0 +1,360 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Клиенты</title> {% endblock %}
+
+{% block content %}
+  
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+        <div class="row">
+            <div class="col-lg-10">
+              <h4 class="card-title mb-0">Клиенты</h4>
+            </div>
+            <div class="col-lg-2 text-end">
+              <a href="{% url 'customer:customer_create' %}" type="button" class="btn btn-success">Создать</a>
+            </div>
+          </div>
+    </div>
+
+    
+
+    <div class="card-body">
+        <form method="get">
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Поиск</label>
+                  <input type="text" name="search" id="search" class="form-control" value="{{ request.GET.search|default:'' }}"/>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Группы</label>
+                  <select class="form-select" name="group" >
+                    <option value="">Группы</option>
+                    {% for item in groups %}
+                      <option value="{{item.id}}" {% if request.GET.group == item.id|stringformat:"s" %}selected{% endif %}>{{item.name}}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Пол</label>
+                  <select class="form-select" name="gender">
+                    <option value="">Пол</option>
+                    {% for item in gender %}
+                      <option value="{{item.id}}" {% if request.GET.gender == item.id|stringformat:"s" %}selected{% endif %}>{{item.name}}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Год рождения</label>
+                  <input type="text" id="birth_year" name="birth_year" class="form-control" placeholder="" value="{{ request.GET.birth_year|default:'' }}"/>
+              </div>
+            </div>
+  
+  
+            <div class="col-12">
+              <div class="d-md-flex align-items-center" style="justify-content: flex-end !important;">
+
+                <div class="mt-3 mt-md-0" style="padding: 2px;">
+                  <a href="{% url 'customer:customer_list' %}" class="btn btn-secondary">
+                    <i class="ti ti-refresh fs-4"></i>
+                    Сбросить
+                  </a>
+                </div>
+  
+                <div class="mt-3 mt-md-0" style="padding: 2px;">
+                  <button type="submit" class="btn btn-primary hstack gap-6">
+                    <i class="ti ti-search fs-4"></i>Фильтровать
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </form>
+    </div>
+    <div class="card-body p-4">
+        <!-- Выполнить -->
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table customer-table mb-0 align-middle">
+            <thead class="text-dark fs-4">
+                <tr>
+                  <th>
+                    №
+                  </th>
+                  <th>ФИО</th>
+                  <th>Год рождения</th>
+                  <th>Телефон</th>
+                  <th>Баланс</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in custumer %}
+                <tr>
+                  <td>{{forloop.counter}}</td>
+                  <td class="customer-name-cell">
+                    <a href="{% url 'customer:custumer_detaile' item.id %}">
+                      <div class="d-flex align-items-center">
+                        {% if item.photo and item.photo.url %}
+                            <img src="{{ item.photo.url }}" class="rounded-circle flex-shrink-0" width="40" height="40" />
+                        {% else %}
+                            <img src="{% static 'dash/images/profile/1.png' %}" class="rounded-circle flex-shrink-0" width="40" height="40" />
+                        {% endif %}
+                        <div class="ms-3 customer-name-text">
+                          <h6 class="fw-semibold mb-0">{{item.full_name}}</h6>
+                        </div>
+                      </div>
+                    </a>
+                  </td>
+                  <td>
+                    <p class="mb-0 fw-normal">{{item.birth_date}}</p>
+                  </td>
+                  <td>
+                    <p class="mb-0 fw-normal">{{item.phone}}</p>
+                  </td>
+                  <td>
+                    <button type="button"
+                            class="btn btn-balance"
+                            style="background: linear-gradient(90deg, #ffe259 0%, #ffa751 100%); color: #222; font-weight: 600; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(255, 174, 0, 0.12); border: none;"
+                            data-bs-toggle="modal"
+                            data-bs-target="#balanceModal"
+                            data-custumer-id="{{ item.id }}"
+                            data-custumer-name="{{ item.full_name }}"
+                            data-balance="{{ item.balance }}">
+                      <i class="bi bi-coin me-3" style="color: #ffb300; font-size: 1.3em;"></i>
+                      {{ item.balance|default:0 }}
+                    </button>
+                  </td>
+                  <td>
+      
+      
+                    <div class="row">
+                      <div class="col-md-3">
+                          {% if item.is_send %}
+                            <!-- Если приглашение отправлено - показываем кнопку закрытия доступа -->
+                            <a href="{% url 'customer:close_cabinet_access' item.id %}" 
+                               class="btn btn-sm btn-warning btn-delete-client"
+                               title="Закрыть доступ к личному кабинету"
+                               onclick="return confirm('Вы уверены, что хотите закрыть доступ к личному кабинету для {{ item.full_name }}? Это удалит учетную запись пользователя.');">
+                              <i class="ti ti-lock fs-5"></i>
+                            </a>
+                          {% else %}
+                            <!-- Если приглашение не отправлено - показываем кнопку удаления -->
+                            <a href="{% url 'customer:cutsumer_delete' item.id %}" 
+                               class="btn btn-sm btn-danger btn-delete-client"
+                               title="Удалить клиента"
+                               onclick="return confirm('Вы уверены, что хотите удалить клиента {{ item.full_name }}?');">
+                              <i class="ti ti-trash fs-5"></i>
+                            </a>
+                          {% endif %}
+                          <a  class="btn btn-sm btn-primary" href="{% url 'customer:custumer_update' item.id %}">
+                            <i class="ti ti-edit fs-5"></i>
+                          </a>
+                          {% if item.user %}
+                            <!-- Кнопка повторной отправки данных для входа -->
+                            <a href="{% url 'customer:resend_client_credentials' item.id %}" 
+                               class="btn btn-sm btn-success d-inline-flex align-items-center justify-content-center"
+                               title="Повторная отправка данных для входа"
+                               onclick="return confirm('Будет сгенерирован новый пароль и отправлен на {{ item.user.email }}. Продолжить?');">
+                              <i class="ti ti-send fs-5"></i>
+                            </a>
+                          {% elif item.is_send == False %}
+                            <!-- Кнопка первичной отправки данных -->
+                            <a href="{% url 'customer:send_client_credentials' item.id %}" 
+                               class="btn btn-sm btn-primary d-inline-flex align-items-center justify-content-center"
+                               title="Отправить данные для входа">
+                              <i class="ti ti-send fs-5"></i>
+                            </a>
+                          {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Назад">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&laquo;</span>
+      </li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Вперёд">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&raquo;</span>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+</div>
+  <!-- Модальное окно изменения баланса -->
+  <div class="modal fade" id="balanceModal" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="balanceForm" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="balanceModalLabel">Изменить баланс клиента</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="custumer_id" id="balanceCustumerId">
+          <div class="mb-3">
+            <label class="form-label">Клиент</label>
+            <input type="text" class="form-control" id="balanceCustumerName" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Баланс (баллы)</label>
+            <input type="number" class="form-control" name="balance" id="balanceInput" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Комментарий</label>
+            <input type="text" class="form-control" name="description" id="descriptionInput" required>
+          </div>
+          <div class="alert alert-danger d-none" id="balanceError"></div>
+          <div class="alert alert-success d-none" id="balanceSuccess">Баланс успешно обновлён!</div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+<script>
+  document.querySelectorAll('.btn-balance').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.getElementById('balanceCustumerId').value = btn.getAttribute('data-custumer-id');
+      document.getElementById('balanceCustumerName').value = btn.getAttribute('data-custumer-name');
+      document.getElementById('descriptionInput').value = '';
+      document.getElementById('balanceInput').value = btn.getAttribute('data-balance');
+      document.getElementById('balanceError').classList.add('d-none');
+      document.getElementById('balanceSuccess').classList.add('d-none');
+    });
+  });
+
+  document.getElementById('balanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var custumerId = document.getElementById('balanceCustumerId').value;
+    var balance = document.getElementById('balanceInput').value;
+    var description = document.getElementById('descriptionInput').value;
+    fetch("{% url 'customer:update_balance' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({custumer_id: custumerId, balance: balance, description: description})
+    })
+    .then(response => response.json())
+    .then(json => {
+      var err = document.getElementById('balanceError');
+      var ok = document.getElementById('balanceSuccess');
+      err.classList.add('d-none');
+      ok.classList.add('d-none');
+      if (json.success) {
+        ok.classList.remove('d-none');
+        // Обновить баланс в таблице без перезагрузки:
+        document.querySelector('button[data-custumer-id="'+custumerId+'"]').innerHTML =
+          '<i class="bi bi-coin me-1" style="color: #ffb300; font-size: 1.3em;"></i> ' + balance;
+        setTimeout(() => {
+          var modal = bootstrap.Modal.getInstance(document.getElementById('balanceModal'));
+          modal.hide();
+        }, 1000);
+      } else {
+        err.textContent = json.error || "Ошибка";
+        err.classList.remove('d-none');
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Адаптивные стили для таблицы клиентов */
+  
+  /* На десктопе сохраняем text-nowrap */
+  @media (min-width: 768px) {
+    .customer-table {
+      white-space: nowrap;
+    }
+  }
+  
+  /* На мобильных устройствах */
+  @media (max-width: 767px) {
+    /* Убираем text-nowrap, разрешаем перенос текста */
+    .customer-table {
+      white-space: normal !important;
+    }
+    
+    /* Ограничиваем ширину ячейки с именем и добавляем правый отступ */
+    .customer-name-cell {
+      max-width: 140px !important;
+      padding-right: 20px !important;
+      vertical-align: top;
+    }
+    
+    /* Уменьшаем размер текста и разрешаем перенос */
+    .customer-name-text {
+      max-width: 100%;
+      padding-right: 10px;
+    }
+    
+    .customer-name-text h6 {
+      font-size: 0.8rem !important; /* Ещё немного уменьшаем */
+      line-height: 1.3;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      margin-right: 5px;
+    }
+    
+    /* Изображение не сжимается */
+    .flex-shrink-0 {
+      flex-shrink: 0;
+    }
+    
+    /* Добавляем отступ для следующей колонки (год рождения) */
+    .customer-table tbody td:nth-child(3) {
+      padding-left: 15px !important;
+      vertical-align: top;
+    }
+    
+    /* Уменьшаем размер текста в других ячейках для компактности */
+    .customer-table tbody td {
+      font-size: 0.85rem;
+    }
+  }
+</style>
+{% endblock %}

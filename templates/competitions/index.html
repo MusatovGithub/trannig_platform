@@ -1,0 +1,151 @@
+{% extends base_template %}
+{% load static %}
+{% block title %} <title>Соревнования</title> {% endblock %}
+
+{% block content %}
+
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 border-bottom">
+    <div class="row">
+      <div class="col-lg-10">
+        <h4 class="card-title mb-0">Соревнования</h4>
+      </div>
+      <div class="col-lg-2 text-end">
+        <a href="{% url 'competitions:create_competition' %}" class="btn btn-success">Создать</a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="get">
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="mb-3">
+            <label class="form-label">Название</label>
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" value="{{ request.GET.search|default:'' }}" placeholder="Поиск по названию">
+              <span class="input-group-text"><i class="ti ti-search"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="mb-3">
+            <label class="form-label">Дата начала</label>
+            <div class="input-group date">
+              <input type="text" class="form-control datepicker" name="date" placeholder="дд.мм.гггг" autocomplete="off" required value="{{ request.GET.date|default:'' }}">
+              <span class="input-group-addon input-group-text">
+                <i class="ti ti-calendar fs-5"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="mb-3">
+            <label class="form-label">Дата окончания</label>
+            <div class="input-group date">
+              <input type="text" class="form-control datepicker" name="end_date" placeholder="дд.мм.гггг" autocomplete="off" value="{{ request.GET.end_date|default:'' }}">
+              <span class="input-group-addon input-group-text">
+                <i class="ti ti-calendar fs-5"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3 d-flex align-items-end">
+          <div class="mb-3 w-100">
+            <div class="d-flex flex-column flex-md-row gap-2 w-100">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="ti ti-search fs-4"></i>
+                Фильтровать
+              </button>
+              <a href="{% url 'competitions:competitions_list' %}" class="btn btn-secondary w-100">
+                <i class="ti ti-refresh fs-4"></i>
+                Сбросить
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="card-body p-4">
+    <div class="table-responsive mb-4 border rounded-1">
+      <table class="table text-nowrap mb-0 align-middle">
+        <thead class="text-dark fs-4">
+          <tr>
+            <th>№</th>
+            <th>Название</th>
+            <th>Дата начала</th>
+            <th>Дата окончания</th>
+            <th>Место</th>
+            <th>Статус</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for comp in page_obj %}
+          <tr>
+            <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+            <td>
+              <a href="{% url 'competitions:get_competition_details' comp.id %}">
+                <h6 class="fs-5 fw-semibold mb-0">{{ comp.name }}</h6>
+              </a>
+            </td>
+            <td>{{ comp.date|date:"d.m.Y" }}</td>
+            <td>{{ comp.end_date|date:"d.m.Y" }}</td>
+            <td>{{ comp.location }}</td>
+            <td>{{ comp.status }}</td>
+            <td>
+              <a href="{% url 'competitions:update_competition' comp.id %}" class="btn btn-sm btn-primary" title="Редактировать">
+                <i class="ti ti-edit fs-5"></i>
+              </a>
+              <a href="{% url 'competitions:delete_competition' comp.id %}" class="btn btn-sm btn-danger"
+                 onclick="return confirm('Удалить это соревнование?');" title="Удалить">
+                <i class="ti ti-trash fs-5"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center">Соревнований не найдено</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.has_other_pages %}
+    <nav>
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Назад">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">&laquo;</span>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Вперёд">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">&raquo;</span>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Мой профиль</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Мой профиль</h4>
+                </div>
+  
+                <!-- Форма-->
+                <form action="" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div>
+                    <div class="card-body">
+                      <h4 class="card-title">Личная информация</h4>
+                      <p class="text-danger">{{error}}</p>
+                      <div class="row pt-3">
+  
+                        <!--ФИО-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Ф.И.О</label>
+                            <input type="text" id="name" name="name" class="form-control" value="{{ user_change.first_name }}"/>
+                          </div>
+                        </div>
+                        <!--Телефон-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="phone" id="phone" name="phone" class="form-control international-inputmask" value="{{ user_change.phone }}"/>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                              <label class="form-label">Email</label>
+                              <input type="email" id="email" name="email" class="form-control" value="{{ user_change.email }}"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                              <label class="form-label">Адрес</label>
+                              <input type="text" id="company" name="company" class="form-control" value="{{ user_change.company }}"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                              <label class="form-label">Фото</label>
+                              
+                              <input type="file" id="avatar" name="avatar" class="form-control" />
+                              {% if user_change.avatar %}
+                                <div class="mt-2">
+                                  <span class="text-muted ms-2">Фото На данный момент: </span><img src="{{ user_change.avatar.url }}" alt="{{ user_change.avatar.url }}"style="max-width:120px; max-height:120px; border-radius:6px;">
+                                </div>
+                              {% else %}
+                                  Фото не загружено
+                              {% endif %}
+                            </div>
+                        </div>
+                        
+                      </div>
+                    </div>
+  
+                    <div class="form-actions">
+                      <div class="card-body border-top">
+                        <button type="submit" class="btn btn-primary" id="buttonSave">
+                          Сохранить
+                        </button>
+                        <a href="{% url 'supervisor:cabinet' %}" class="btn bg-danger-subtle text-danger ms-6">
+                          Отмена
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+
+
+
+{% endblock %}

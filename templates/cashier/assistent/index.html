@@ -1,0 +1,94 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Касса</title> {% endblock %}
+
+{% block content %}
+  
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+        <div class="row">
+
+            <div class="col-lg-10">
+              <h4 class="card-title mb-0">Касса</h4>
+            </div>
+            {% for ite in request.user.user_id.all %}
+                {% for permission in ite.roll.perm.all %}
+                    {% if permission.name == 'Может создавать кассы' %}
+                        <div class="col-lg-2 text-end">
+                            <a href="{% url 'customer:cashier_create' %}" type="button" class="btn btn-success">Создать кассу</a>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+
+          </div>
+    </div>
+
+    
+    <div class="card-body p-4">
+        <!-- Выполнить -->
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+            <thead class="text-dark fs-4">
+                <tr>
+                  <th>
+                    №
+                  </th>
+                  <th>Название</th>
+                  <th>Комментарий</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in objects_list %}
+                <tr>
+                  <td>{{forloop.counter}}</td>
+                  <td>
+                    <h6 class="fs-4 fw-semibold mb-0">{{item.name}}</h6>
+                  </td>
+                  <td>
+                    {% if item.description == None %}
+                        <p class="mb-0 fw-normal"></p>
+                    {% else %}
+                        <p class="mb-0 fw-normal">{{item.description}}</p>
+                    {% endif %}
+                  </td>
+                  <td>
+      
+      
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% for ite in request.user.user_id.all %}
+                                {% for permission in ite.roll.perm.all %}
+                                    {% if permission.name == 'Может изменять кассы' %}
+                                        <a href="{% url 'customer:cashier_update' item.id %}" class="btn btn-sm btn-primary">
+                                            <i class="ti ti-edit fs-5"></i>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+
+                            {% for ite in request.user.user_id.all %}
+                                {% for permission in ite.roll.perm.all %}
+                                    {% if permission.name == 'Может удалять кассы' %}
+                                        <a href="{% url 'customer:cashier_delete' item.id %}" class="btn btn-sm btn-danger btn-delete-client">
+                                            <i class="ti ti-trash fs-5"></i>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}

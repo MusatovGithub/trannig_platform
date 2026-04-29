@@ -1,0 +1,108 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Изменить занятие</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Изменить занятие</h4>
+                </div>
+  
+                <!-- Форма-->
+                <form action="" method="post">
+                  {% csrf_token %} 
+                  <div>
+                    <div class="card-body">
+                      <h4 class="card-title">Информация</h4>
+                      <p class="text-danger">{{error}}</p>
+                      <div class="row pt-3">
+  
+                        <!--Название-->
+                        <div class="col-md-12">
+                            <div class="mb-3 has-success">
+                              <label class="form-label">Выберите Группы</label>
+                              <select class="form-select" id="groups_id" name="groups_id">
+                                {% for group in groups %}
+                                  <option value="{{group.id}}"  {% if group.id == classess.groups_id.id %}selected{% endif %}>{{group.name}}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          </div>
+                        <!--Вид спорта-->
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                              <label class="form-label">Дата</label>
+                              <div class="input-group date">       
+                                <input type="text" class="form-control" name="start_date" value="{{ classess.date|date:'d.m.Y' }}"/>
+                                <span class="input-group-addon input-group-text">
+                                  <i class="ti ti-calendar fs-5"></i>
+                                </span>
+                              </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                              <label class="form-label">Начало</label>
+                              <input type="time" id="strat" name="strat" class="form-control" value="{{ classess.strat|time:'H:i' }}"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                              <label class="form-label">Конец</label> 
+                              <input type="time" id="end" name="end" class="form-control" value="{{ classess.end|time:'H:i' }}"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3 has-success">
+                              <label class="form-label">Выберите Тренеры</label>
+                              <select class="form-select" id="employe" name="employe">
+                                {% for item in employe %}
+                                  <option value="{{item.id}}" {% if item.id == classess.employe.id %}selected{% endif %}>{{item.full_name}}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                              <label class="form-label">Комментарий</label>
+                              <textarea name="comment" id="comment" class="form-control">{{ classess.comment }}</textarea>
+                            </div>
+                        </div>
+                        
+                      </div>
+  
+  
+                      </div>
+                    <div class="form-actions">
+                      <div class="card-body border-top">
+                        <button type="submit" class="btn btn-primary" id="buttonSave">
+                          Сохранить
+                        </button>
+                        <a href="{% url 'group_classe:group_classess' %}" class="btn bg-danger-subtle text-danger ms-6">
+                          Отмена
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+  
+
+
+
+{% endblock %}

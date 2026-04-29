@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+# Ожидание доступности базы данных
+echo "Waiting for database..."
+until pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER"; do
+  sleep 1
+done
+
+echo "Database is available!"
+exec "$@"

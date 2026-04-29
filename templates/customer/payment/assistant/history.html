@@ -1,0 +1,242 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Платежи</title> {% endblock %}
+
+{% block content %}
+  
+<div class="container-fluid mw-100">
+    <div class="card card-body py-3">
+      <div class="row align-items-center">
+        <div class="col-12">
+          <div class="d-sm-flex align-items-center justify-space-between">
+            <h4 class="mb-4 mb-sm-0 card-title">Платежи</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="card-body p-0">
+        <img src="{% static 'dash/images/backgrounds/profilebg.jpg' %}" alt="matdash-img" class="img-fluid">
+        <div class="row align-items-center">
+          <div class="col-lg-12 mt-n3 order-lg-2 order-1">
+            <div class="mt-n5">
+              <div class="d-flex align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center justify-content-center round-110">
+                  <div class="border border-4 border-white d-flex align-items-center justify-content-center rounded-circle overflow-hidden round-100">
+                    {% if cutumer.photo and cutumer.photo.url %}
+                        <img src="{{ cutumer.photo.url }}" calt="matdash-img" class="w-100 h-100" />
+                    {% else %}
+                        <img src="{% static 'dash/images/profile/1.png' %}" alt="matdash-img" class="w-100 h-100" />
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="text-center">
+                <h5 class="mb-0">{{cutumer.full_name}}</h5>
+                <p class="mb-0">{{cutumer.phone}}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <ul class="nav nav-pills user-profile-tab justify-content-end mt-2 bg-primary-subtle rounded-2 rounded-top-0" id="pills-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_detaile' cutumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-profile-tab">
+              <i class="ti ti-user-circle fs-5"></i>
+              <span class="d-none d-md-block">Профиль</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_subscriptions' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-file-description fs-5"></i>
+              <span class="d-none d-md-block">Абонементы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment_history' cutumer.id  %}" class="nav-link active hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-receipt fs-5"></i>
+              <span class="d-none d-md-block">Платежи</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_docs_all' cutumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-friends-tab">
+              <i class="ti ti-file-check fs-5"></i>
+              <span class="d-none d-md-block">Документы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_representatives_all' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-friends fs-5"></i>
+              <span class="d-none d-md-block">Представители</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-history fs-5"></i>
+              <span class="d-none d-md-block">История посещений</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-content" id="pills-tabContent">
+      
+      <div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+        
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="table-responsive mb-4 border rounded-1">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+                        <tr>
+                          <th>
+                            №
+                          </th>
+                          <th>Наименование</th>
+                          <th>Дата</th>
+                          <th>Стоимость</th>
+                          <th>Касса</th>
+                          <th>Действия</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for item in payment %}
+                        <tr>
+                          <td>{{forloop.counter}}</td>
+                          <td>
+                            {% if item.subscription %}
+                                <a href="#" class="mb-0 fw-normal nav-link text-primary"  data-bs-toggle="modal" data-bs-target="#with-grid-modal{{item.id}}">Абонементы</a>
+                                <div class="modal fade" id="with-grid-modal{{item.id}}" tabindex="-1" aria-labelledby="scroll-long-inner-modal" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-scrollable">
+                                      <div class="modal-content">
+                                        <div class="modal-header d-flex align-items-center">
+                                          <h4 class="modal-title" id="myLargeModalLabel">
+                                            Информация об абонементе
+                                          </h4>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                          <div class="container-fluid">
+                                            <div class="row mt-3">
+                                              <div class="col-lg-12  py-3">
+                                                <ul class="list-group">
+                                                  <li class="list-group-item d-flex align-items-center">                         
+                                                    Клиент
+                                                    <span class="badge bg-light-primary text-primary  ms-auto">{{item.custumer.full_name}}</span>
+                                                  </li>
+                                                  <li class="list-group-item d-flex align-items-center">
+                                                    Действует в группах
+                                                    <span class="badge bg-light-danger text-danger  ms-auto"><a href="{% url 'groups_custumer:groups_detail' item.groups.id %}" class="nav-link text-info">{{item.groups}}</a></span>
+                                                  </li>
+                                                  <li class="list-group-item d-flex align-items-center">
+                                                    Стоимость
+                                                    {% if item.subscription.is_free %}
+                                                      <span class="badge bg-light-success text-primary ms-auto">Бесплатно</span>
+                                                    {% elif item.subscription.total_cost %}
+                                                      <span class="badge bg-light-success text-primary ms-auto">
+                                                          {{ item.subscription.total_cost|default:"0,00" }}
+                                                      </span>
+                                                    {% else %}
+                                                      <span class="badge bg-light-success text-primary ms-auto">0,00</span>
+                                                    {% endif %}
+                                                  </li>
+                                                  <li class="list-group-item d-flex align-items-center">
+                                                    Остаток посещений
+                                                    <span class="badge bg-light-success text-primary  ms-auto">
+                                                      {% if item.subscription.unlimited %}
+                                                        Безлимит
+                                                      {% else %}
+                                                        {{ item.subscription.count_of_trainnig_left }} из {{ item.subscription.number_classes }}
+                                                      {% endif %}
+                                                    </span>
+                                                  </li>
+                                                  <li class="list-group-item d-flex align-items-center">
+                                                    Статус оплаты
+                                                    <div class="ms-auto">
+                                                      <span class="badge {% if item.subscription.attendance_status == 'paid' %}subscription-status-paid{% elif item.subscription.attendance_status == 'unpaid' %}subscription-status-unpaid{% else %}subscription-status-free{% endif %}">
+                                                        {% if item.subscription.attendance_status == 'paid' %}Оплачено
+                                                        {% elif item.subscription.attendance_status == 'unpaid' %}Не оплачено
+                                                        {% else %}Бесплатно{% endif %}
+                                                      </span>
+                                                      {% if item.subscription.attendance_status == "unpaid" and item.subscription.remaining_amount > 0 %}
+                                                        <br><small class="debt-indicator mt-1 d-inline-block">
+                                                          <i class="ti ti-alert-triangle"></i> 
+                                                          Долг: {{ item.subscription.remaining_amount|floatformat:0 }}
+                                                        </small>
+                                                      {% endif %}
+                                                    </div>
+                                                  </li>
+                                                  <li class="list-group-item d-flex align-items-center">
+                                                    <p>Выдал - {{item.subscription.owner}}</p>
+                                                    <span class="badge bg-light-success text-primary  ms-auto">{{item.subscription.created_at}}</span>
+                                                  </li>
+                                                  <li class="list-group-item d-flex align-items-center">
+                                                    Действует
+                                                    <span class="badge bg-light-success text-primary  ms-auto">{{item.subscription.start_date}} - {{item.subscription.end_date}}</span>
+                                                  </li>
+                                                </ul>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn bg-danger-subtle text-danger  waves-effect text-start" data-bs-dismiss="modal">
+                                            Закрыть
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                            {% elif item.summ_date == None  %}
+                              <p class="mb-0 fw-normal">	
+                                Не оплачено</p>
+                            {% else %}
+                                <p class="mb-0 fw-normal">Оплата занятия</p>
+                            {% endif %}
+                          </td>
+                          <td>
+                              <p class="mb-0 fw-normal">{{item.summ_date}}</p>
+                          </td>
+                          <td>
+                            {% if item.summ == 0 and not item.cashier and not item.subscription %}
+                              <span class="badge bg-info">Прощено</span>
+                            {% else %}
+                              <p class="mb-0 fw-normal">{{item.summ}}</p>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if item.summ == 0 and not item.cashier and not item.subscription %}
+                              <span class="text-muted">—</span>
+                            {% else %}
+                              <p class="mb-0 fw-normal">{{item.cashier|default:"—"}}</p>
+                            {% endif %}
+                          </td>
+                          <td>
+              
+              
+                            <div class="row">
+                              <div class="col-md-3">
+                                {% for ite in request.user.user_id.all %}
+                                    {% for permission in ite.roll.perm.all %}
+                                        {% if permission.name == 'Может удалять платежи' %}
+                                            <a href="{% url 'customer:custumer_payment_delete' cutumer.id item.id %}" class="btn btn-sm btn-danger btn-delete-client">
+                                                <i class="ti ti-trash fs-5"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                </table>
+              </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

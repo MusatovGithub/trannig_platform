@@ -1,0 +1,182 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Изменить клиента</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Изменить клиента</h4>
+                </div>
+  
+                <!-- Форма-->
+                <form action="" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div>
+                    <div class="card-body">
+                      <h4 class="card-title">Личная информация</h4>
+                      <p class="text-danger">{{error}}</p>
+                      <div class="row pt-3">
+  
+                        <!--ФИО-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label required">Ф.И.О <span class="text-danger">*</span></label>
+                            <input type="text" id="full_name" name="full_name" class="form-control" value="{{ custumer.full_name }}" required/>
+                            <div class="invalid-feedback">Заполните поле Ф.И.О.</div>
+                          </div>
+                        </div>
+                        <!--Телефон-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="phone" id="phone" name="phone" class="form-control international-inputmask" value="{{ custumer.phone }}"/>
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Пол-->
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                            <label class="form-label">Пол</label>
+                            <select class="form-select" id="gender" name="gender">
+                              {% for item in gender %}
+                                <option value="{{item.id}}" {% if item.id == custumer.gender_id %}selected{% endif %}>{{item.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                        <!--День рождения-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">День рождения</label>
+                            <div class="input-group date">
+                              
+                              <input type="text" class="form-control mydatepicker" name="birth_date" placeholder="дд.мм.гггг" value="{{ custumer.birth_date|date:'d.m.Y' }}" />
+        
+                              <span class="input-group-addon input-group-text">
+                                <i class="ti ti-calendar fs-5"></i>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Адрес-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Адрес</label>
+                            <input type="text" id="address" name="address" class="form-control" value="{{ custumer.address }}"/>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+  
+                    <hr />
+                    <div class="card-body">
+                      <h4 class="card-title mb-4">Доп информация</h4>
+  
+                      <div class="row">
+                        <!--Номер договора-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Номер договора</label>
+                            <input type="text" id="contract_number" name="contract_number" class="form-control" value="{{ custumer.contract_number }}"/>
+                          </div>
+                        </div>
+                        <!--Тип договора-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Тип договора</label>
+                            <input type="text" id="contract_type" name="contract_type" class="form-control" value="{{ custumer.contract_type }}"/>
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Дата начала обучения-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Дата начала обучения</label>
+                            <div class="input-group date">
+                              
+                              <input type="text" class="form-control mydatepicker" name="start_date" placeholder="дд.мм.гггг" value="{{ custumer.strat_date|date:'d.m.Y' }}" />
+        
+                              <span class="input-group-addon input-group-text">
+                                <i class="ti ti-calendar fs-5"></i>
+                              </span>
+                            </div>
+
+                          </div>
+                        </div>
+                        <!--Группы-->
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                            <label class="form-label" help_text="Чтобы выбрать сразу несколько групп зажмите ctrl на клавиатуре">Группы</label>
+                            <small class="form-text text-muted d-block mb-2" style="font-size: 0.875rem;">
+                              <i class="ti ti-info-circle me-1"></i>Чтобы выбрать сразу несколько групп зажмите ctrl на клавиатуре
+                            </small>
+                            <select class="select2 form-select" id="group" name="group" multiple="multiple">
+                              {% for item in groups %}
+                                <option value="{{item.id}}"  {% if item in custumer.groups.all %}selected{% endif %}>{{item.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Спортивный разряд-->
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                            <label class="form-label">Спортивный разряд</label>
+                            <select class="form-select" id="sport_rank" name="sport_rank">
+                              {% for item in sport_categorys %}
+                                <option value="{{item.id}}" {% if item.id == custumer.sport_category.id %}selected{% endif %}>{{item.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                        <!--Фото-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Фото</label>
+                            
+                            <input type="file" id="photo" name="photo" class="form-control" />
+                            {% if custumer.photo %}
+                                Фото На данный момент: <a href="{{ custumer.photo.url }}" class="text-primary">{{ custumer.photo.name }}</a>
+                            {% else %}
+                                Фото не загружено
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+  
+                    <div class="form-actions">
+                      <div class="card-body border-top">
+                        <button type="submit" class="btn btn-primary" id="buttonSave">
+                          Сохранить
+                        </button>
+                        <a href="{% url 'customer:customer_list' %}" class="btn bg-danger-subtle text-danger ms-6">
+                          Отмена
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+
+
+
+{% endblock %}

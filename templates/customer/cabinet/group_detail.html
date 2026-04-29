@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}<title>Детализация группы - {{ group.name }}</title>{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <!-- Заголовок страницы -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h2 class="mb-1">{{ group.name }}</h2>
+          {% if group.type_sport %}
+            <p class="text-muted mb-0">{{ group.type_sport.name }}</p>
+          {% endif %}
+        </div>
+        <a href="{% url 'supervisor:home_client' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Назад к главной
+        </a>
+      </div>
+
+      <!-- Информация о текущем пользователе -->
+      {% if current_user_data %}
+        <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(90deg, #7b61ff 0%, #5f4b8b 100%); color: #fff; border-radius: 16px;">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h5 class="mb-2">
+                  <i class="bi bi-person-circle me-2"></i>Ваше место в группе
+                </h5>
+                <div class="d-flex align-items-center">
+                  <div class="me-4">
+                    <div class="small text-white-80">Рейтинг</div>
+                    <div class="fw-bold fs-3">{{ current_user_data.avg_score|floatformat:2 }}</div>
+                  </div>
+                  <div class="me-4">
+                    <div class="small text-white-80">Место</div>
+                    <div class="fw-bold fs-3">{{ current_user_data.place }}/{{ total_members }}</div>
+                  </div>
+                  <div>
+                    <div class="small text-white-80">Всего участников</div>
+                    <div class="fw-bold fs-3">{{ total_members }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 text-end">
+                <div class="badge px-3 py-2 rounded-pill" style="background: rgba(255,255,255,0.2); color: #fff; font-size: 1.1rem;">
+                  {% if current_user_data.place == 1 %}
+                    <i class="bi bi-trophy-fill me-1"></i>1-е место
+                  {% elif current_user_data.place == 2 %}
+                    <i class="bi bi-award-fill me-1"></i>2-е место
+                  {% elif current_user_data.place == 3 %}
+                    <i class="bi bi-award me-1"></i>3-е место
+                  {% else %}
+                    <i class="bi bi-person me-1"></i>{{ current_user_data.place }}-е место
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Участники группы -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-people-fill me-2 text-primary"></i>
+            Участники группы ({{ total_members }})
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          {% if members_data %}
+            <div class="row g-0">
+              {% for member_id, member_data in members_data.items %}
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="p-3 border-end border-bottom h-100 group-member-card" style="border-color: #f0f0f0 !important;">
+                    <!-- Заголовок карточки -->
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="me-3">
+                        <div class="position-relative">
+                          {% if member_data.member.user.avatar %}
+                            <img src="{{ member_data.member.user.avatar.url }}" alt="avatar" 
+                                 class="rounded-circle group-member-avatar" style="width:50px; height:50px; object-fit:cover;">
+                          {% else %}
+                            <div class="rounded-circle d-flex align-items-center justify-content-center group-member-avatar" 
+                                 style="width:50px; height:50px; background:#f0f4ff; color:#7b61ff;">
+                              <i class="bi bi-person-fill fs-4"></i>
+                            </div>
+                          {% endif %}
+                          <!-- Бейдж места -->
+                          <div class="position-absolute top-0 start-100 translate-middle">
+                            <span class="badge rounded-pill {% if member_data.place == 1 %}bg-warning{% elif member_data.place == 2 %}bg-secondary{% elif member_data.place == 3 %}bg-danger{% else %}bg-primary{% endif %}">
+                              {{ member_data.place }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="fw-bold">
+                          {% if member_data.member.user.id == request.user.id %}
+                            <span class="text-primary">Вы</span>
+                          {% else %}
+                            {{ member_data.member.user.first_name }} {{ member_data.member.user.last_name }}
+                          {% endif %}
+                        </div>
+                        <div class="text-muted small">
+                          Рейтинг: <span class="fw-semibold group-rating-score">{{ member_data.avg_score|floatformat:2 }}</span>
+                        </div>
+                        {% if member_data.member.sport_category %}
+                          <div class="mt-1">
+                            <span class="badge px-2 py-1 rounded-pill" style="background: linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%); color: #fff; font-size: 0.75rem;">
+                              <i class="bi bi-trophy me-1"></i>
+                              {{ member_data.member.sport_category.name }}
+                            </span>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <!-- Достижения -->
+                    {% if member_data.achievements %}
+                      <div class="mb-3">
+                        <div class="fw-semibold text-primary mb-2">
+                          <i class="bi bi-trophy me-1"></i>Достижения
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                          {% for achievement in member_data.achievements %}
+                            <span class="badge bg-success-subtle text-success">{{ achievement.name }}</span>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endif %}
+
+                    <!-- Результаты соревнований -->
+                    {% if member_data.competition_results %}
+                      <div>
+                        <div class="fw-semibold text-info mb-2">
+                          <i class="bi bi-flag me-1"></i>Соревнования
+                        </div>
+                        <div class="small">
+                          {% for result in member_data.competition_results %}
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                              <span class="text-muted">{{ result.competition.name }}</span>
+                              <span class="badge {% if result.place == 1 %}bg-warning{% elif result.place == 2 %}bg-secondary{% elif result.place == 3 %}bg-danger{% else %}bg-primary{% endif %}">
+                                {{ result.place }} место
+                              </span>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endif %}
+
+                    <!-- Если нет достижений и соревнований -->
+                    {% if not member_data.achievements and not member_data.competition_results %}
+                      <div class="text-center text-muted py-2">
+                        <i class="bi bi-info-circle me-1"></i>Нет данных о достижениях
+                      </div>
+                    {% endif %}
+                    {% if request.user.id != member_data.member.user.id %}
+                      <div class="mt-3 pt-3 border-top">
+                        <a href="{% url 'customer:team_member_detail' member_data.member.id %}" 
+                          class="btn btn-outline-primary btn-sm w-100">
+                          <i class="bi bi-eye me-1"></i>Подробнее
+                        </a>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-people fs-1 mb-3 d-block"></i>
+              <div>Нет данных об участниках группы</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

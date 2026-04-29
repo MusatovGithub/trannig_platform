@@ -1,0 +1,33 @@
+{% for news in page_obj %}
+  <div class="col-md-6 col-lg-4 col-xl-3 mb-4 news-card">
+    <div class="card h-100 shadow-sm">
+      {% if news.image %}
+        <img src="{{ news.image.url }}" class="card-img-top" alt="{{ news.title }}" style="height:180px; object-fit:cover;">
+      {% else %}
+        <div class="d-flex align-items-center justify-content-center bg-light" style="height:180px;">
+          <i class="bi bi-award-fill fs-1 text-warning"></i>
+        </div>
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title mb-2 d-flex align-items-center">
+          <i class="ti ti-inbox fs-4 me-2"></i>
+          {{ news.title }}
+        </h5>
+        <span class="badge {% if news.status == 'Опубликовано' %}bg-success{% else %}bg-secondary{% endif %} mb-2">
+          {{ news.status }}
+        </span>
+        {% include 'includes/collapsible_text.html' with text=news.descriptions css_class='card-text' max_length=150 %}
+        <a href="{% url 'news:news_update' news.id %}" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-pencil"></i> Редактировать
+        </a>
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <div class="col-12">
+    <div class="alert alert-info d-flex align-items-center">
+      <iconify-icon icon="solar:news-bold" class="fs-4 text-primary me-2"></iconify-icon>
+      Нет новостей.
+    </div>
+  </div>
+{% endfor %}

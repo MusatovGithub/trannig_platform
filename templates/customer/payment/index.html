@@ -1,0 +1,493 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>История посещений</title> {% endblock %}
+
+{% block content %}
+  
+<div class="container-fluid mw-100">
+    <div class="card card-body py-3">
+      <div class="row align-items-center">
+        <div class="col-12">
+          <div class="d-sm-flex align-items-center justify-space-between">
+            <h4 class="mb-4 mb-sm-0 card-title">История посещений</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="card-body p-0">
+        <img src="{% static 'dash/images/backgrounds/profilebg.jpg' %}" alt="matdash-img" class="img-fluid">
+        <div class="row align-items-center">
+          <div class="col-lg-12 mt-n3 order-lg-2 order-1">
+            <div class="mt-n5">
+              <div class="d-flex align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center justify-content-center round-110">
+                  <div class="border border-4 border-white d-flex align-items-center justify-content-center rounded-circle overflow-hidden round-100">
+                    {% if cutumer.photo and cutumer.photo.url %}
+                        <img src="{{ cutumer.photo.url }}" calt="matdash-img" class="w-100 h-100" />
+                    {% else %}
+                        <img src="{% static 'dash/images/profile/1.png' %}" alt="matdash-img" class="w-100 h-100" />
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="text-center">
+                <h5 class="mb-0">{{cutumer.full_name}}</h5>
+                <p class="mb-0">{{cutumer.phone}}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <ul class="nav nav-pills user-profile-tab justify-content-end mt-2 bg-primary-subtle rounded-2 rounded-top-0" id="pills-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_detaile' cutumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-profile-tab">
+              <i class="ti ti-user-circle fs-5"></i>
+              <span class="d-none d-md-block">Профиль</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_subscriptions' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-file-description fs-5"></i>
+              <span class="d-none d-md-block">Абонементы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment_history' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-receipt fs-5"></i>
+              <span class="d-none d-md-block">Платежи</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_docs_all' cutumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-friends-tab">
+              <i class="ti ti-file-check fs-5"></i>
+              <span class="d-none d-md-block">Документы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_representatives_all' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-friends fs-5"></i>
+              <span class="d-none d-md-block">Представители</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment' cutumer.id  %}" class="nav-link active hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-history fs-5"></i>
+              <span class="d-none d-md-block">История посещений</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+        <div class="card">
+          <div class="row">
+            <div class="col-lg-12 p-4">
+              <form action="" method="get">
+                <div class="row">
+
+                  <div class="col-md-2">
+                    <div class="mb-3 has-success">
+                      <label class="form-label">Статус оплаты</label>
+                      <select class="form-select" id="payment_status" name="payment_status">
+                        <option value="">----</option>
+                        <option value="paid">Оплачено</option>
+                        <option value="unpaid">Не оплачено</option>
+                        <option value="free">Бесплатно</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="mb-3 has-success">
+                      <label class="form-label">Статус визита</label>
+                      <select class="form-select" id="attendance_status" name="attendance_status">
+                        <option value="">----</option>
+                        <option value="attended">Был</option>
+                        <option value="not_attended">Не Был</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="mb-3 has-success">
+                      <label class="form-label">Группа</label>
+                      <select class="form-select" id="group" name="group">
+                        <option value="">---- Все группы ----</option>
+                        {% for group in groups %}
+                          <option value="{{ group.id }}" {% if selected_group_id == group.id %}selected{% endif %}>
+                            {{ group.name }}{% if group.id in groups_with_unpaid_ids %} (есть неоплаченные){% endif %}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-auto align-self-end">
+                    <div class="d-flex flex-column flex-md-row gap-2 w-100">
+                      <button type="submit" class="btn btn-primary w-100">
+                        <i class="ti ti-search fs-4"></i>
+                        Фильтровать
+                      </button>
+                      <a href="{% url 'customer:custumer_payment' cutumer.id %}" class="btn btn-secondary w-100">
+                        <i class="ti ti-refresh fs-4"></i>
+                        Сбросить
+                      </a>
+                    </div>
+                  </div>
+
+                </div>
+              </form>
+            </div>
+            <div class="col-lg-12 p-4">
+              <div class="table-responsive mb-4 border rounded-1">
+                  
+                  <table class="table text-nowrap mb-0 align-middle">
+                      <thead class="text-dark fs-4">
+                          <tr>
+                            <th>Дата посещения</th>
+                            <th>Статус</th>
+                            <th>Группа</th>
+                            <th>Оплачено</th>
+                            <th>Дата отметки</th>
+                            <th>Кем отмечено</th>
+                            <!-- <th>Действия</th> -->
+                          </tr>
+                        </thead>
+                        <tbody id="attendances-tbody">
+                          {% if selected_group_id %}
+                            {% for item in payment %}
+                              {% if item.owner %}
+                            <tr>
+                              <td>
+                                  <p class="mb-0 fw-normal">{{item.date}}</p>
+                              </td>
+                              <td>
+                                {% if item.attendance_status == 'attended_2' or item.attendance_status == 'attended_3' or item.attendance_status == 'attended_4' or item.attendance_status == 'attended_5' or item.attendance_status == 'attended_10' %}
+                                    <p class="mb-0 fw-normal"><i class="ti ti-check fs-5"></i></p>
+                                {% elif item.attendance_status == 'not_attended' %}
+                                    <p class="mb-0 fw-normal"><i class="ti ti-x fs-5"></i></p>
+                                {% else %}
+                                    <p class="mb-0 fw-normal"><i class="ti ti-circle-off fs-5"></i></p>
+                                {% endif %}
+                              </td>
+                              <td>
+                                <p class="mb-0 fw-normal">
+                                    {{item.gr_class}}
+                                </p>
+                              </td>
+                            <td>
+                              {% if item.attendance_status == 'not_attended' %}
+                                <span class="badge bg-secondary">Не был</span>
+                              {% else %}
+                                {% if item.payment_status_display == "Оплачено (абонемент)" %}
+                                  <span class="badge bg-success" title="Списано с оплаченного абонемента">Оплачено (абонемент)</span>
+                                {% elif item.payment_status_display == "Списано с неоплаченного абонемента" %}
+                                  <span class="badge bg-warning text-dark" title="Занятие привязано к неоплаченному абонементу. Оплатите абонемент для завершения оплаты.">
+                                    <i class="ti ti-alert-circle"></i> Списано с неоплаченного абонемента
+                                  </span>
+                                {% elif item.payment_status_display == "Бесплатный абонемент" %}
+                                  <span class="badge bg-info">Бесплатно (абонемент)</span>
+                                {% elif item.payment_status_display == "Оплачено наличными" %}
+                                  <span class="badge bg-success">Оплачено наличными</span>
+                                {% elif item.payment_status_display == "Прощено" %}
+                                  <span class="badge bg-info" title="Посещение прощено (бесплатно)">Прощено</span>
+                                {% else %}
+                                  <span class="badge bg-danger">Не оплачено</span>
+                                {% endif %}
+                              {% endif %}
+                            </td>
+                              <td>
+                                <p class="mb-0 fw-normal">
+                                    {{item.update_at}}
+                                </p>
+                              </td>
+                              <td>
+                                <p class="mb-0 fw-normal">
+                                    {{item.owner}}
+                                </p>
+                              </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                          {% else %}
+                            <tr>
+                              <td colspan="6" class="text-center">
+                                <p class="mb-0 text-muted">
+                                  Выберите группу для просмотра посещений
+                                </p>
+                              </td>
+                            </tr>
+                          {% endif %}
+                        </tbody>
+                  </table>
+                </div>
+
+                <div id="payment-button-container">
+                  {% if selected_group_id %}
+                    {% if has_unpaid_in_selected_group %}
+                      <a class="btn btn-primary" href="{% url 'customer:custumer_payment_create' cutumer.id selected_group_id %}" id="payment-button">
+                        <i class="ti ti-plus fs-5"></i> 
+                        Оплатить занятия
+                      </a>
+                    {% elif payment %}
+                      <div class="alert alert-info">
+                        <i class="ti ti-info-circle fs-5"></i>
+                        В выбранной группе нет неоплаченных посещений
+                      </div>
+                    {% else %}
+                      <div class="alert alert-info">
+                        <i class="ti ti-info-circle fs-5"></i>
+                        В выбранной группе нет посещений
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    <div class="alert alert-warning">
+                      <i class="ti ti-alert-circle fs-5"></i>
+                      Выберите группу для оплаты/просмотра посещений
+                    </div>
+                  {% endif %}
+                </div>
+          </div>
+        </div>
+        </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const groupSelect = document.getElementById('group');
+    const attendancesTbody = document.getElementById('attendances-tbody');
+    const paymentButtonContainer = document.getElementById('payment-button-container');
+    const paymentStatusSelect = document.getElementById('payment_status');
+    const attendanceStatusSelect = document.getElementById('attendance_status');
+    const customerId = {{ cutumer.id }};
+    
+    function loadAttendances(groupId) {
+        if (!groupId) {
+            attendancesTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <p class="mb-0 text-muted">Выберите группу для просмотра посещений</p>
+                    </td>
+                </tr>
+            `;
+            paymentButtonContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="ti ti-alert-circle fs-5"></i>
+                    Выберите группу для оплаты посещений
+                </div>
+            `;
+            return;
+        }
+        
+        // Показываем индикатор загрузки
+        attendancesTbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        // Собираем параметры фильтрации
+        const params = new URLSearchParams();
+        if (paymentStatusSelect.value) {
+            params.append('payment_status', paymentStatusSelect.value);
+        }
+        if (attendanceStatusSelect.value) {
+            params.append('attendance_status', attendanceStatusSelect.value);
+        }
+        
+        // Формируем URL правильно, заменяя только нужные части
+        const urlTemplate = `{% url 'customer:get_attendances_by_group_ajax' 999999 888888 %}`;
+        const url = urlTemplate.replace('999999', customerId).replace('888888', groupId || '0');
+        const fullUrl = url + (params.toString() ? '?' + params.toString() : '');
+        
+        fetch(fullUrl, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Если есть сообщение (например, когда группа не выбрана)
+                if (data.message) {
+                    attendancesTbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <p class="mb-0 text-muted">${data.message}</p>
+                            </td>
+                        </tr>
+                    `;
+                    paymentButtonContainer.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="ti ti-alert-circle fs-5"></i>
+                            Выберите группу для оплаты посещений
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (data.attendances.length === 0) {
+                    attendancesTbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <p class="mb-0 text-muted">Нет посещений для отображения</p>
+                            </td>
+                        </tr>
+                    `;
+                    paymentButtonContainer.innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="ti ti-info-circle fs-5"></i>
+                            В выбранной группе нет неоплаченных посещений
+                        </div>
+                    `;
+                } else {
+                    let tbodyHtml = '';
+                    let hasUnpaid = false;
+                    
+                    data.attendances.forEach(function(attendance) {
+                        // Проверяем, является ли посещение неоплаченным
+                        // Исключаем прощенные посещения
+                        const isUnpaid = attendance.attendance_status !== 'not_attended' &&
+                            !attendance.is_block &&
+                            (
+                                !attendance.has_subscription ||
+                                attendance.subscription_status === 'unpaid'
+                            ) &&
+                            attendance.payment_status_display !== 'Прощено';
+                        if (isUnpaid) {
+                            hasUnpaid = true;
+                        }
+                        
+                        let statusIcon = '<i class="ti ti-circle-off fs-5"></i>';
+                        if (attendance.attendance_status.startsWith('attended_')) {
+                            statusIcon = '<i class="ti ti-check fs-5"></i>';
+                        } else if (attendance.attendance_status === 'not_attended') {
+                            statusIcon = '<i class="ti ti-x fs-5"></i>';
+                        }
+                        
+                        // Используем новый payment_status_display
+                        let paymentStatusBadge = '';
+                        if (attendance.attendance_status === 'not_attended') {
+                            paymentStatusBadge = '<span class="badge bg-secondary">Не был</span>';
+                        } else {
+                            const status = attendance.payment_status_display || 'Не оплачено';
+                            if (status === 'Оплачено (абонемент)') {
+                                paymentStatusBadge = '<span class="badge bg-success" title="Списано с оплаченного абонемента">Оплачено (абонемент)</span>';
+                            } else if (status === 'Списано с неоплаченного абонемента') {
+                                paymentStatusBadge = '<span class="badge bg-warning text-dark" title="Занятие привязано к неоплаченному абонементу"><i class="ti ti-alert-circle"></i> Списано с неоплаченного абонемента</span>';
+                            } else if (status === 'Бесплатный абонемент') {
+                                paymentStatusBadge = '<span class="badge bg-info">Бесплатно (абонемент)</span>';
+                            } else if (status === 'Оплачено наличными') {
+                                paymentStatusBadge = '<span class="badge bg-success">Оплачено наличными</span>';
+                            } else if (status === 'Прощено') {
+                                paymentStatusBadge = '<span class="badge bg-info" title="Посещение прощено (бесплатно)">Прощено</span>';
+                            } else {
+                                paymentStatusBadge = '<span class="badge bg-danger">Не оплачено</span>';
+                            }
+                        }
+                        
+                        tbodyHtml += `
+                            <tr>
+                                <td><p class="mb-0 fw-normal">${attendance.date}</p></td>
+                                <td><p class="mb-0 fw-normal">${statusIcon}</p></td>
+                                <td><p class="mb-0 fw-normal">${attendance.group_name}</p></td>
+                                <td>${paymentStatusBadge}</td>
+                                <td><p class="mb-0 fw-normal">${attendance.update_at}</p></td>
+                                <td><p class="mb-0 fw-normal">${attendance.owner}</p></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    attendancesTbody.innerHTML = tbodyHtml;
+                    
+                    // Обновляем кнопку оплаты
+                    if (hasUnpaid && groupId && groupId !== '0') {
+                        // Формируем URL правильно, заменяя только нужные части
+                        const paymentUrlTemplate = `{% url 'customer:custumer_payment_create' 999999 888888 %}`;
+                        const paymentUrl = paymentUrlTemplate.replace('999999', customerId).replace('888888', groupId);
+                        paymentButtonContainer.innerHTML = `
+                            <a class="btn btn-primary" href="${paymentUrl}" id="payment-button">
+                                <i class="ti ti-plus fs-5"></i> 
+                                Оплатить занятия
+                            </a>
+                        `;
+                    } else {
+                        paymentButtonContainer.innerHTML = `
+                            <div class="alert alert-info">
+                                <i class="ti ti-info-circle fs-5"></i>
+                                В выбранной группе нет неоплаченных посещений
+                            </div>
+                        `;
+                    }
+                }
+            } else {
+                attendancesTbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <p class="mb-0 text-danger">Ошибка загрузки данных: ${data.error || 'Неизвестная ошибка'}</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            attendancesTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <p class="mb-0 text-danger">Ошибка при загрузке данных</p>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+    
+    // Обработчик изменения группы
+    groupSelect.addEventListener('change', function() {
+        const groupId = this.value;
+        // Обновляем URL без перезагрузки страницы
+        const url = new URL(window.location.href);
+        if (groupId) {
+            url.searchParams.set('group', groupId);
+        } else {
+            url.searchParams.delete('group');
+        }
+        window.history.pushState({}, '', url);
+        loadAttendances(groupId);
+    });
+    
+    // Обработчики изменения фильтров
+    paymentStatusSelect.addEventListener('change', function() {
+        if (groupSelect.value) {
+            loadAttendances(groupSelect.value);
+        }
+    });
+    
+    attendanceStatusSelect.addEventListener('change', function() {
+        if (groupSelect.value) {
+            loadAttendances(groupSelect.value);
+        }
+    });
+    
+    // Если группа уже выбрана при загрузке страницы, загружаем данные
+    {% if selected_group_id %}
+        loadAttendances({{ selected_group_id }});
+    {% endif %}
+});
+</script>
+
+{% endblock %}

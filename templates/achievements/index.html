@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+<title>Достижения</title>
+{% endblock %}
+
+{% block content %}
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 mt-2 border-bottom">
+    <div class="row">
+      <div class="col-12 col-lg-8">
+        <h4 class="card-title mb-0">
+          <i class="bi bi-award-fill text-warning me-2"></i>
+          Достижения
+        </h4>
+      </div>
+      <div class="col-12 col-lg-4 text-end mb-2 mb-lg-0">
+        <a href="{% url 'achievements:achievement_create' %}" class="btn btn-success w-100 w-sm-auto">
+          <i class="bi bi-plus-circle me-1"></i> Добавить достижение
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="achv-filter">
+    <a href="{% url 'achievements:achievement_list' %}"
+      class="achv-filter-btn {% if not current_tag %}active{% endif %}"
+      data-tag="all">
+      Все
+    </a>
+    {% comment %} <a href="?tag=basic"
+      class="achv-filter-btn {% if current_tag == 'basic' %}active{% endif %}"
+      data-tag="basic">
+      Базовые
+    </a>
+    <a href="?tag=advanced"
+      class="achv-filter-btn {% if current_tag == 'advanced' %}active{% endif %}"
+      data-tag="advanced">
+      Продвинутые
+    </a>
+    <a href="?tag=pro"
+      class="achv-filter-btn {% if current_tag == 'pro' %}active{% endif %}"
+      data-tag="pro">
+      Профи
+    </a> {% endcomment %}
+    <a href="?tag=water_element"
+      class="achv-filter-btn {% if current_tag == 'water_element' %}active{% endif %}"
+      data-tag="water_element">
+      Водная стихия
+    </a>
+    <a href="?tag=swimming_skills"
+      class="achv-filter-btn {% if current_tag == 'swimming_skills' %}active{% endif %}"
+      data-tag="swimming_skills">
+      Умею плавать
+    </a>
+    <a href="?tag=champion_path"
+      class="achv-filter-btn {% if current_tag == 'champion_path' %}active{% endif %}"
+      data-tag="champion_path">
+      Чемпионский путь
+    </a>
+    <a href="?tag=team_captain"
+      class="achv-filter-btn {% if current_tag == 'team_captain' %}active{% endif %}"
+      data-tag="team_captain">
+      Капитан команды
+    </a>
+    <a href="?tag=land_champion"
+      class="achv-filter-btn {% if current_tag == 'land_champion' %}active{% endif %}"
+      data-tag="land_champion">
+      Сухопутный чемпион
+    </a>
+    <a href="?tag=media_champion"
+      class="achv-filter-btn {% if current_tag == 'media_champion' %}active{% endif %}"
+      data-tag="media_champion">
+      Медиа-чемпион
+    </a>
+    <a href="?tag=challenge_master"
+      class="achv-filter-btn {% if current_tag == 'challenge_master' %}active{% endif %}"
+      data-tag="challenge_master">
+      Челлендж-мастер
+    </a>
+  </div>
+  <div class="card-body">
+    <div id="achievements-list" class="row">
+      {% include "achievements/_achievements_list.html" %}
+    </div>
+    {% if page_obj.has_next %}
+      <div class="text-center mt-3">
+        <button id="load-more-btn" class="btn btn-outline-primary" data-next-page="{{ page_obj.next_page_number }}">
+          Загрузить ещё
+        </button>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', function() {
+        const nextPage = this.getAttribute('data-next-page');
+        fetch(`?page=${nextPage}`, {
+          headers: {'x-requested-with': 'XMLHttpRequest'}
+        })
+        .then(response => response.text())
+        .then(html => {
+          // Вставляем новые достижения перед кнопкой
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          const newItems = tempDiv.querySelectorAll('.achievement-card');
+          const list = document.getElementById('achievements-list');
+          newItems.forEach(item => list.appendChild(item));
+          // Обновляем или скрываем кнопку
+          if (tempDiv.querySelector('#load-more-btn')) {
+            this.setAttribute('data-next-page', tempDiv.querySelector('#load-more-btn').getAttribute('data-next-page'));
+          } else {
+            this.style.display = 'none';
+          }
+        });
+      });
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.achv-filter-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        document.querySelectorAll('.achv-filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  });
+</script>
+{% endblock %}

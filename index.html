@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Select</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-5">
+            <h5>Available Rights</h5>
+            <select id="available-rights" class="form-select" multiple size="10">
+                <option>Administrating | Journal Record</option>
+                <option>Users and Groups | Group | Can Add</option>
+                <option>Users and Groups | Group | Can Change</option>
+                <option>Users and Groups | Permission | Can Delete</option>
+                <option>Users and Groups | Permission | Can View</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-center justify-content-center">
+            <div>
+                <button id="add-rights" class="btn btn-primary mb-2">>> Add</button>
+                <button id="remove-rights" class="btn btn-secondary"><< Remove</button>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <h5>Selected Rights</h5>
+            <select id="selected-rights" class="form-select" multiple size="10"></select>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+    // JavaScript to move items between lists
+    $(document).ready(function () {
+        $('#add-rights').click(function () {
+            $('#available-rights option:selected').appendTo('#selected-rights');
+        });
+
+        $('#remove-rights').click(function () {
+            $('#selected-rights option:selected').appendTo('#available-rights');
+        });
+    });
+</script>
+</body>
+</html>

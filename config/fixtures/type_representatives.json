@@ -1,0 +1,23 @@
+[
+    {
+        "model": "custumer.typerepresentatives",
+        "pk": 1,
+        "fields": {
+            "name": "Родитель"
+        }
+    },
+    {
+        "model": "custumer.typerepresentatives",
+        "pk": 2,
+        "fields": {
+            "name": "Опекун"
+        }
+    },
+    {
+        "model": "custumer.typerepresentatives",
+        "pk": 3,
+        "fields": {
+            "name": "Другое"
+        }
+    }
+]

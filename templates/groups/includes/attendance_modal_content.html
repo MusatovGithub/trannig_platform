@@ -1,0 +1,102 @@
+{% load tz %}
+<div class="attendance-modal-content">
+  <div class="attendance-modal-meta">
+    <div>
+      <span class="fw-semibold me-2 text-muted">Клиент:</span>
+      <span>{{ attend.custumer.full_name }}</span>
+    </div>
+    {% if attend.gr_class %}
+      <div>
+        <span class="fw-semibold me-2 text-muted">Занятие:</span>
+        <span>
+          {% if attend.gr_class.groups_id %}
+            {{ attend.gr_class.groups_id.name }}
+            {% if attend.gr_class.name %}
+              · {{ attend.gr_class.name }}
+            {% endif %}
+          {% else %}
+            {{ attend.gr_class.name|default:"Без названия" }}
+          {% endif %}
+        </span>
+      </div>
+      <div>
+        <span class="fw-semibold me-2 text-muted">Дата:</span>
+        <span>
+          {{ attend.gr_class.date|date:"d.m.Y" }}
+          {% if attend.gr_class.strat %}
+            · {{ attend.gr_class.strat|time:"H:i" }}
+          {% endif %}
+        </span>
+      </div>
+    {% endif %}
+    {% if attend.used_subscription %}
+      <div>
+        <span class="fw-semibold me-2 text-muted">Абонемент:</span>
+        <span>{{ attend.used_subscription }}</span>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if attend.is_block %}
+    <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+      <i class="ti ti-info-circle me-1"></i>
+      <strong>Статус оплаты:</strong> {{ attend.payment_status_display }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endif %}
+
+  <form class="attendance-form"
+        data-attendance-id="{{ attend.id }}"
+        data-customer-id="{{ attend.custumer.id }}">
+    <input type="hidden" name="attendance_id" value="{{ attend.id }}">
+
+    <div class="mb-3">
+      <label for="attendance-comment-{{ attend.id }}" class="form-label mb-1">Комментарий (необязательно)</label>
+      <textarea id="attendance-comment-{{ attend.id }}"
+                name="comment"
+                class="form-control"
+                rows="2">{{ attend.comment|default_if_none:'' }}</textarea>
+    </div>
+
+    <p class="mb-2 text-center fw-semibold text-uppercase small text-muted">Проставить оценку</p>
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+      <button type="button"
+              class="btn btn-grade grade-2 px-3 py-2 {% if attend.attendance_status == 'attended_2' %}active{% endif %}"
+              name="status"
+              value="attended_2">2</button>
+      <button type="button"
+              class="btn btn-grade grade-3 px-3 py-2 {% if attend.attendance_status == 'attended_3' %}active{% endif %}"
+              name="status"
+              value="attended_3">3</button>
+      <button type="button"
+              class="btn btn-grade grade-4 px-3 py-2 {% if attend.attendance_status == 'attended_4' %}active{% endif %}"
+              name="status"
+              value="attended_4">4</button>
+      <button type="button"
+              class="btn btn-grade grade-5 px-3 py-2 {% if attend.attendance_status == 'attended_5' %}active{% endif %}"
+              name="status"
+              value="attended_5">5</button>
+      <button type="button"
+              class="btn btn-grade grade-10 px-3 py-2 {% if attend.attendance_status == 'attended_10' %}active{% endif %}"
+              name="status"
+              value="attended_10">10</button>
+    </div>
+
+    <p class="mb-2 text-center fw-semibold text-uppercase small text-muted">Отметка посещения</p>
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-2">
+      <button type="button"
+              class="btn btn-outline-warning attendance-flag-btn {% if attend.attendance_status == 'not_attended' %}active{% endif %}"
+              name="status"
+              value="not_attended">
+        <i class="ti ti-ban me-1"></i>Не был
+      </button>
+      <button type="button"
+              class="btn btn-outline-danger attendance-flag-btn {% if attend.attendance_status == 'none' %}active{% endif %}"
+              name="status"
+              value="none">
+        <i class="ti ti-trash me-1"></i>Удалить
+      </button>
+    </div>
+  </form>
+</div>
+

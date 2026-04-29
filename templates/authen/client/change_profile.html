@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} <title>Мой профиль</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <!-- start Person Info -->
+        <div class="card">
+            <div class="card-header text-bg-primary">
+                <h4 class="mb-0 text-white">Мой профиль</h4>
+            </div>
+
+            <!-- Форма-->
+            <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div>
+                    <div class="card-body">
+                        <h4 class="card-title">Личная информация</h4>
+                        {% if error %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                {{ error }}
+                            </div>
+                        {% endif %}
+                        <div class="row pt-3">
+
+                            <!--ФИО-->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person-fill me-2"></i>Ф.И.О
+                                    </label>
+                                    <input type="text" 
+                                           id="name" 
+                                           name="name" 
+                                           class="form-control" 
+                                           value="{{ user_change.first_name }}"
+                                           required />
+                                </div>
+                            </div>
+
+                            <!--Телефон-->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-telephone-fill me-2"></i>Телефон
+                                    </label>
+                                    <input type="tel" 
+                                           id="phone" 
+                                           name="phone" 
+                                           class="form-control international-inputmask" 
+                                           value="{{ user_change.phone }}"
+                                           required />
+                                </div>
+                            </div>
+
+                            <!--Email-->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-envelope-fill me-2"></i>Email
+                                    </label>
+                                    <input type="email" 
+                                           id="email" 
+                                           name="email" 
+                                           class="form-control" 
+                                           value="{{ user_change.email }}"
+                                           required />
+                                </div>
+                            </div>
+
+                            <!--Фото-->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-camera-fill me-2"></i>Фото профиля
+                                    </label>
+                                    <input type="file" 
+                                           id="avatar" 
+                                           name="avatar" 
+                                           class="form-control" 
+                                           accept="image/*" />
+                                    
+                                    {% if user_change.avatar %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">Текущее фото:</small>
+                                            <div class="d-flex align-items-center mt-1">
+                                                <img src="{{ user_change.avatar.url }}" 
+                                                     alt="Текущее фото" 
+                                                     class="rounded-circle me-2" 
+                                                     style="width: 40px; height: 40px; object-fit: cover;" />
+                                                <a href="{{ user_change.avatar.url }}" 
+                                                   class="text-primary text-decoration-none" 
+                                                   target="_blank">
+                                                    Просмотреть
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <small class="text-muted">Фото не загружено</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <div class="card-body border-top">
+                            <button type="submit" class="btn btn-primary" id="buttonSave">
+                                <i class="bi bi-check-circle-fill me-2"></i>Сохранить
+                            </button>
+                            <a href="{% url 'supervisor:home_client' %}" class="btn bg-danger-subtle text-danger ms-2">
+                                <i class="bi bi-x-circle-fill me-2"></i>Отмена
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+        <!-- end Person Info -->
+    </div>
+</div>
+
+{% endblock %}

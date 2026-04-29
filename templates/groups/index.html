@@ -1,0 +1,180 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Группы</title> {% endblock %}
+
+{% block content %}
+
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+      <div class="row">
+        <div class="col-lg-10">
+          <h4 class="card-title mb-0">Группы</h4>
+        </div>
+        <div class="col-lg-2 text-end">
+          <a href="{% url 'groups_custumer:groups_create' %}" type="button" class="btn btn-success">Создать</a>
+        </div>
+      </div>
+  
+    </div>
+  
+    <!-- ----------------------------------------- -->
+    <!-- 1. Фильтр -->
+    <!-- ----------------------------------------- -->
+  
+    <div class="card-body">
+        <form method="GET" class="filter-form">
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Название</label>
+                  <input type="text" id="name_group" name="search" class="form-control" placeholder="Найти" value="{{ search_query }}"/>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Тренер</label>
+                  <select class="form-select" name="employe_id">
+                    <option value="">Все тренеры</option>
+                    {% for employe in employes %}
+                    <option 
+                    value="{{ employe.id }}" 
+                    {% if employe.id|stringformat:"s" == selected_employe_id|stringformat:"s" %}selected{% endif %}
+                  >
+                    {{ employe.full_name }}
+                  </option>
+                    {% endfor %}
+                  </select>
+              </div>
+            </div>
+  
+            <div class="col-sm-3 d-flex align-items-end">
+              <div class="mb-3 w-100">
+                <div class="d-flex flex-column flex-md-row gap-2 w-100">
+                  <button type="submit" class="btn btn-primary w-100">
+                    <i class="ti ti-search fs-4"></i>
+                    Фильтровать
+                  </button>
+                  <a href="{% url 'groups_custumer:groups_all' %}" class="btn btn-secondary w-100">
+                    <i class="ti ti-refresh fs-4"></i>
+                    Сбросить
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+    </div>
+  
+  
+  
+  
+  
+    <!-- ----------------------------------------- -->
+    <!-- 2. Таблица -->
+    <!-- ----------------------------------------- -->
+  
+    <div class="card-body p-4">
+  
+      <!-- Выполнить -->
+  
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+          <thead class="text-dark fs-4">
+            <tr>
+              <th>№</th>
+              <th>Название</th>
+              <th>Начало обучения</th>
+              <th>Ученики</th>
+              <th>Расписание</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in groups %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>
+                <a href="{% url 'groups_custumer:groups_detail' item.id %}">
+                  <h6 class="fs-4 fw-semibold mb-0">{{ item.name }}</h6>
+                </a>
+              </td>
+              <td>
+                <p class="mb-0 fw-normal">{{ item.strat_training }}</p>
+              </td>
+              <td>
+                <p>{{ item.custumer_count }}</p>
+              </td>
+              <td>
+                <ul>
+                  {% for schedule in item.groups.all %}
+                    <li>
+                     {{ schedule.week }}: 
+                      <span class="mb-1 badge rounded-pill text-bg-success">{{ schedule.strat_time }} - {{ schedule.end_time }}</span>
+                    </li>
+                  {% empty %}
+                    <li>Расписание не добавлено</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              <td>
+  
+                <div class="row">
+                  <div class="col-md-3">
+                      <a type="button" class="btn btn-sm btn-primary" href="{% url 'groups_custumer:groups_update' item.id %}">
+                        <i class="ti ti-edit fs-5"></i>
+                      </a>
+                      <a href="{% url 'groups_custumer:groups_delete' item.id %}" type="button" class="btn btn-sm btn-danger btn-delete-client">
+                        <i class="ti ti-trash fs-5"></i>
+                      </a>
+                  </div>
+                </div>
+
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+  
+      </div>
+    </div>
+  
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Назад">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&laquo;</span>
+      </li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Вперёд">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&raquo;</span>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

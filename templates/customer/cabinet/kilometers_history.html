@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок страницы -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="mb-0">История километров</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'supervisor:home_client' %}">Главная</a></li>
+                        <li class="breadcrumb-item active">История дистанции</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Всего километров</p>
+                            <h4 class="mb-0">{{ stats.total_kilometers }} км</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-primary align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-run font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Занятий</p>
+                            <h4 class="mb-0">{{ stats.total_sessions }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-success align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-calendar font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Среднее за занятие</p>
+                            <h4 class="mb-0">{{ stats.avg_kilometers_per_session }} км</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-warning align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-trending-up font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Среднее в день</p>
+                            <h4 class="mb-0">{{ stats.avg_kilometers_per_day }} км</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-info align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-time font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика по группам -->
+    {% if group_stats %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Статистика по группам</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for group_name, group_stat in group_stats.items %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ group_name }}</h5>
+                                    <h3 class="text-primary">{{ group_stat.total_kilometers }} км</h3>
+                                    <p class="text-muted mb-1">{{ group_stat.sessions }} занятий</p>
+                                    <p class="text-muted">Среднее: {{ group_stat.avg_per_session }} км</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Фильтры -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-2">
+                            <label class="form-label">Период</label>
+                            <select name="period" class="form-select" onchange="handlePeriodChange(this)">
+                                <option value="week" {% if period == "week" %}selected{% endif %}>Текущая неделя</option>
+                                <option value="month" {% if period == "month" %}selected{% endif %}>Текущий месяц</option>
+                                <option value="year" {% if period == "year" %}selected{% endif %}>Текущий год</option>
+                                <option value="custom" {% if period == "custom" %}selected{% endif %}>Произвольный период</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Дата начала</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from|date:'Y-m-d' }}" 
+                                   {% if period != "custom" %}disabled{% endif %}>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Дата окончания</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to|date:'Y-m-d' }}"
+                                   {% if period != "custom" %}disabled{% endif %}>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Группа</label>
+                            <select name="group_id" class="form-select">
+                                <option value="">Все группы</option>
+                                {% for group in groups %}
+                                <option value="{{ group.id }}" {% if group_id == group.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ group.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">Применить</button>
+                            <a href="{% url 'customer:get_kilometers_history' %}" class="btn btn-secondary">Сбросить</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- История километров -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">История километров по занятиям</h4>
+                    <p class="text-muted mb-0">Период: {{ date_from|date:"d.m.Y" }} - {{ date_to|date:"d.m.Y" }} ({{ stats.period_days }} дней)</p>
+                </div>
+                <div class="card-body">
+                    {% if kilometers_history %}
+                        <div class="table-responsive mb-4 border rounded-1">
+                            <table class="table text-nowrap mb-0 align-middle">
+                                <thead class="table">
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Время</th>
+                                        <th>Тип</th>
+                                        <th>Группа/Событие</th>
+                                        <th>Название</th>
+                                        <th>Тренер</th>
+                                        <th>Дистанция</th>
+                                        <th>Баллы</th>
+                                        <th>Оценка/Результат</th>
+                                        <th>Этапы/Дисциплина</th>
+                                        <th>Стиль</th>
+                                        <th>Комментарий</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in kilometers_history %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-light text-dark">
+                                                {{ record.date|date:"d.m.Y" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if record.time %}
+                                                {{ record.time|time:"H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.type == "competition" %}
+                                                <span class="badge bg-info">Соревнование</span>
+                                            {% else %}
+                                                <span class="badge bg-primary">Тренировка</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium">{{ record.group_name }}</span>
+                                        </td>
+                                        <td>{{ record.class_name }}</td>
+                                        <td>{{ record.trainer_name }}</td>
+                                        <td>
+                                            {% if record.distance_km > 0 %}
+                                                {% if record.type == "competition" %}
+                                                    <span class="badge bg-info">{{ record.distance_km }} км</span>
+                                                {% else %}
+                                                    <span class="badge bg-primary">{{ record.distance_km }} км</span>
+                                                {% endif %}
+                                                <br>
+                                                <small class="text-muted">{{ record.distance_meters }} м</small>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.type == "competition" %}
+                                                <span class="badge bg-light text-dark">-</span>
+                                            {% elif record.points == 10 %}
+                                                <span class="badge bg-success">{{ record.points }}</span>
+                                            {% elif record.points >= 5 %}
+                                                <span class="badge bg-primary">{{ record.points }}</span>
+                                            {% elif record.points >= 3 %}
+                                                <span class="badge bg-warning">{{ record.points }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ record.points }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.type == "competition" %}
+                                                <span class="text-info fw-medium">{{ record.evaluation_type }}</span>
+                                                <br>
+                                                <small class="text-muted">{{ record.evaluation_description }}</small>
+                                            {% else %}
+                                                <span class="text-muted">{{ record.evaluation_type }}</span>
+                                                <br>
+                                                <small class="text-muted">{{ record.evaluation_description }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.stages %}
+                                                <span class="text-muted">{{ record.stages }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.style %}
+                                                <span class="text-muted">{{ record.style }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.comment %}
+                                                <span class="text-muted">{{ record.comment }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="avatar-md mx-auto">
+                                <div class="avatar-title bg-light text-primary rounded-circle font-size-24">
+                                    <i class="bx bx-run"></i>
+                                </div>
+                            </div>
+                            <h5 class="mt-3">Нет данных</h5>
+                            <p class="text-muted">За выбранный период занятия с дистанциями не найдены</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Обработка изменения периода
+function handlePeriodChange(selectElement) {
+    const form = selectElement.form;
+    const dateFromInput = form.querySelector('input[name="date_from"]');
+    const dateToInput = form.querySelector('input[name="date_to"]');
+    
+    if (selectElement.value === 'custom') {
+        // Включаем поля дат для произвольного периода
+        dateFromInput.disabled = false;
+        dateToInput.disabled = false;
+        // Не отправляем форму автоматически, ждем заполнения дат
+        return;
+    } else {
+        // Отключаем поля дат и отправляем форму для предустановленных периодов
+        dateFromInput.disabled = true;
+        dateToInput.disabled = true;
+        form.submit();
+    }
+}
+
+// Включение/отключение полей дат при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    const periodSelect = document.querySelector('select[name="period"]');
+    const dateFromInput = document.querySelector('input[name="date_from"]');
+    const dateToInput = document.querySelector('input[name="date_to"]');
+    
+    function toggleDateInputs() {
+        const isCustom = periodSelect.value === 'custom';
+        dateFromInput.disabled = !isCustom;
+        dateToInput.disabled = !isCustom;
+    }
+    
+    toggleDateInputs();
+});
+</script>
+{% endblock %}

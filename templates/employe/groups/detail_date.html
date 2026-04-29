@@ -1,0 +1,210 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block content %}
+
+<div id="attendance-page-context"
+     data-group-id="{{ group.id }}"
+     data-view="date"
+     data-selected-date="{{ selected_date|date:'Y-m-d' }}"
+     hidden></div>
+
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 border-bottom">
+    <div class="row">
+      <div class="col-12 col-lg-7">
+        <h4 class="card-title mb-0">{{ group.name }}</h4>
+        <p>
+          Отображается одно занятие.
+          <a href="{% url 'groups_custumer:groups_detail' group.id %}">Показать за месяц</a>
+        </p>
+      </div>
+      {% if employee_permissions.can_add_customers %}
+        <div class="col-12 col-lg-2 text-end mt-2" id="buttunSend">
+          <div class="btn-group w-100">
+            <button class="btn btn-primary dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+              Создать/Добавить
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <li>
+                <a class="dropdown-item" href="{% url 'customer:customer_create' %}">Создать нового клиента</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'groups_custumer:groups_custumer_create' group.id %}">Добавить клиента</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+      {% if employee_permissions.can_add_classes %}
+        <div class="col-12 col-lg-3 text-end mt-2">
+          <a href="{% url 'groups_custumer:groups_classess_add' group.id %}" type="button" class="btn btn-primary w-100">Добавить занятие</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card-body p-4">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-danger">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3">
+      <a href="{% url 'groups_custumer:groups_detail_with_date' pk=group.id selected_date=prev_day|date:'Y-m-d' %}" class="btn btn-sm btn-primary mb-2 mb-sm-0">← Предыдущий</a>
+      <h4 class="mb-0">
+        {{ selected_date|date:'d' }} -
+        {% if selected_date.month == 1 %}Январь
+        {% elif selected_date.month == 2 %}Февраль
+        {% elif selected_date.month == 3 %}Март
+        {% elif selected_date.month == 4 %}Апрель
+        {% elif selected_date.month == 5 %}Май
+        {% elif selected_date.month == 6 %}Июнь
+        {% elif selected_date.month == 7 %}Июль
+        {% elif selected_date.month == 8 %}Август
+        {% elif selected_date.month == 9 %}Сентябрь
+        {% elif selected_date.month == 10 %}Октябрь
+        {% elif selected_date.month == 11 %}Ноябрь
+        {% elif selected_date.month == 12 %}Декабрь
+        {% endif %}  {{ selected_date.year }} Г
+      </h4>
+      <a href="{% url 'groups_custumer:groups_detail_with_date' pk=group.id selected_date=next_day|date:'Y-m-d' %}" class="btn btn-sm btn-primary mt-2 mt-sm-0">Следующий →</a>
+    </div>
+
+    <div class="table-container d-none d-lg-block">
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+          <thead class="text-dark text-center fs-4">
+            <tr>
+              <th style="width: 5%;">№</th>
+              <th>Ф.И.О</th>
+              {% for day, name in calendar_days %}
+                <th>{{ name }} <br>{{ day|date:"j D" }} </th>
+              {% endfor %}
+              <th>Остаток посещений</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {% for item in custumer_data %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  <a href="{% url 'customer:custumer_detaile' item.id %}" class="fs-4 fw-semibold mb-0">{{ item.full_name }}</a>
+                </td>
+                {% for cell in item.attendance_cells %}
+                  <td>
+                    {% if cell.has_data %}
+                      <button class="grade-pill {{ cell.css }} open-attendance-modal"
+                              data-attendance-id="{{ cell.id }}"
+                              data-customer-name="{{ item.full_name }}"
+                              data-group-id="{{ group.id }}">
+                        {{ cell.text }}
+                      </button>
+                    {% else %}
+                      <button class="grade-pill status-empty open-attendance-modal"
+                              data-gr-class-id="{{ cell.gr_class_id }}"
+                              data-custumer-id="{{ item.id }}"
+                              data-customer-name="{{ item.full_name }}"
+                              data-date="{{ cell.date|date:'Y-m-d' }}"
+                              data-group-id="{{ group.id }}">
+                        +
+                      </button>
+                    {% endif %}
+                  </td>
+                {% endfor %}
+                <td>
+                  {% include 'groups/includes/customer_subscription_links.html' with customer=item variant='desktop' group=group employee_permissions=employee_permissions render_mode='placeholder' %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="d-lg-none">
+      {% for item in custumer_data %}
+        <div class="mobile-card" data-customer-id="{{ item.id }}">
+          <div class="mobile-card-header">
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <h6 class="mb-0">
+                <a href="{% url 'customer:custumer_detaile' item.id %}" class="text-decoration-none text-white">{{ item.full_name }}</a>
+              </h6>
+              <div class="d-flex align-items-center gap-2">
+                <span class="grades-count" id="grades-count-{{ item.id }}">0 оценок · не был: 0</span>
+                <span class="badge bg-light text-dark">{{ forloop.counter }}</span>
+                <i class="ti ti-chevron-down expand-indicator" id="expand-{{ item.id }}"></i>
+              </div>
+            </div>
+          </div>
+          <div class="mobile-card-body" id="card-body-{{ item.id }}">
+            {% include 'groups/includes/customer_subscription_links.html' with customer=item variant='mobile' group=group employee_permissions=employee_permissions render_mode='placeholder' %}
+
+            <div class="attendance-grid">
+              <div class="row g-2">
+                {% for cell in item.attendance_cells %}
+                  <div class="col-3 col-sm-2">
+                    <div class="text-center attendance-slot">
+                      <small class="text-muted d-block">{{ cell.date|date:"j" }}</small>
+                      <small class="text-muted d-block">{{ cell.date|date:"D" }}</small>
+                      {% if cell.date_name %}
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">{{ cell.date_name }}</small>
+                      {% endif %}
+                      {% if cell.has_data %}
+                        <button class="grade-pill {{ cell.css }} w-100 open-attendance-modal"
+                                data-attendance-id="{{ cell.id }}"
+                                data-customer-name="{{ item.full_name }}"
+                                data-group-id="{{ group.id }}">
+                          {{ cell.text }}
+                        </button>
+                      {% else %}
+                        <button class="grade-pill status-empty w-100 open-attendance-modal"
+                                data-gr-class-id="{{ cell.gr_class_id }}"
+                                data-custumer-id="{{ item.id }}"
+                                data-customer-name="{{ item.full_name }}"
+                                data-date="{{ cell.date|date:'Y-m-d' }}"
+                                data-group-id="{{ group.id }}">
+                          +
+                        </button>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="attendance-modal" tabindex="-1" aria-labelledby="attendance-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header d-flex align-items-center">
+        <h4 class="modal-title" id="attendance-modal-label">Загрузка...</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="attendance-modal-body">
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn bg-danger-subtle text-danger waves-effect" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% for item in custumer_data %}
+  {% include 'groups/includes/customer_subscription_modals.html' with customer=item group=group render_mode='placeholder' %}
+{% endfor %}
+
+<script src="{% static 'dash/js/attendance.js' %}"></script>
+<script src="{% static 'dash/js/mobile-attendance.js' %}"></script>
+
+{% endblock %}

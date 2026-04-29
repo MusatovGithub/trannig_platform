@@ -1,0 +1,72 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Виды спорта</title> {% endblock %}
+
+{% block content %}
+
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+      <div class="row">
+        <div class="col-lg-8">
+          <h4 class="card-title mb-0">Виды спорта</h4>
+        </div>
+        <div class="col-lg-4 text-end">
+          <a href="{% url 'groups_custumer:type_sport_create' %}" type="button" class="btn btn-success">Создать виды спорта </a>
+          <a href="{% url 'groups_custumer:groups_create' %}" type="button" class="btn btn-success">Создать Группы</a>
+        </div>
+
+      </div>
+  
+    </div>  
+    <!-- ----------------------------------------- -->
+    <!-- 2. Таблица -->
+    <!-- ----------------------------------------- -->
+  
+    <div class="card-body p-4">
+  
+      <!-- Выполнить -->
+  
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+          <thead class="text-dark fs-4">
+            <tr>
+              <th>№</th>
+              <th>Название</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in type_sport %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>
+                <a href="">
+                  <h6 class="fs-4 fw-semibold mb-0">{{ item.name }}</h6>
+                </a>
+              </td>
+              <td>
+  
+                <div class="row">
+                  <div class="col-md-3">
+                      <a href="{% url 'groups_custumer:type_sport_update' item.id %}" type="button" class="btn btn-sm btn-primary">
+                        <i class="ti ti-edit fs-5"></i>
+                      </a>
+                      <a href="{% url 'groups_custumer:type_sport_delete' item.id %}" type="button" class="btn btn-sm btn-danger btn-delete-client">
+                        <i class="ti ti-trash fs-5"></i>
+                      </a>
+                  </div>
+                </div>
+
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+  
+      </div>
+    </div>
+  
+  </div>
+
+{% endblock %}

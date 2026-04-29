@@ -1,0 +1,137 @@
+[
+    {
+        "model": "employe.employepermissionsgroups",
+        "pk": 1,
+        "fields":
+            {"name": "Группы"}
+    },
+
+    {
+        "model": "employe.employepermissionsgroups",
+        "pk": 2,
+        "fields":
+            {"name": "Клиенты"}
+    },
+
+    {
+        "model": "employe.employepermissionsgroups",
+        "pk": 3,
+        "fields":
+            {"name": "Тренировки"}
+    },
+
+    {
+        "model": "employe.employepermissionsgroups",
+        "pk": 4,
+        "fields":
+            {"name": "Соревнования"}
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 1,
+        "fields":
+            {
+                "name": "Может добавлять отметки посещаемости",
+                "group": 1
+            }
+    },
+    {
+        "model": "employe.employepermissions",
+        "pk": 2,
+        "fields":
+            {
+                "name": "Может просматривать занятия только своих групп",
+                "group": 1
+            }
+    },
+    {
+        "model": "employe.employepermissions",
+        "pk": 3,
+        "fields":
+            {
+                "name": "Может просматривать только свои группы",
+                "group": 1
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 4,
+        "fields":
+            {
+                "name": "Может просматривать только своих клиентов",
+                "group": 2
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 5,
+        "fields":
+            {
+                "name": "Может просматривать программу тренировки",
+                "group": 3
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 6,
+        "fields":
+            {
+                "name": "Может создавать программу тренировки",
+                "group": 3
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 7,
+        "fields":
+            {
+                "name": "Может редактировать программу тренировки",
+                "group": 3
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 8,
+        "fields":
+            {
+                "name": "Может просматривать соревнования",
+                "group": 4
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 9,
+        "fields":
+            {
+                "name": "Может создавать соревнования",
+                "group": 4
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 10,
+        "fields":
+            {
+                "name": "Может редактировать соревнования",
+                "group": 4
+            }
+    },
+
+    {
+        "model": "employe.employepermissions",
+        "pk": 11,
+        "fields":
+            {
+                "name": "Может управлять результатами соревнований",
+                "group": 4
+            }
+    }
+]

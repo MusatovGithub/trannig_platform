@@ -1,0 +1,160 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Профиль</title> {% endblock %}
+
+{% block content %}
+  
+<div class="container-fluid mw-100">
+    <div class="card card-body py-3">
+      <div class="row align-items-center">
+        <div class="col-12">
+          <div class="d-sm-flex align-items-center justify-space-between">
+            <h4 class="mb-4 mb-sm-0 card-title">Профиль</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="card-body p-0">
+        <img src="{% static 'dash/images/backgrounds/profilebg.jpg' %}" alt="matdash-img" class="img-fluid">
+        <div class="row align-items-center">
+          <div class="col-lg-12 mt-n3 order-lg-2 order-1">
+            <div class="mt-n5">
+              <div class="d-flex align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center justify-content-center round-110">
+                  <div class="border border-4 border-white d-flex align-items-center justify-content-center rounded-circle overflow-hidden round-100">
+                    {% if custumer.photo and custumer.photo.url %}
+                        <img src="{{ custumer.photo.url }}" calt="matdash-img" class="w-100 h-100" />
+                    {% else %}
+                        <img src="{% static 'dash/images/profile/1.png' %}" alt="matdash-img" class="w-100 h-100" />
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="text-center">
+                <h5 class="mb-0">{{custumer.full_name}}</h5>
+                <p class="mb-0">{{custumer.phone}}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <ul class="nav nav-pills user-profile-tab justify-content-end mt-2 bg-primary-subtle rounded-2 rounded-top-0" id="pills-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_detaile' custumer.id %}" class="nav-link active hstack gap-2 rounded-0 fs-12 py-6" id="pills-profile-tab">
+              <i class="ti ti-user-circle fs-5"></i>
+              <span class="d-none d-md-block">Профиль</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_subscriptions' custumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-file-description fs-5"></i>
+              <span class="d-none d-md-block">Абонементы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment_history' custumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-receipt fs-5"></i>
+              <span class="d-none d-md-block">Платежи</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_docs_all' custumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-friends-tab">
+              <i class="ti ti-file-check fs-5"></i>
+              <span class="d-none d-md-block">Документы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_representatives_all' custumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-friends fs-5"></i>
+              <span class="d-none d-md-block">Представители</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment' custumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-history fs-5"></i>
+              <span class="d-none d-md-block">История посещений</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="card shadow-none border">
+              <div class="row">
+                <div class="col-lg-6">
+                    <div class="card-body">
+                        <h4 class="mb-3">{{custumer.full_name}}</h4>
+                        <div class="vstack gap-3 mt-4">
+                          <div class="hstack gap-6">
+                            <i class="ti ti-phone text-dark fs-6"></i>
+                            <h6 class=" mb-0">Телефон: {{custumer.phone}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-mail text-dark fs-6"></i>
+                            <h6 class=" mb-0">E-mail: {{custumer.email}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-device-desktop text-dark fs-6"></i>
+                            <h6 class=" mb-0">День рождения: {{custumer.birth_date}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-map-pin text-dark fs-6"></i>
+                            <h6 class=" mb-0">Адрес: {{custumer.address}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-gender-genderfluid text-dark fs-6"></i>
+                            <h6 class=" mb-0">Пол: {{custumer.gender}}</h6>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card-body">
+                        <br>
+                        <div class="vstack gap-3 mt-4">
+                          <div class="hstack gap-6">
+                            <i class="ti ti-number text-dark fs-6"></i>
+                            <h6 class=" mb-0">Номер договора: {{custumer.contract_number}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-align-box-bottom-center text-dark fs-6"></i>
+                            <h6 class=" mb-0">Тип договора: {{custumer.contract_type}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-calendar-time text-dark fs-6"></i>
+                            <h6 class=" mb-0">Дата начала обучения: {{custumer.strat_date}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-olympics text-dark fs-6"></i>
+                            <h6 class=" mb-0">Спортивный разряд: {{custumer.sport_category}}</h6>
+                          </div>
+                          <div class="hstack gap-6">
+                            <i class="ti ti-box-multiple text-dark fs-6"></i>
+                            <h6 class=" mb-0">Группы: {% for item in custumer.groups.all %} {{item.name}}  {% endfor %}</h6>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+              </div>
+            </div>
+            <a class="btn btn-warning" href="{% url 'customer:assign_achievements' custumer.id %}">
+                <i class="bi bi-award-fill"></i> Достижения
+            </a>
+            <a class="btn btn-primary" href="{% url 'customer:custumer_update' custumer.id %}">
+                <i class="ti ti-edit fs-5"></i> Редактировать
+            </a>
+            <a class="btn btn-danger" href="{% url 'customer:customer_list' %}">
+                <i class="ti ti-arrow-back fs-5"></i> Назад
+            </a>
+        </div>
+      </div>
+    </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,105 @@
+name: Deploy via Archive
+
+on:
+  push:
+    branches:
+        - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "${{ secrets.SERVER_PORT }}" "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync project files via rsync
+        run: |
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='AGENTS.md' \
+            --exclude='venv/' \
+            --exclude='wsl_venv/' \
+            --exclude='logs/' \
+            --exclude='backups/' \
+            --exclude='.uv.lock' \
+            --exclude='.ruff_cache/' \
+            --exclude='.cursor/' \
+            --exclude='media/' \
+            -e "ssh -p ${{ secrets.SERVER_PORT }}" \
+            ./ "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}/"
+
+      - name: Backup database before deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd ${{ secrets.SERVER_PATH }}
+            # Если контейнер БД недоступен, не прерываем деплой (нужно для аварийного рестарта контейнеров)
+            echo "Проверка доступности контейнера БД..."
+            if ! docker compose -f docker-compose.production.yaml exec -T db pg_isready -U debug -d debug >/dev/null 2>&1; then
+              echo "ПРЕДУПРЕЖДЕНИЕ: контейнер БД недоступен, шаг бекапа пропущен."
+              exit 0
+            fi
+
+            # Создаем директорию для бекапов, если её нет
+            mkdir -p backups
+
+            # Формируем имя файла с текущей датой и временем
+            BACKUP_FILE="backups/db_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
+
+            # Создаем бекап базы данных PostgreSQL
+            echo "Создание бекапа базы данных..."
+            docker compose -f docker-compose.production.yaml exec -T db pg_dump -U debug -d debug | gzip > "$BACKUP_FILE"
+
+            # Проверяем, что бекап успешно создан и не пустой
+            if [ ! -f "$BACKUP_FILE" ]; then
+              echo "ОШИБКА: Файл бекапа не был создан!"
+              exit 1
+            fi
+
+            if [ ! -s "$BACKUP_FILE" ]; then
+              echo "ОШИБКА: Файл бекапа пустой!"
+              rm "$BACKUP_FILE"
+              exit 1
+            fi
+
+            # Проверяем размер файла (должен быть больше 1KB)
+            FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2>/dev/null || stat -c%s "$BACKUP_FILE" 2>/dev/null)
+            if [ "$FILE_SIZE" -lt 1024 ]; then
+              echo "ОШИБКА: Файл бекапа слишком мал ($FILE_SIZE байт). Возможно, бекап поврежден!"
+              rm "$BACKUP_FILE"
+              exit 1
+            fi
+
+            echo "Бекап успешно создан: $BACKUP_FILE (размер: $FILE_SIZE байт)"
+
+            # Удаляем старые бекапы (оставляем последние 3)
+            cd backups
+            ls -t db_backup_*.sql.gz 2>/dev/null | tail -n +4 | xargs -r rm
+            echo "Старые бекапы очищены, оставлены последние 3"
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd ${{ secrets.SERVER_PATH }}
+            docker compose -f docker-compose.production.yaml build
+            docker compose -f docker-compose.production.yaml up -d
+            docker system prune -a -f --volumes

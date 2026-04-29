@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}<title>Мои соревнования</title>{% endblock %}
+{% block content %}
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 border-bottom">
+    <h4 class="card-title mb-0"><i class="bi bi-trophy-fill text-warning me-2"></i>Мои соревнования</h4>
+  </div>
+  <div class="card-body">
+    <form method="get">
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="mb-3">
+            <label class="form-label">Название</label>
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" value="{{ request.GET.search|default:'' }}" placeholder="Поиск по названию">
+              <span class="input-group-text"><i class="ti ti-search"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="mb-3">
+            <label class="form-label">Локация</label>
+            <div class="input-group">
+              <input type="text" name="location" class="form-control" value="{{ request.GET.location|default:'' }}" placeholder="Поиск по локации">
+              <span class="input-group-text"><i class="ti ti-search"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="mb-3">
+            <label class="form-label">Дата начала</label>
+            <div class="input-group date">
+              <input type="text" class="form-control datepicker" name="date" placeholder="дд.мм.гггг" autocomplete="off" value="{{ request.GET.date|default:'' }}">
+              <span class="input-group-addon input-group-text">
+                <i class="ti ti-calendar fs-5"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="mb-3">
+            <label class="form-label">Дата окончания</label>
+            <div class="input-group date">
+              <input type="text" class="form-control datepicker" name="end_date" placeholder="дд.мм.гггг" autocomplete="off" value="{{ request.GET.end_date|default:'' }}">
+              <span class="input-group-addon input-group-text">
+                <i class="ti ti-calendar fs-5"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3 d-flex align-items-end">
+          <div class="mb-3 w-100">
+            <div class="d-flex flex-column flex-md-row gap-2 w-100">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="ti ti-search fs-4"></i>
+                Фильтровать
+              </button>
+              <a href="{% url 'customer:get_my_competitions' %}" class="btn btn-secondary w-100">
+                <i class="ti ti-refresh fs-4"></i>
+                Сбросить
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="card-body p-4">
+    <div class="table-responsive mb-4 border rounded-1">
+      <table class="table text-nowrap mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Название</th>
+            <th>Дата начала</th>
+            <th>Дата окончания</th>
+            <th>Локация</th>
+            <th>Дистанция (м)</th>
+            <th>Дисциплина</th>
+            <th>Время</th>
+            <th>Разряд</th>
+            <th>Место</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for res in results %}
+          <tr>
+            <td>{{ res.competition.name }}</td>
+            <td>{{ res.competition.date|date:"d.m.Y" }}</td>
+            <td>{{ res.competition.end_date|date:"d.m.Y" }}</td>
+            <td>{{ res.competition.location }}</td>
+            <td>{{ res.distance }}</td>
+            <td>{{ res.discipline }}</td>
+            <td>
+              {% if res.is_disqualified %}
+                <span class="badge bg-danger">Дисквалифицирован</span>
+              {% else %}
+                {{ res.formatted_time|default:"—" }}
+              {% endif %}
+            </td>
+            <td>
+              {% if res.sport_category %}
+                <span class="badge bg-success">{{ res.sport_category.name }}</span>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if res.is_disqualified %}
+                <span class="badge bg-danger" 
+                      data-bs-toggle="tooltip" 
+                      data-bs-placement="top" 
+                      title="{% if res.disqualification_comment %}{{ res.disqualification_comment }}{% else %}Причина не указана{% endif %}">
+                  Дисквалифицирован
+                </span>
+              {% else %}
+                {{ res.place }}
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center text-muted">Нет данных</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// Инициализация tooltip'ов Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

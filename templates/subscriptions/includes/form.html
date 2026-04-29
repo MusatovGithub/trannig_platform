@@ -1,0 +1,390 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header text-bg-primary">
+                <h4 class="mb-0 text-white">Выдать абонемент для {{custumer.full_name}}</h4>
+            </div>
+
+            <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="card-body">
+                    {% if error %}
+                        <p class="text-danger">{{ error }}</p>
+                    {% endif %}
+
+                    <div class="row pt-3">
+                        <div class="col-md-12">
+                            <div class="mb-3 has-success">
+                                <label class="form-label">Шаблон абонемента</label>
+                                <select class="form-select" id="temp" name="temp">
+                                    <option value="">-------------</option>
+                                    {% for item in temp %}
+                                        <option value="{{ item.id }}">{{ item.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if user_permissions.can_add_templates or user_permissions.can_add_subscriptions %}
+                                    <a href="{% url 'customer:subscription_template_all' %}" class="nav-link text-primary">
+                                        Перейти на страницу добавления шаблонов
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if allow_group_selection %}
+                            <div class="col-md-6">
+                                <div class="mb-3 has-success">
+                                    <label class="form-label" help_text="Чтобы выбрать сразу несколько групп зажмите ctrl на клавиатуре">Группы в которых действует</label>
+                                    <small class="form-text text-muted d-block mb-2" style="font-size: 0.875rem;">
+                                        <i class="ti ti-info-circle me-1"></i>Чтобы выбрать сразу несколько групп зажмите ctrl на клавиатуре
+                                    </small>
+                                    <select class="select2 form-select" id="group" name="group" multiple>
+                                        {% for item in groups %}
+                                            <option value="{{ item.id }}"
+                                                {% if item.id|stringformat:"s" in form_data.group_ids %}selected{% endif %}>
+                                                {{ item.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label d-block">Группа</label>
+                                    <ul class="list-group">
+                                        {% for group_item in fixed_groups %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ group_item.name }}
+                                            </li>
+                                            <input type="hidden" name="group" value="{{ group_item.id }}">
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Количество занятий</label>
+                                <input type="number" id="number" name="number" class="form-control" value="{{ form_data.number }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Дата начала</label>
+                                <div class="input-group date">
+                                    <input type="text" class="form-control datepicker" name="start_date" placeholder="дд.мм.гггг" value="{{ form_data.start_date }}">
+                                    <span class="input-group-addon input-group-text">
+                                        <i class="ti ti-calendar fs-5"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Дата окончания</label>
+                                <div class="input-group date">
+                                    <input type="text" class="form-control datepicker" name="end_date" placeholder="дд.мм.гггг" value="{{ form_data.end_date }}">
+                                    <span class="input-group-addon input-group-text">
+                                        <i class="ti ti-calendar fs-5"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="unlimited" value="option1" {% if form_data.unlimited %}checked{% endif %}>
+                                <label class="form-check-label" for="inlineCheckbox1">Безлимитный</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <input class="form-check-input" type="checkbox" id="is_free" name="is_free" value="option1" {% if form_data.is_free %}checked{% endif %}>
+                                <label class="form-check-label" for="is_free">Выдать бесплатно</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <input class="form-check-input" type="checkbox" id="auto_bind_attendances" name="auto_bind_attendances" value="option1" {% if form_data.auto_bind_attendances is False %}{% else %}checked{% endif %}>
+                                <label class="form-check-label" for="auto_bind_attendances">
+                                    Автоматически списать подходящие посещения
+                                    <i class="ti ti-info-circle ms-1" 
+                                       data-bs-toggle="tooltip" 
+                                       data-bs-placement="top"
+                                       data-bs-html="true"
+                                       title="При активации этой опции система автоматически найдёт и спишет все неоплаченные посещения клиента, которые попадают в период действия этого абонемента (с <strong>даты начала</strong> по <strong>дату окончания</strong>) и относятся к выбранным группам. Это позволяет избежать ручного списания каждого посещения."></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="price-section">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Стоимость абонемента</label>
+                                <input type="number" id="price" name="price" class="form-control" value="{{ form_data.price }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="pay">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Сумма платежа</label>
+                                <input type="number" id="summ" name="summ" class="form-control" value="{{ form_data.summ }}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3 has-success">
+                                <label class="form-label">Касса</label>
+                                <select class="form-select" id="cashier" name="cashier">
+                                    <option value="">-------------</option>
+                                    {% for item in cashier %}
+                                        <option value="{{ item.id }}" {% if form_data.cashier == item.id|stringformat:"s" %}selected{% endif %}>{{ item.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if user_permissions.can_view_cashiers or user_permissions.can_add_cashiers %}
+                                    <a href="{% url 'customer:cashier_list' %}" class="nav-link text-primary">
+                                        Кассы для зачисления платежей
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label">Дата платежа</label>
+                                <div class="input-group date">
+                                    <input type="text" class="form-control datepicker" name="date_summ" placeholder="дд.мм.гггг" value="{{ form_data.date_summ }}">
+                                    <span class="input-group-addon input-group-text">
+                                        <i class="ti ti-calendar fs-5"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+                    <div class="card-body border-top">
+                        <button type="submit" class="btn btn-primary" id="buttonSave">Сохранить</button>
+                        <a href="{{ cancel_url }}" class="btn bg-danger-subtle text-danger ms-6">Отмена</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="templates-data">
+    {
+      {% for item in temp %}
+        "{{ item.id }}": {
+          "number": "{{ item.number_classes }}",
+          "start_date": "{{ item.start_date|date:'d.m.Y' }}",
+          "end_date": "{{ item.end_date|date:'d.m.Y' }}",
+          "expired": "{{ item.expired }}",
+          "price": "{{ item.price }}",
+          "unlimited": {{ item.unlimited|yesno:"true,false" }},
+          "is_free": {{ item.is_free|yesno:"true,false" }},
+          "is_day": {{ item.is_day|yesno:"true,false" }},
+          "is_week": {{ item.is_week|yesno:"true,false" }},
+          "is_month": {{ item.is_month|yesno:"true,false" }}
+        }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const templateSelect = document.getElementById("temp");
+        const numberInput = document.getElementById("number");
+        const unlimitedCheckbox = document.getElementById("inlineCheckbox1");
+        const isFreeCheckbox = document.getElementById("is_free");
+        const paySection = document.getElementById("pay");
+        const priceSection = document.getElementById("price-section");
+
+        if (!templateSelect) {
+            return;
+        }
+
+        const templatesDataElement = document.getElementById("templates-data");
+        const templates = templatesDataElement ? JSON.parse(templatesDataElement.textContent) : {};
+        const startDateInput = document.querySelector("input[name='start_date']");
+        const endDateInput = document.querySelector("input[name='end_date']");
+        const priceInput = document.getElementById("price");
+
+        function toggleNumberInput() {
+            numberInput.disabled = unlimitedCheckbox.checked;
+            if (unlimitedCheckbox.checked) {
+                numberInput.value = "";
+            }
+        }
+
+        function togglePaySection() {
+            if (isFreeCheckbox.checked) {
+                paySection.classList.add("d-none");
+                priceSection.classList.add("d-none");
+            } else {
+                paySection.classList.remove("d-none");
+                priceSection.classList.remove("d-none");
+            }
+        }
+
+        function parseDateString(value) {
+            if (!value) {
+                return null;
+            }
+            const parts = value.split(".");
+            if (parts.length !== 3) {
+                return null;
+            }
+            const day = Number.parseInt(parts[0], 10);
+            const month = Number.parseInt(parts[1], 10) - 1;
+            const year = Number.parseInt(parts[2], 10);
+
+            if (
+                Number.isNaN(day) ||
+                Number.isNaN(month) ||
+                Number.isNaN(year)
+            ) {
+                return null;
+            }
+
+            const parsed = new Date(year, month, day);
+            if (
+                parsed.getFullYear() !== year ||
+                parsed.getMonth() !== month ||
+                parsed.getDate() !== day
+            ) {
+                return null;
+            }
+
+            return parsed;
+        }
+
+        function formatDate(date) {
+            if (!date || Number.isNaN(date.getTime())) {
+                return "";
+            }
+            return date
+                .toLocaleDateString("ru-RU", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                });
+        }
+
+        function addDuration(baseDate, template) {
+            const expiredRaw = Number.parseInt(template.expired, 10);
+            if (!Number.isFinite(expiredRaw) || expiredRaw <= 0) {
+                return baseDate;
+            }
+
+            const result = new Date(baseDate.getTime());
+
+            if (template.is_day) {
+                result.setDate(result.getDate() + expiredRaw);
+                return result;
+            }
+
+            if (template.is_week) {
+                result.setDate(result.getDate() + expiredRaw * 7);
+                return result;
+            }
+
+            if (template.is_month) {
+                const originalDay = result.getDate();
+                result.setMonth(result.getMonth() + expiredRaw);
+
+                if (result.getDate() !== originalDay) {
+                    result.setDate(0);
+                }
+                return result;
+            }
+
+            // fallback — трактуем как количество дней
+            result.setDate(result.getDate() + expiredRaw);
+            return result;
+        }
+
+        function resolveStartDate(selectedTemplate) {
+            const currentValue = startDateInput ? startDateInput.value.trim() : "";
+            let baseDate = parseDateString(currentValue);
+
+            if (!baseDate && selectedTemplate.start_date) {
+                baseDate = parseDateString(selectedTemplate.start_date);
+            }
+
+            if (!baseDate) {
+                baseDate = new Date();
+            }
+
+            if (startDateInput && !currentValue) {
+                startDateInput.value = formatDate(baseDate);
+            }
+
+            return baseDate;
+        }
+
+        function updateFormFields() {
+            const selectedTemplate = templates[templateSelect.value];
+
+            if (!selectedTemplate) {
+                return;
+            }
+
+            numberInput.disabled = selectedTemplate.unlimited;
+            numberInput.value = selectedTemplate.unlimited ? "" : selectedTemplate.number;
+
+            unlimitedCheckbox.checked = selectedTemplate.unlimited;
+            isFreeCheckbox.checked = selectedTemplate.is_free;
+            toggleNumberInput();
+            togglePaySection();
+
+            const baseDate = resolveStartDate(selectedTemplate);
+
+            if (priceInput) {
+                priceInput.value = selectedTemplate.price || "";
+            }
+
+            if (endDateInput) {
+                const computedEnd = addDuration(baseDate, selectedTemplate);
+                endDateInput.value = formatDate(computedEnd);
+            }
+        }
+
+        templateSelect.addEventListener("change", updateFormFields);
+        unlimitedCheckbox.addEventListener("change", toggleNumberInput);
+        isFreeCheckbox.addEventListener("change", togglePaySection);
+        if (startDateInput) {
+            startDateInput.addEventListener("change", function () {
+                if (templateSelect.value) {
+                    updateFormFields();
+                }
+            });
+        }
+
+        // Первичная инициализация
+        toggleNumberInput();
+        togglePaySection();
+
+        // Инициализация tooltips для подсказок
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    });
+</script>
+

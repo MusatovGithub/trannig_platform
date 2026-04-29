@@ -1,0 +1,298 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Выдать абонемент</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Выдать абонемент</h4>
+                </div>
+  
+                <!-- Форма-->
+                <form action="" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div>
+                    <div class="card-body">
+                      <p class="text-danger">{{error}}</p>
+                      <div class="row pt-3">
+                        <div class="col-md-12">
+                          <div class="mb-3 has-success">
+                              <label class="form-label">Шаблон абонемента</label>
+                              <select class="form-select" id="temp" name="temp">
+                                  <option value="">-------------</option>
+                                  {% for item in temp %}
+                                  <option value="{{item.id}}">{{item.name}}</option>
+                                  {% endfor %}
+                              </select>
+                              <a href="{% url 'customer:subscription_template_all' %}" class="nav-link text-primary">Перейти на страницу добавления шаблонов</a>
+                          </div>
+                      </div>
+                        <!--ФИО-->
+                        <div class="col-md-6">
+                            <div class="mb-3 has-success">
+                                <label class="form-label" help_text="Чтобы выбрать сразу несколько групп зажмите ctrl на клавиатуре">Группы в которых действует</label>
+                                <small class="form-text text-muted d-block mb-2" style="font-size: 0.875rem;">
+                                  <i class="ti ti-info-circle me-1"></i>Чтобы выбрать сразу несколько групп зажмите ctrl на клавиатуре
+                                </small>
+                                <select class="select2 form-select" id="group" name="group" multiple>
+                                      {% for item in group %}
+                                      <option value="{{ item.id }}" {% if item in subscription.groups.all %}selected{% endif %}>
+                                          {{ item.name }}
+                                      </option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                        </div>
+                        <!--Телефон-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Количество занятий</label>
+                            <input type="number" id="number" name="number" class="form-control international-inputmask" value="{{ subscription.number_classes }}"/>
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Пол-->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Дата начала</label>
+                                <div class="input-group date">
+                              
+                                  <input type="text" class="form-control" name="start_date" placeholder="дд.мм.гггг" value="{{ subscription.start_date|date:'d.m.Y' }}" />
+            
+                                  <span class="input-group-addon input-group-text">
+                                    <i class="ti ti-calendar fs-5"></i>
+                                  </span>
+                                </div>
+                              </div>
+                        </div>
+                        <!--День рождения-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Дата окончания</label>
+                            <div class="input-group date">
+                              
+                              <input type="text" class="form-control" name="end_date" placeholder="дд.мм.гггг" value="{{ subscription.end_date|date:'d.m.Y' }}" />
+        
+                              <span class="input-group-addon input-group-text">
+                                <i class="ti ti-calendar fs-5"></i>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Адрес-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="unlimited" value="option1" {% if subscription.unlimited %}checked{% endif %}>
+                            <label class="form-check-label" for="inlineCheckbox1">Безлимитный</label>
+                          </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <input class="form-check-input" type="checkbox" id="is_free" name="is_free" value="option1" {% if subscription.is_free %}checked{% endif %}>
+                            <label class="form-check-label" for="is_free">Выдать бесплатно</label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row" id="price">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Стоимость абонемента</label>
+                            <input type="number" id="price" name="price" class="form-control" value="{% if form_data.price %}{{form_data.price}}{% else %}{{subscription.total_cost}}{% endif %}"/>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row" id="pay">
+                        <!--Пол-->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Сумма платежа</label>
+                                <input type="number" id="summ" name="summ" class="form-control" value="{{payment.summ}}"/>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                              <label class="form-label">Касса</label>
+                              <select class="form-select" id="cashier" name="cashier">
+                                  <option value="">-------------</option>
+                                {% for item in cashier %}
+                                  <option value="{{item.id}}" {% if item.id == payment.cashier_id %}selected{% endif %}>{{item.name}}</option>
+                                {% endfor %}
+                              </select>
+                              <a href="{% url 'customer:cashier_list' %}" class="nav-link text-primary">Кассы для зачисления платежей</a>
+                          </div>
+                        </div>
+
+                        <div class="col-md-12">
+                          <div class="mb-3">
+                            <label class="form-label">Дата платежа</label>
+                            <div class="input-group date">
+                              
+                              <input type="text" class="form-control" name="date_summ" placeholder="дд.мм.гггг"  value="{{payment.summ_date|date:'d.m.Y'}}"/>
+        
+                              <span class="input-group-addon input-group-text">
+                                <i class="ti ti-calendar fs-5"></i>
+                              </span>
+                            </div>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                      <div class="card-body border-top">
+                        <button type="submit" class="btn btn-primary" id="buttonSave">
+                          Сохранить
+                        </button>
+                        <a href="{% url 'customer:custumer_subscriptions' custumer.id %}" class="btn bg-danger-subtle text-danger ms-6">
+                          Отмена
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+
+
+  <script type="application/json" id="templates-data">
+    {
+      {% for item in temp %}
+        "{{ item.id }}": {
+          "number": "{{ item.number_classes }}",
+          "start_date": "{{ item.start_date|date:'d.m.Y' }}",
+          "end_date": "{{ item.end_date|date:'d.m.Y' }}",
+          "expired": "{{ item.expired }}",
+          "price": "{{ item.price }}",
+          "unlimited": {{ item.unlimited|yesno:"true,false" }},
+          "is_free": {{ item.is_free|yesno:"true,false" }},
+          "is_day": {{ item.is_day|yesno:"true,false" }},
+          "is_week": {{ item.is_week|yesno:"true,false" }},
+          "is_month": {{ item.is_month|yesno:"true,false" }}
+        }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const templateSelect = document.getElementById("temp");
+        const numberInput = document.getElementById("number");
+        const startDateInput = document.querySelector("input[name='start_date']");
+        const endDateInput = document.querySelector("input[name='end_date']");
+        const unlimitedCheckbox = document.getElementById("inlineCheckbox1");
+        const isFreeCheckbox = document.getElementById("is_free");
+        const paySection = document.getElementById("pay");
+        const priceSection = document.getElementById("price");
+
+        const templates = JSON.parse(document.getElementById('templates-data').textContent);
+
+        function toggleNumberInput() {
+            numberInput.disabled = unlimitedCheckbox.checked;
+            if (unlimitedCheckbox.checked) {
+                numberInput.value = "";
+            }
+        }
+        
+
+        function updateFormFields() {
+    const selectedTemplate = templates[templateSelect.value];
+
+    if (selectedTemplate) {
+      numberInput.disabled = selectedTemplate.unlimited; 
+        numberInput.value = selectedTemplate.unlimited ? "" : selectedTemplate.number;
+
+        unlimitedCheckbox.checked = selectedTemplate.unlimited;
+        isFreeCheckbox.checked = selectedTemplate.is_free;
+        // Обновляем поле цены
+        const priceInput = document.getElementById("price");
+        if (priceInput) {
+            priceInput.value = selectedTemplate.price;
+        }
+        togglePaySection();
+        
+        // Если выбран бесплатный шаблон, скрываем поле стоимости
+        if (selectedTemplate.is_free) {
+            priceSection.style.display = "none";
+        } else {
+            priceSection.style.display = "flex";
+        }
+
+        let today = new Date();
+        let startDate = new Date(today);
+        startDate.setDate(today.getDate());
+
+        let endDate = new Date(startDate);
+        
+        if (selectedTemplate.is_day) {
+            // Kunlarni qo'shish
+            endDate.setDate(startDate.getDate() + Number(selectedTemplate.expired)); // Bugungi sanaga expired miqdorida kun qo'shish
+        } else if (selectedTemplate.is_week) {
+            // Haftalarni qo'shish (Hafta * 7 = kunlar)
+            const weeksToAdd = Number(selectedTemplate.expired);
+            const daysToAdd = weeksToAdd * 7; // Haftalarni kunlarga aylantirish
+            endDate.setDate(startDate.getDate() + daysToAdd); // Kunlarni qo'shish
+        } else if (selectedTemplate.is_month) {
+            // Oylik qo'shish
+            const monthsToAdd = Number(selectedTemplate.expired);
+            endDate.setMonth(startDate.getMonth() + monthsToAdd); // Oylarga qo'shish
+
+            // Agar sananing oxirida biron xato bo'lsa (masalan, fevral oyida 30 kun), sanani to'g'ri qo'shish
+            if (endDate.getDate() !== startDate.getDate()) {
+                endDate.setDate(0); // Agar oxirgi sana noto'g'ri bo'lsa, oyni to'g'irlash
+            }
+        }
+
+        // Formatlash (agar kerak bo'lsa)
+        startDateInput.value = formatDate(startDate);
+        endDateInput.value = formatDate(endDate);
+    }
+}
+
+
+        function togglePaySection() {
+            const isFree = isFreeCheckbox.checked;
+            paySection.style.display = isFree ? "none" : "flex";
+            priceSection.style.display = isFree ? "none" : "flex";
+        }
+
+        function formatDate(date) {
+            let day = date.getDate().toString().padStart(2, "0");
+            let month = (date.getMonth() + 1).toString().padStart(2, "0");
+            let year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        templateSelect.addEventListener("change", updateFormFields);
+        isFreeCheckbox.addEventListener("change", togglePaySection);
+        unlimitedCheckbox.addEventListener("change", toggleNumberInput);
+        
+        // Инициализируем состояние полей при загрузке страницы
+        togglePaySection();
+        toggleNumberInput(); // Добавлена инициализация поля "Количество занятий"
+        
+
+        if (templateSelect.value) {
+            updateFormFields();
+        }
+    });
+</script>
+
+
+{% endblock %}

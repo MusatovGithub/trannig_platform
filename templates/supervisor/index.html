@@ -1,0 +1,221 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Главная</title> {% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<h4>Главная</h4>
+  
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card mb-lg-0 training-today-card">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-4">Тренировки сегодня</h5>
+            <div class="training-today-scroll">
+              <ul class="timeline-widget mb-0 position-relative mb-n5" data-simplebar>
+                {% for item in classess %}
+                <li class="timeline-item d-flex position-relative mb-3">
+                  <div class="timeline-time mt-n1 text-muted flex-shrink-0 text-end">
+                    {{item.strat}}
+                  </div>
+                  <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                    <span class="timeline-badge bg-primary flex-shrink-0 mt-2"></span>
+                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                  </div>
+                  <div class="timeline-desc fs-12 text-muted mt-n1 flex-grow-1">
+                    <a href="{% url 'groups_custumer:groups_detail_with_date' item.groups_id.id item.date|date:'Y-m-d' %}" class="nav-link d-block">{{item.groups_id}}</a>
+                    <div class="text-break">{{item.employe.full_name}}</div>
+                  </div>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card mb-lg-0">
+          <div class="card-body">
+            <h5 class="card-title mb-4">Неоплаченные посещения</h5>
+            {% if unpaid_payments %}
+              <ul class="list-group">
+                {% for row in unpaid_payments %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'customer:custumer_payment' row.custumer_id %}?group={{ row.groups_id }}" class="nav-link text-center">{{ row.custumer__full_name }}</a>
+                    <span class="badge bg-danger rounded-pill">{{ row.count }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="text-muted">Нет задолженностей</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card mb-lg-0">
+          <div class="card-body">
+            <h5 class="card-title mb-1">Закончились занятия / истёк срок абонемента</h5>
+            <div class="medium text-muted mb-3">Клиенты, у кого закончились занятия или истёк срок</div>
+            {% if exhausted_subs %}
+              <ul class="list-group">
+                {% for sub in exhausted_subs %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a class="nav-link" href="{% url 'customer:subscription_detail' sub.id %}">
+                      <div class="fw-semibold">{{ sub.name }}</div>
+                      <div class="small text-muted">
+                        {% if sub.reason == 'no_visits' %}
+                          Посещения исчерпаны
+                        {% else %}
+                          Срок истёк
+                        {% endif %}
+                        {% if sub.end_date %} · до {{ sub.end_date|date:'d.m.Y' }}{% endif %}
+                      </div>
+                    </a>
+                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#close-subscription-modal{{sub.id}}">
+                      Закрыть абонемент
+                    </button>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="text-muted">Нет клиентов с завершёнными абонементами</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+</div>
+
+<!-- Модальные окна подтверждения закрытия абонементов -->
+{% for sub in exhausted_subs %}
+<div class="modal fade close-subscription-modal" id="close-subscription-modal{{sub.id}}" tabindex="-1" aria-labelledby="closeSubscriptionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="closeSubscriptionModalLabel">Подтверждение закрытия абонемента</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Вы точно хотите закрыть абонемент для клиента <strong>{{ sub.name }}</strong>?</p>
+        <div class="alert alert-warning" role="alert">
+          <i class="ti ti-alert-triangle me-2"></i>
+          <strong>Внимание!</strong> Нельзя закрыть неоплаченный абонемент. Бесплатные и оплаченные абонементы можно закрывать.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-danger" onclick="closeSubscription({{ sub.id }})">
+          <i class="ti ti-x me-1"></i>Закрыть абонемент
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+function closeSubscription(subscriptionId) {
+  // Показываем индикатор загрузки
+  const button = event.target;
+  const originalText = button.innerHTML;
+  button.innerHTML = '<i class="ti ti-loader me-1"></i>Закрытие...';
+  button.disabled = true;
+  
+  // Получаем CSRF токен
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                   document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+  
+  // Отправляем AJAX-запрос
+  const url = `{% url 'customer:close_subscription' 0 %}`.replace('0', subscriptionId);
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken
+    },
+    body: JSON.stringify({})
+  })
+  .then(response => {
+    console.log('Response status:', response.status);
+    return response.json();
+  })
+  .then(data => {
+    console.log('Response data:', data);
+    if (data.success) {
+      // Показываем сообщение об успехе
+      showToast('success', data.message);
+      
+      // Закрываем модальное окно
+      const modal = bootstrap.Modal.getInstance(document.getElementById(`close-subscription-modal${subscriptionId}`));
+      modal.hide();
+      
+      // Удаляем элемент из списка
+      const listItem = document.querySelector(`[data-subscription-id="${subscriptionId}"]`);
+      if (listItem) {
+        listItem.remove();
+      }
+      
+      // Обновляем страницу через 1 секунду
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    } else {
+      // Показываем ошибку
+      showToast('error', data.error);
+      
+      // Восстанавливаем кнопку
+      button.innerHTML = originalText;
+      button.disabled = false;
+    }
+  })
+  .catch(error => {
+    console.error('Ошибка:', error);
+    showToast('error', 'Произошла ошибка при закрытии абонемента');
+    
+    // Восстанавливаем кнопку
+    button.innerHTML = originalText;
+    button.disabled = false;
+  });
+}
+
+function showToast(type, message) {
+  // Создаем toast уведомление
+  const toastContainer = document.getElementById('toast-container') || createToastContainer();
+  
+  const toastId = 'toast-' + Date.now();
+  const toastHtml = `
+    <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="ti ti-${type === 'success' ? 'check' : 'alert-triangle'} me-2 text-${type === 'success' ? 'success' : 'danger'}"></i>
+        <strong class="me-auto">${type === 'success' ? 'Успешно' : 'Ошибка'}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        ${message}
+      </div>
+    </div>
+  `;
+  
+  toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+  
+  const toastElement = document.getElementById(toastId);
+  const toast = new bootstrap.Toast(toastElement);
+  toast.show();
+  
+  // Удаляем toast после скрытия
+  toastElement.addEventListener('hidden.bs.toast', () => {
+    toastElement.remove();
+  });
+}
+
+function createToastContainer() {
+  const container = document.createElement('div');
+  container.id = 'toast-container';
+  container.className = 'toast-container position-fixed top-0 end-0 p-3';
+  container.style.zIndex = '9999';
+  document.body.appendChild(container);
+  return container;
+}
+</script>
+
+{% endblock %}

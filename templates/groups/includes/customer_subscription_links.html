@@ -1,0 +1,112 @@
+{% with render_mode=render_mode|default:'content' %}
+{% if render_mode == 'content' %}
+  {% if variant == 'desktop' %}
+    <div id="customer-subscriptions-desktop-{{ customer.id }}"
+         class="customer-subscriptions-desktop customer-summary-container"
+         data-customer-id="{{ customer.id }}">
+      {% if employee_permissions.can_add_subscriptions %}
+        <a href="{% url 'groups_custumer:group_subscription_create' group.id customer.id %}"
+           class="nav-link text-primary text-center">
+          Выдать абонемент
+        </a>
+      {% endif %}
+
+      {% for subscription in customer.subscriptions %}
+        {% if subscription.unlimited %}
+          <div>
+            <button class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#with-grid-modal{{ subscription.id }}">
+              Б/Л - {% if subscription.remained == None %}0{% else %}{{ subscription.remained }}{% endif %}
+            </button>
+          </div>
+        {% else %}
+          <button class="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#with-grid-modal{{ subscription.id }}">
+            {{ subscription.number_classes }}/
+            {% if subscription.remained == None %}0{% else %}{{ subscription.remained }}{% endif %}
+          </button>
+        {% endif %}
+      {% empty %}
+        <div class="text-muted small text-center py-2">Абонементы отсутствуют</div>
+      {% endfor %}
+
+      {% if customer.unpaid_count > 0 %}
+        <a href="{% url 'customer:custumer_payment' customer.id %}?group={{ group.id }}"
+           class="nav-link text-danger text-center">
+          Не оплачено: {{ customer.unpaid_count }}
+        </a>
+      {% endif %}
+    </div>
+  {% elif variant == 'mobile' %}
+    <div id="customer-subscriptions-mobile-{{ customer.id }}"
+         class="subscription-buttons customer-summary-container"
+         data-customer-id="{{ customer.id }}">
+      {% if employee_permissions.can_add_subscriptions %}
+        <a href="{% url 'groups_custumer:group_subscription_create' group.id customer.id %}"
+           class="btn btn-sm btn-outline-primary">
+          Выдать абонемент
+        </a>
+      {% endif %}
+
+      {% for subscription in customer.subscriptions %}
+        {% if subscription.unlimited %}
+          <button class="btn btn-sm btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#with-grid-modal{{ subscription.id }}">
+            Б/Л - {% if subscription.remained == None %}0{% else %}{{ subscription.remained }}{% endif %}
+          </button>
+        {% else %}
+          <button class="btn btn-sm btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#with-grid-modal{{ subscription.id }}">
+            {{ subscription.number_classes }}/
+            {% if subscription.remained == None %}0{% else %}{{ subscription.remained }}{% endif %}
+          </button>
+        {% endif %}
+      {% empty %}
+        <div class="text-muted small py-2">Абонементы отсутствуют</div>
+      {% endfor %}
+
+      {% if customer.unpaid_count > 0 %}
+        <a href="{% url 'customer:custumer_payment' customer.id %}?group={{ group.id }}"
+           class="btn btn-sm btn-outline-danger">
+          Не оплачено: {{ customer.unpaid_count }}
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% else %}
+  {% if variant == 'desktop' %}
+    <div id="customer-subscriptions-desktop-{{ customer.id }}"
+         class="customer-subscriptions-desktop customer-summary-container"
+         data-customer-id="{{ customer.id }}">
+      {% if employee_permissions.can_add_subscriptions %}
+        <a href="{% url 'groups_custumer:group_subscription_create' group.id customer.id %}"
+           class="nav-link text-primary text-center">
+          Выдать абонемент
+        </a>
+      {% endif %}
+      <div class="text-muted small text-center py-2">
+        Загрузка данных...
+      </div>
+    </div>
+  {% elif variant == 'mobile' %}
+    <div id="customer-subscriptions-mobile-{{ customer.id }}"
+         class="subscription-buttons customer-summary-container"
+         data-customer-id="{{ customer.id }}">
+      {% if employee_permissions.can_add_subscriptions %}
+        <a href="{% url 'groups_custumer:group_subscription_create' group.id customer.id %}"
+           class="btn btn-sm btn-outline-primary">
+          Выдать абонемент
+        </a>
+      {% endif %}
+      <div class="text-muted small py-2">
+        Загрузка данных...
+      </div>
+    </div>
+  {% endif %}
+{% endif %}
+{% endwith %}
+

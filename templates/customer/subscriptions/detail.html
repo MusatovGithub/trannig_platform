@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load math_filters %}
+{% load user_groups %}
+
+{% block title %}
+<title>Детали абонемента - {{ subscription.custumer.full_name }}</title>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Информация об абонементе -->
+        <div class="card mb-4">
+            <div class="card-header text-bg-primary d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 text-white">Абонемент клиента: {{ subscription.custumer.full_name }}</h4>
+                <div>
+                    <a href="{% url 'customer:custumer_detaile' subscription.custumer.id %}" class="btn btn-light btn-sm">
+                        <i class="ti ti-user me-1"></i>Профиль клиента
+                    </a>
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#createNewSubscriptionModal">
+                        <i class="ti ti-plus me-1"></i>Новый абонемент
+                    </button>
+                    {% if not subscription.is_blok %}
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#closeSubscriptionModal">
+                        <i class="ti ti-x me-1"></i>Закрыть абонемент
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Клиент:</strong></td>
+                                <td>{{ subscription.custumer.full_name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Период действия:</strong></td>
+                                <td>
+                                    {% if subscription.start_date and subscription.end_date %}
+                                        {{ subscription.start_date|date:'d.m.Y' }} - {{ subscription.end_date|date:'d.m.Y' }}
+                                    {% else %}
+                                        Не указан
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Количество занятий:</strong></td>
+                                <td>
+                                    {% if subscription.unlimited %}
+                                        <span class="badge bg-info">Безлимитный</span>
+                                    {% else %}
+                                        {{ subscription.number_classes|default:"Не указано" }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Осталось занятий:</strong></td>
+                                <td>
+                                    {% if subscription.unlimited %}
+                                        <span class="badge bg-info">Безлимит</span>
+                                    {% else %}
+                                        <span class="badge {% if subscription.count_of_trainnig_left > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ subscription.count_of_trainnig_left }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Статус оплаты:</strong></td>
+                                <td>
+                                    {% if subscription.attendance_status == 'paid' %}
+                                        <span class="badge bg-success">Оплачено</span>
+                                    {% elif subscription.attendance_status == 'unpaid' %}
+                                        <span class="badge bg-warning">Не оплачено</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Бесплатно</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Стоимость:</strong></td>
+                                <td>
+                                    {% if subscription.is_free %}
+                                        <span class="badge bg-info">Бесплатно</span>
+                                    {% else %}
+                                        {{ subscription.total_cost|default:"Не указана" }} ₽
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Группы:</strong></td>
+                                <td>
+                                    {% for group in subscription.groups.all %}
+                                        <span class="badge bg-secondary me-1">{{ group.name }}</span>
+                                    {% empty %}
+                                        Не указаны
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Статус:</strong></td>
+                                <td>
+                                    {% if subscription.is_blok %}
+                                        <span class="badge bg-danger">Закрыт</span>
+                                        {% if subscription.closing_date %}
+                                            <small class="text-muted">({{ subscription.closing_date|date:'d.m.Y' }})</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-success">Активен</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Посещения -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Посещения по абонементу</h5>
+            </div>
+            <div class="card-body">
+                {% if attendances %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Время</th>
+                                    <th>Группа</th>
+                                    <th>Тренер</th>
+                                    <th>Статус посещения</th>
+                                    <th>Комментарий</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attendance in attendances %}
+                                <tr>
+                                    <td>{{ attendance.gr_class.date|date:'d.m.Y' }}</td>
+                                    <td>{{ attendance.gr_class.strat|time:'H:i' }}</td>
+                                    <td>
+                                        <a href="{% url 'groups_custumer:groups_detail_with_date' attendance.gr_class.groups_id.id attendance.gr_class.date|date:'Y-m-d' %}" 
+                                           class="nav-link">{{ attendance.gr_class.groups_id.name }}</a>
+                                    </td>
+                                    <td>{{ attendance.gr_class.employe.full_name }}</td>
+                                    <td>
+                                        {% if attendance.attendance_status == 'not_attended' %}
+                                            <span class="badge bg-danger">Не был</span>
+                                        {% elif attendance.attendance_status == 'attended_2' %}
+                                            <span class="badge bg-warning">Был (2)</span>
+                                        {% elif attendance.attendance_status == 'attended_3' %}
+                                            <span class="badge bg-info">Был (3)</span>
+                                        {% elif attendance.attendance_status == 'attended_4' %}
+                                            <span class="badge bg-primary">Был (4)</span>
+                                        {% elif attendance.attendance_status == 'attended_5' %}
+                                            <span class="badge bg-success">Был (5)</span>
+                                        {% elif attendance.attendance_status == 'attended_10' %}
+                                            <span class="badge bg-success">Был (10)</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Не указан</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ attendance.comment|default:"-" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="ti ti-calendar-x fs-1"></i>
+                        <p class="mt-2">Нет посещений по этому абонементу</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Платежи -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Платежи по абонементу</h5>
+            </div>
+            <div class="card-body">
+                {% if payments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Дата платежа</th>
+                                    <th>Сумма</th>
+                                    <th>Касса</th>
+                                    <th>Статус</th>
+                                    <th>Кто принял</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td>{{ payment.summ_date|date:'d.m.Y' }}</td>
+                                    <td>{{ payment.summ|default:"-" }} ₽</td>
+                                    <td>{{ payment.cashier.name|default:"-" }}</td>
+                                    <td>
+                                        {% if payment.is_pay %}
+                                            <span class="badge bg-success">Оплачен</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Не оплачен</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ payment.owner.full_name|default:"-" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Итоговая информация по платежам -->
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <strong>Всего оплачено:</strong> 
+                                {% for payment in payments %}
+                                    {% if payment.is_pay and payment.summ %}{{ payment.summ }}{% endif %}
+                                {% empty %}
+                                    0
+                                {% endfor %} ₽
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-warning">
+                                <strong>Остаток к доплате:</strong> {{ subscription.remaining_amount }} ₽
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="ti ti-credit-card-off fs-1"></i>
+                        <p class="mt-2">Нет платежей по этому абонементу</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для закрытия абонемента -->
+<div class="modal fade" id="closeSubscriptionModal" tabindex="-1" aria-labelledby="closeSubscriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="closeSubscriptionModalLabel">Подтверждение закрытия абонемента</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы точно хотите закрыть абонемент для клиента <strong>{{ subscription.custumer.full_name }}</strong>?</p>
+                <div class="alert alert-warning" role="alert">
+                    <i class="ti ti-alert-triangle me-2"></i>
+                    <strong>Внимание!</strong> Нельзя закрыть неоплаченный абонемент. Бесплатные и оплаченные абонементы можно закрывать.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" onclick="closeSubscription({{ subscription.id }})">
+                    <i class="ti ti-x me-1"></i>Закрыть абонемент
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для создания нового абонемента -->
+<div class="modal fade" id="createNewSubscriptionModal" tabindex="-1" aria-labelledby="createNewSubscriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createNewSubscriptionModalLabel">Создать новый абонемент</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Создать новый абонемент для клиента <strong>{{ subscription.custumer.full_name }}</strong>?</p>
+                <div class="alert alert-info" role="alert">
+                    <i class="ti ti-info-circle me-2"></i>
+                    Вы будете перенаправлены на страницу создания нового абонемента.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <a href="{% url 'customer:custumer_subscriptions_add' subscription.custumer.id %}" class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i>Создать абонемент
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function closeSubscription(subscriptionId) {
+    // Показываем индикатор загрузки
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="ti ti-loader me-1"></i>Закрытие...';
+    button.disabled = true;
+    
+    // Получаем CSRF токен
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                     document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+    
+    // Отправляем AJAX-запрос
+    const url = `{% url 'customer:close_subscription' 0 %}`.replace('0', subscriptionId);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            // Показываем сообщение об успехе
+            showToast('success', data.message);
+            
+            // Закрываем модальное окно
+            const modal = bootstrap.Modal.getInstance(document.getElementById('closeSubscriptionModal'));
+            modal.hide();
+            
+            // Обновляем страницу через 1 секунду
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            // Показываем ошибку
+            showToast('error', data.error);
+            
+            // Восстанавливаем кнопку
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        showToast('error', 'Произошла ошибка при закрытии абонемента');
+        
+        // Восстанавливаем кнопку
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+function showToast(type, message) {
+    // Создаем toast уведомление
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
+    
+    const toastId = 'toast-' + Date.now();
+    const toastHtml = `
+        <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="ti ti-${type === 'success' ? 'check' : 'alert-triangle'} me-2 text-${type === 'success' ? 'success' : 'danger'}"></i>
+                <strong class="me-auto">${type === 'success' ? 'Успешно' : 'Ошибка'}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    // Удаляем toast после скрытия
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+    return container;
+}
+</script>
+
+{% endblock %}

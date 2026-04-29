@@ -1,0 +1,54 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Отправить приглашение</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Отправить приглашение</h4>
+                </div>
+                <!-- Форма-->
+                <form action="" method="post">
+                  {% csrf_token %}
+                    <div class="card-body">
+                      <p>Сотруднику <p class="card-title">{{employe.full_name}}</p> будет отправлено письмо со ссылкой для доступа. Вы сможете запретить доступ в будущем</p>
+  
+                      <div class="row pt-3">
+                        <h3 class="text-danger">{{error}}</h3>
+                        <br>
+                        <!--ФИО-->
+                        <div class="col-md-12">
+                          <div class="mb-3">
+                            <label class="form-label">E-mail</label>
+                            <input type="email" id="email" name="email"  class="form-control"/>
+                          </div>
+                        </div>
+  
+                    
+                  </div>
+                  
+                  </div>
+                  <div class="form-actions">
+                    <div class="card-body border-top">
+                      <button type="submit" class="btn btn-primary" id="buttonSave">
+                          Отправить
+                      </button>
+                      <a href="{% url 'employe:employe_list' %}" class="btn bg-danger-subtle text-danger ms-6">
+                        Отмена
+                      </a>
+                    </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+
+
+
+{% endblock %}

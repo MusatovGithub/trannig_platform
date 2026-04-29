@@ -1,0 +1,159 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Документы</title> {% endblock %}
+
+{% block content %}
+  
+<div class="container-fluid mw-100">
+    <div class="card card-body py-3">
+      <div class="row align-items-center">
+        <div class="col-12">
+          <div class="d-sm-flex align-items-center justify-space-between">
+            <h4 class="mb-4 mb-sm-0 card-title">Документы</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="card-body p-0">
+        <img src="{% static 'dash/images/backgrounds/profilebg.jpg' %}" alt="matdash-img" class="img-fluid">
+        <div class="row align-items-center">
+          <div class="col-lg-12 mt-n3 order-lg-2 order-1">
+            <div class="mt-n5">
+              <div class="d-flex align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center justify-content-center round-110">
+                  <div class="border border-4 border-white d-flex align-items-center justify-content-center rounded-circle overflow-hidden round-100">
+                    {% if cutumer.photo and cutumer.photo.url %}
+                        <img src="{{ cutumer.photo.url }}" calt="matdash-img" class="w-100 h-100" />
+                    {% else %}
+                        <img src="{% static 'dash/images/profile/1.png' %}" alt="matdash-img" class="w-100 h-100" />
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="text-center">
+                <h5 class="mb-0">{{cutumer.full_name}}</h5>
+                <p class="mb-0">{{cutumer.phone}}</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <ul class="nav nav-pills user-profile-tab justify-content-end mt-2 bg-primary-subtle rounded-2 rounded-top-0" id="pills-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_detaile' cutumer.id %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-profile-tab">
+              <i class="ti ti-user-circle fs-5"></i>
+              <span class="d-none d-md-block">Профиль</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_subscriptions' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-file-description fs-5"></i>
+              <span class="d-none d-md-block">Абонементы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment_history' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-followers-tab" >
+              <i class="ti ti-receipt fs-5"></i>
+              <span class="d-none d-md-block">Платежи</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_docs_all' cutumer.id %}" class="nav-link active hstack gap-2 rounded-0 fs-12 py-6" id="pills-friends-tab">
+              <i class="ti ti-file-check fs-5"></i>
+              <span class="d-none d-md-block">Документы</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_representatives_all' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-friends fs-5"></i>
+              <span class="d-none d-md-block">Представители</span>
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url 'customer:custumer_payment' cutumer.id  %}" class="nav-link hstack gap-2 rounded-0 fs-12 py-6" id="pills-gallery-tab">
+              <i class="ti ti-history fs-5"></i>
+              <span class="d-none d-md-block">История посещений</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="card shadow-none border">
+              <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                      <div class="card-body">
+                        <h4 class="card-title mb-3">Загруженные документы</h4>
+                        <p>Вы можете скачать и удалить любой загруженный файл</p>
+                        <ol class="list-group list-group-numbered">
+                          {% if docs %}
+                            {% for item in docs %}
+                                {% if item.files and item.files.url and item.name %}
+                                  <li class="list-group-item d-flex justify-content-between align-items-start m-0">
+                                      <div class="ms-2 me-auto">
+                                          <div class="fw-bold"><a href="{{ item.files.url }}" target="_blank">{{ item.name }}</a></div>
+                                      </div>
+                                      <a href="{% url 'customer:custumer_dos_delet' cutumer.id item.id %}" class="badge bg-danger"><i class="ti ti-trash fs-5"></i></a>
+                                  </li>
+                                {% else %}
+                                  <li class="list-group-item d-flex justify-content-between align-items-start m-0">
+                                      <div class="ms-2 me-auto">
+                                          <div class="fw-bold">Информация отсутствует.</div>
+                                      </div>
+                                  </li>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                          <li class="list-group-item text-center">
+                            Информация отсутствует.
+                          </li>
+                        {% endif %}
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                <div class="col-lg-6">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Загрузить новый документ</h4>
+                        <p>Чтобы проще было ориентироваться вы можете дать файлу удобное название</p>
+                        <form action="" method="post" enctype="multipart/form-data">
+                            {% csrf_token %} 
+                            <div class="row pt-3">
+                                <p class="text-danger">{{error}}</p>
+                                <!--ФИО-->
+                                <div class="col-md-12">
+                                  <div class="mb-3">
+                                    <label class="form-label">Название</label>
+                                    <input type="text" id="name" name="name" class="form-control" value="{{ form_data.name }}"/>
+                                  </div>
+                                </div>
+                                <!--Телефон-->
+                                <div class="col-md-12">
+                                  <div class="mb-3">
+                                    <label class="form-label">Файл</label>
+                                    <input type="file" id="file" name="file" class="form-control international-inputmask"/>
+                                  </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                      <button type="submit" class="btn btn-primary">Сохранить</button>
+                                    </div>
+                                  </div>
+                              </div>
+                        </form>
+                      </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

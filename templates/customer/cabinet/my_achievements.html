@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% load static %}
+{% load get_item %}
+
+{% block title %}
+<title>Мои достижения</title>
+{% endblock %}
+
+{% block content %}
+<style>
+  .achievement-inactive { filter: grayscale(1) brightness(0.7); }
+  .achievement-mask { pointer-events: none; }
+  
+  /* Стили для разделенных секций */
+  .achievement-section-header {
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .achievement-section-header h5 {
+    font-weight: 600;
+    margin-bottom: 0;
+  }
+  
+  /* Анимация для активных достижений */
+  .card.border-success {
+    transition: all 0.3s ease;
+  }
+  
+  .card.border-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15) !important;
+  }
+  
+  /* Стили для бейджей */
+  .badge.bg-success {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .badge.bg-secondary {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  /* Стили для формы поиска */
+  .form-control:focus, .form-select:focus {
+    border-color: #7b61ff;
+    box-shadow: 0 0 0 0.2rem rgba(123, 97, 255, 0.25);
+  }
+  
+  /* Анимация для кнопок */
+  .btn {
+    transition: all 0.2s ease;
+  }
+  
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  
+  /* Стили для бейджей с баллами */
+  .badge.bg-warning {
+    font-size: 0.75rem;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+  }
+  
+  .badge.bg-success {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
+  }
+</style>
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 mt-2 border-bottom">
+    <div class="row">
+      <div class="col-12">
+        <h4 class="card-title mb-0">
+          <i class="bi bi-award-fill text-warning me-2"></i>
+          Мои достижения
+        </h4>
+      </div>
+    </div>
+  </div>
+  <!-- Поиск и фильтры -->
+  <div class="px-4 py-3 border-bottom">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label for="search" class="form-label">Поиск по названию</label>
+        <input type="text" class="form-control" id="search" name="search" 
+               value="{{ search_query }}" placeholder="Введите название достижения...">
+      </div>
+      <div class="col-md-3">
+        <label for="status" class="form-label">Статус</label>
+        <select class="form-select" id="status" name="status">
+          <option value="" {% if not current_status %}selected{% endif %}>Все</option>
+          <option value="active" {% if current_status == 'active' %}selected{% endif %}>Только активные</option>
+          <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Только неактивные</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-search me-1"></i>Фильтровать
+        </button>
+      </div>
+      <div class="col-md-2">
+        <a href="{% url 'customer:my_achievements' %}" class="btn btn-outline-secondary w-100">
+          <i class="bi bi-x-circle me-1"></i>Очистить
+        </a>
+      </div>
+      <!-- Скрытые поля для сохранения фильтра по тегу -->
+      {% if current_tag %}
+        <input type="hidden" name="tag" value="{{ current_tag }}">
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Фильтры по тегам -->
+  <div class="achv-filter">
+    <a href="{% url 'customer:my_achievements' %}{% if search_query %}?search={{ search_query }}{% endif %}{% if current_status %}{% if search_query %}&{% else %}?{% endif %}status={{ current_status }}{% endif %}"
+      class="achv-filter-btn {% if not current_tag %}active{% endif %}"
+      data-tag="all">
+      Все
+    </a>
+    {% comment %} <a href="?tag=basic{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"
+      class="achv-filter-btn {% if current_tag == 'basic' %}active{% endif %}"
+      data-tag="basic">
+      Базовые
+    </a>
+    <a href="?tag=advanced{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"
+      class="achv-filter-btn {% if current_tag == 'advanced' %}active{% endif %}"
+      data-tag="advanced">
+      Продвинутые
+    </a>
+    <a href="?tag=pro{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}"
+      class="achv-filter-btn {% if current_tag == 'pro' %}active{% endif %}"
+      data-tag="pro">
+      Профи
+    </a> {% endcomment %}
+    <a href="?tag=water_element"
+      class="achv-filter-btn {% if current_tag == 'water_element' %}active{% endif %}"
+      data-tag="water_element">
+      Водная стихия
+    </a>
+    <a href="?tag=swimming_skills"
+      class="achv-filter-btn {% if current_tag == 'swimming_skills' %}active{% endif %}"
+      data-tag="swimming_skills">
+      Умею плавать
+    </a>
+    <a href="?tag=champion_path"
+      class="achv-filter-btn {% if current_tag == 'champion_path' %}active{% endif %}"
+      data-tag="champion_path">
+      Чемпионский путь
+    </a>
+    <a href="?tag=team_captain"
+      class="achv-filter-btn {% if current_tag == 'team_captain' %}active{% endif %}"
+      data-tag="team_captain">
+      Капитан команды
+    </a>
+    <a href="?tag=land_champion"
+      class="achv-filter-btn {% if current_tag == 'land_champion' %}active{% endif %}"
+      data-tag="land_champion">
+      Сухопутный чемпион
+    </a>
+    <a href="?tag=media_champion"
+      class="achv-filter-btn {% if current_tag == 'media_champion' %}active{% endif %}"
+      data-tag="media_champion">
+      Медиа-чемпион
+    </a>
+    <a href="?tag=challenge_master"
+      class="achv-filter-btn {% if current_tag == 'challenge_master' %}active{% endif %}"
+      data-tag="challenge_master">
+      Челлендж-мастер
+    </a>
+  </div>
+  <div class="card-body">
+    <!-- Информация о результатах -->
+    {% if search_query or current_status or current_tag %}
+      <div class="alert alert-info mb-3">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Результаты поиска:</strong>
+        {% if search_query %}Поиск: "{{ search_query }}"{% endif %}
+        {% if current_status == 'active' %} • Только активные{% endif %}
+        {% if current_status == 'inactive' %} • Только неактивные{% endif %}
+        {% if current_tag == 'basic' %} • Базовые{% endif %}
+        {% if current_tag == 'advanced' %} • Продвинутые{% endif %}
+        {% if current_tag == 'pro' %} • Профи{% endif %}
+        {% if current_tag == 'water_element' %} • Водная стихия{% endif %}
+        {% if current_tag == 'swimming_skills' %} • Умею плавать{% endif %}
+        {% if current_tag == 'champion_path' %} • Чемпионский путь{% endif %}
+        {% if current_tag == 'team_captain' %} • Капитан команды{% endif %}
+        {% if current_tag == 'land_champion' %} • Сухопутный чемпион{% endif %}
+        {% if current_tag == 'media_champion' %} • Медиа-чемпион{% endif %}
+        {% if current_tag == 'challenge_master' %} • Челлендж-мастер{% endif %}
+        <br>
+        <small>
+          Найдено: 
+          <span class="badge bg-primary">{{ active_achievements|length }} активных</span>
+          {% if inactive_achievements %}
+            <span class="badge bg-secondary ms-1">{{ inactive_achievements|length }} неактивных</span>
+          {% endif %}
+        </small>
+      </div>
+    {% endif %}
+    
+    <div class="row" id="achievements-list">
+      {% include "customer/cabinet/_my_achievements_list.html" %}
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Обработка кликов по фильтрам тегов
+    document.querySelectorAll('.achv-filter-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        document.querySelectorAll('.achv-filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Автоматический поиск при изменении статуса
+    document.getElementById('status').addEventListener('change', function() {
+      document.querySelector('form').submit();
+    });
+
+    // Поиск с задержкой при вводе в поле поиска
+    let searchTimeout;
+    document.getElementById('search').addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        document.querySelector('form').submit();
+      }, 500); // Задержка 500мс
+    });
+
+    // Обработка Enter в поле поиска
+    document.getElementById('search').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('form').submit();
+      }
+    });
+  });
+</script>
+{% endblock %}

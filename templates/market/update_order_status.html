@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}<title>Изменение статуса заказа #{{ order.id }}</title>{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">Изменение статуса заказа #{{ order.id }}</h4>
+      </div>
+      <div class="card-body">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6 class="text-muted">Текущий статус</h6>
+            <span class="badge bg-{{ order.get_status_color }} fs-6">{{ order.get_status_display }}</span>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted">Клиент</h6>
+            <div class="d-flex align-items-center">
+              {% if order.customer.avatar %}
+                <img src="{{ order.customer.avatar.url }}" class="rounded-circle me-2" width="32" height="32" alt="{{ order.customer.username }}">
+              {% else %}
+                <div class="rounded-circle bg-secondary me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                  <i class="ti ti-user text-white"></i>
+                </div>
+              {% endif %}
+              <span>{{ order.customer.username }}</span>
+            </div>
+          </div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="status" class="form-label">Новый статус</label>
+            <select name="status" id="status" class="form-select" required>
+              {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="notes" class="form-label">Примечания (необязательно)</label>
+            <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Добавьте примечания к изменению статуса...">{{ order.notes }}</textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="ti ti-check me-2"></i>Обновить статус
+            </button>
+            <a href="{% url 'market:order_detail' order.id %}" class="btn btn-secondary">
+              <i class="ti ti-arrow-left me-2"></i>Отмена
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Информация о заказе</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Общая сумма:</strong> {{ order.total_amount }} баллов</p>
+            <p><strong>Количество товаров:</strong> {{ order.items.count }} шт.</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+            <p><strong>Последнее обновление:</strong> {{ order.updated_at|date:"d.m.Y H:i" }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Цунамис Mobile Preview</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #dbeafe;
+        color: #111827;
+        display: grid;
+        place-items: center;
+      }
+
+      .wrap {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(320px, 390px));
+        gap: 28px;
+        padding: 28px;
+      }
+
+      .phone {
+        height: min(812px, calc(100vh - 56px));
+        min-height: 680px;
+        background: #f8fafc;
+        border: 10px solid #111827;
+        border-radius: 36px;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.25);
+        overflow: hidden;
+      }
+
+      .screen {
+        height: 100%;
+        overflow: auto;
+        padding: 20px 18px 88px;
+      }
+
+      .hero {
+        margin-bottom: 12px;
+      }
+
+      .eyebrow {
+        color: #0f766e;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 30px;
+        line-height: 1.08;
+        margin-top: 3px;
+      }
+
+      h2 {
+        font-size: 19px;
+        margin: 20px 0 10px;
+      }
+
+      .muted {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 20px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .top-nav {
+        display: flex;
+        gap: 8px;
+        margin: 0 -18px 16px;
+        overflow-x: auto;
+        padding: 0 18px 4px;
+        scrollbar-width: none;
+      }
+
+      .top-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .nav-item {
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        color: #334155;
+        flex: 0 0 auto;
+        font-size: 13px;
+        font-weight: 800;
+        padding: 9px 11px;
+      }
+
+      .nav-item.active {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #fff;
+      }
+
+      .stat,
+      .card,
+      .row {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+      }
+
+      .stat {
+        padding: 12px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 24px;
+        line-height: 1.05;
+      }
+
+      .stat span {
+        color: #64748b;
+        display: block;
+        font-size: 13px;
+        margin-top: 5px;
+      }
+
+      .card {
+        padding: 14px;
+        margin-bottom: 10px;
+      }
+
+      .card strong {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 5px;
+      }
+
+      .row {
+        align-items: center;
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        gap: 10px;
+        padding: 11px;
+        margin-bottom: 8px;
+      }
+
+      .icon {
+        align-items: center;
+        background: #ccfbf1;
+        border-radius: 8px;
+        color: #0f766e;
+        display: grid;
+        font-weight: 900;
+        height: 42px;
+        place-items: center;
+        width: 42px;
+      }
+
+      .pill {
+        background: #0f766e;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 5px 8px;
+        white-space: nowrap;
+      }
+
+      .grade-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .grade-actions span {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 900;
+        min-width: 38px;
+        padding: 8px 10px;
+        text-align: center;
+      }
+
+      .grade-actions .selected {
+        background: #22c55e;
+        border-color: #22c55e;
+        color: #fff;
+      }
+
+      .grade-actions .absent {
+        border-color: #f97316;
+        color: #c2410c;
+      }
+
+      .tabs {
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        left: 0;
+        padding: 9px 8px 16px;
+        position: sticky;
+        right: 0;
+      }
+
+      .tab {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+        text-align: center;
+      }
+
+      .tab.active {
+        color: #0f766e;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          display: block;
+          min-height: auto;
+        }
+
+        .wrap {
+          grid-template-columns: 1fr;
+          padding: 14px;
+        }
+
+        .phone {
+          height: 812px;
+          margin: 0 auto;
+          max-width: 390px;
+        }
+      }
+
+      @media (min-width: 761px) and (max-width: 1240px) {
+        .wrap {
+          grid-template-columns: repeat(2, minmax(320px, 390px));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="phone" aria-label="Экран спортсмена">
+        <div class="screen">
+          <header class="hero">
+            <div class="eyebrow">Спортсмен</div>
+            <h1>Арина, сегодня тренировка</h1>
+            <p class="muted">Кракен, 18:30 · бассейн ФОК №2</p>
+          </header>
+
+          <nav class="top-nav" aria-label="Разделы спортсмена">
+            <div class="nav-item active">Главная</div>
+            <div class="nav-item">Мои достижения</div>
+            <div class="nav-item">Дневник</div>
+            <div class="nav-item">Мои соревнования</div>
+            <div class="nav-item">Испытания</div>
+            <div class="nav-item">Магазин</div>
+            <div class="nav-item">Мои покупки</div>
+            <div class="nav-item">Мой профиль</div>
+          </nav>
+
+          <div class="stats">
+            <div class="stat">
+              <strong>4.8</strong>
+              <span>средняя оценка</span>
+            </div>
+            <div class="stat">
+              <strong>7</strong>
+              <span>достижений</span>
+            </div>
+            <div class="stat">
+              <strong>2.4 км</strong>
+              <span>за неделю</span>
+            </div>
+            <div class="stat">
+              <strong>3 р.</strong>
+              <span>текущий разряд</span>
+            </div>
+          </div>
+
+          <h2>Испытание</h2>
+          <article class="card">
+            <strong>10 пятерок подряд · 4/10</strong>
+            <p class="muted">
+              Принято спортсменом. После выполнения начисляется 120 баллов.
+            </p>
+          </article>
+
+          <h2>Лента</h2>
+          <article class="row">
+            <div class="icon">Т</div>
+            <div>
+              <strong>Задание на сегодня</strong>
+              <p class="muted">
+                Зал: корпус и плечи · Вода: 8×50 техника, отдых 30 сек
+              </p>
+            </div>
+            <span class="pill">18:30</span>
+          </article>
+          <article class="row">
+            <div class="icon">5</div>
+            <div>
+              <strong>Последняя оценка</strong>
+              <p class="muted">Комментарий тренера: хорошо держит темп</p>
+            </div>
+            <span class="pill">вчера</span>
+          </article>
+          <article class="row">
+            <div class="icon">Д</div>
+            <div>
+              <strong>Новое достижение</strong>
+              <p class="muted">Поздравляем: “Разряд подтверждён”</p>
+            </div>
+            <span class="pill">новое</span>
+          </article>
+
+          <h2>Абонемент</h2>
+          <article class="card">
+            <strong>Кракен · 12 занятий осталось</strong>
+            <p class="muted">Действует до 28.05.2026 · оплачено</p>
+          </article>
+          <h2>Рейтинг</h2>
+          <article class="card">
+            <strong>В группе · 2 место из 14</strong>
+            <p class="muted">Средняя оценка 4.8</p>
+          </article>
+          <article class="card">
+            <strong>В команде · 8 место из 46</strong>
+            <p class="muted">Рейтинг по оценкам и достижениям</p>
+          </article>
+          <article class="card">
+            <strong>Группа недели · Кракен</strong>
+            <p class="muted">Средний балл за неделю: 4.9</p>
+          </article>
+          <article class="card">
+            <strong>Рейтинг групп</strong>
+            <p class="muted">1. Кракен · 4.8, 2. Пираньи · 4.6, 3. Дельфины · 4.4</p>
+          </article>
+
+          <h2>Новости</h2>
+          <article class="card">
+            <strong>Сборы в мае</strong>
+            <p class="muted">Опубликована информация по расписанию группы</p>
+          </article>
+
+        </div>
+      </section>
+
+      <section class="phone" aria-label="Экран тренера">
+        <div class="screen">
+          <header class="hero">
+            <div class="eyebrow">Тренер</div>
+            <h1>CRM школы</h1>
+            <p class="muted">Разделы, сотрудники, группы и журнал занятий</p>
+          </header>
+
+          <nav class="top-nav" aria-label="Разделы школы">
+            <div class="nav-item active">Главная</div>
+            <div class="nav-item">Клиенты</div>
+            <div class="nav-item">Группы</div>
+            <div class="nav-item">Занятия</div>
+            <div class="nav-item">Сотрудники</div>
+            <div class="nav-item">Достижения</div>
+            <div class="nav-item">Новости</div>
+            <div class="nav-item">Соревнования</div>
+            <div class="nav-item">Испытания</div>
+            <div class="nav-item">Магазин</div>
+            <div class="nav-item">Мой профиль</div>
+          </nav>
+
+          <div class="stats">
+            <div class="stat">
+              <strong>1</strong>
+              <span>покупка в магазине</span>
+            </div>
+            <div class="stat">
+              <strong>2</strong>
+              <span>абонемента истекли</span>
+            </div>
+            <div class="stat">
+              <strong>3</strong>
+              <span>занятия не оплачены</span>
+            </div>
+            <div class="stat">
+              <strong>8</strong>
+              <span>активных испытаний</span>
+            </div>
+          </div>
+
+          <h2>Сегодня</h2>
+          <article class="row">
+            <div class="icon">З</div>
+            <div>
+              <strong>Задание для тренировки</strong>
+              <p class="muted">
+                Кракен · Зал: корпус · Вода: 8×50 техника
+              </p>
+            </div>
+            <span class="pill">внести</span>
+          </article>
+          <article class="row">
+            <div class="icon">5</div>
+            <div>
+              <strong>Тренировки сегодня</strong>
+              <p class="muted">Кракен · 18:30, Пираньи · 19:30</p>
+            </div>
+            <span class="pill">2</span>
+          </article>
+          <article class="row">
+            <div class="icon">!</div>
+            <div>
+              <strong>Абонементы закончились</strong>
+              <p class="muted">Лохматов Михаил · Коровкина Дарья</p>
+            </div>
+            <span class="pill">2</span>
+          </article>
+          <article class="row">
+            <div class="icon">₽</div>
+            <div>
+              <strong>Не оплачены занятия</strong>
+              <p class="muted">Абдинов Теймур · 3 занятия</p>
+            </div>
+            <span class="pill">3</span>
+          </article>
+          <article class="row">
+            <div class="icon">М</div>
+            <div>
+              <strong>Покупка в магазине</strong>
+              <p class="muted">Арина заказала футболку за 150 баллов</p>
+            </div>
+            <span class="pill">новое</span>
+          </article>
+          <article class="row">
+            <div class="icon">ДР</div>
+            <div>
+              <strong>День рождения сегодня</strong>
+              <p class="muted">Абдурахманова Арина · 12 лет</p>
+            </div>
+            <span class="pill">сегодня</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="phone" aria-label="Карточка спортсмена">
+        <div class="screen">
+          <header class="hero">
+            <div class="eyebrow">Клиенты</div>
+            <h1>Карточка спортсмена</h1>
+            <p class="muted">Абдурахманова Арина Александровна</p>
+          </header>
+
+          <nav class="top-nav" aria-label="Вкладки карточки спортсмена">
+            <div class="nav-item active">Профиль</div>
+            <div class="nav-item">Абонементы</div>
+            <div class="nav-item">Платежи</div>
+            <div class="nav-item">Документы</div>
+            <div class="nav-item">Представители</div>
+            <div class="nav-item">Дневник</div>
+            <div class="nav-item">Достижения</div>
+            <div class="nav-item">Соревнования</div>
+            <div class="nav-item">Испытания</div>
+          </nav>
+
+          <h2>Профиль</h2>
+          <article class="card">
+            <strong>Личные данные</strong>
+            <p class="muted">Кракен · 3 разряд · телефон +7 (905) 320-08-77</p>
+            <p class="muted">Договор, дата рождения, контакты и заметки тренера</p>
+          </article>
+
+          <h2>Связанные данные</h2>
+          <article class="row">
+            <div class="icon">А</div>
+            <div>
+              <strong>Абонемент</strong>
+              <p class="muted">12 занятий осталось · действует до 28.05.2026</p>
+            </div>
+            <span class="pill">оплачен</span>
+          </article>
+          <article class="card">
+            <strong>Выдать абонемент</strong>
+            <p class="muted">
+              Группа · даты действия · количество занятий или безлимит · стоимость · оплата · касса
+            </p>
+          </article>
+          <article class="row">
+            <div class="icon">5</div>
+            <div>
+              <strong>Дневник</strong>
+              <p class="muted">Последняя оценка: 5 · хорошо держит темп</p>
+            </div>
+            <span class="pill">вчера</span>
+          </article>
+          <article class="row">
+            <div class="icon">С</div>
+            <div>
+              <strong>Соревнования</strong>
+              <p class="muted">100 м комплекс · 01:32:660 · 2 место</p>
+            </div>
+            <span class="pill">результат</span>
+          </article>
+          <article class="row">
+            <div class="icon">И</div>
+            <div>
+              <strong>Испытание</strong>
+              <p class="muted">10 пятерок подряд · прогресс 4/10</p>
+            </div>
+            <span class="pill">активно</span>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

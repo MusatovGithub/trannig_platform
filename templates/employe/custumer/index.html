@@ -1,0 +1,179 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Клиенты</title> {% endblock %}
+
+{% block content %}
+  
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+        <div class="row">
+            <div class="col-lg-10">
+              <h4 class="card-title mb-0">Клиенты</h4>
+            </div>
+            {% if user_permissions.can_add_customers %}
+              <div class="col-lg-2 text-end">
+                <a href="{% url 'customer:customer_create' %}" type="button" class="btn btn-success">Создать</a>
+              </div>
+            {% endif %}
+          </div>
+    </div>
+
+    
+
+    <div class="card-body">
+        <form method="get">
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Поиск</label>
+                  <input type="text" name="search" id="search" class="form-control" value="{{ request.GET.search|default:'' }}"/>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Группы</label>
+                  <select class="form-select" name="group" >
+                    <option value="">Группы</option>
+                    {% for item in groups %}
+                      <option value="{{item.id}}" {% if request.GET.group == item.id|stringformat:"s" %}selected{% endif %}>{{item.name}}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Пол</label>
+                  <select class="form-select" name="gender">
+                    <option value="">Пол</option>
+                    {% for item in gender %}
+                      <option value="{{item.id}}" {% if request.GET.gender == item.id|stringformat:"s" %}selected{% endif %}>{{item.name}}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Год рождения</label>
+                  <input type="text" id="birth_year" name="birth_year" class="form-control" placeholder="" value="{{ request.GET.birth_year|default:'' }}"/>
+              </div>
+            </div>
+  
+  
+            <div class="col-12">
+              <div class="d-md-flex align-items-center" style="justify-content: flex-end !important;">
+
+                <div class="mt-3 mt-md-0" style="padding: 2px;">
+                  <a href="{% url 'customer:customer_list' %}" class="btn btn-secondary">
+                    <i class="ti ti-refresh fs-4"></i>
+                    Сбросить
+                  </a>
+                </div>
+  
+                <div class="mt-3 mt-md-0" style="padding: 2px;">
+                  <button type="submit" class="btn btn-primary hstack gap-6">
+                    <i class="ti ti-send fs-4"></i>
+                    Фильтровать
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </form>
+    </div>
+    <div class="card-body p-4">
+        <!-- Выполнить -->
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+            <thead class="text-dark fs-4">
+                <tr>
+                  <th>
+                    №
+                  </th>
+                  <th>ФИО</th>
+                  <th>Год рождения</th>
+                  <th>Телефон</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in custumer %}
+                <tr>
+                  <td>{{forloop.counter}}</td>
+                  <td>
+                    <a href="{% url 'customer:custumer_detaile' item.id %}">
+                      <div class="d-flex align-items-center">
+                        {% if item.photo and item.photo.url %}
+                            <img src="{{ item.photo.url }}" class="rounded-circle" width="40" height="40" />
+                        {% else %}
+                            <img src="{% static 'dash/images/profile/1.png' %}" class="rounded-circle" width="40" height="40" />
+                        {% endif %}
+                        <div class="ms-3">
+                          <h6 class="fs-4 fw-semibold mb-0">{{item.full_name}}</h6>
+                        </div>
+                      </div>
+                    </a>
+                  </td>
+                  <td>
+                    <p class="mb-0 fw-normal">{{item.birth_date}}</p>
+                  </td>
+                  <td>
+                    <p class="mb-0 fw-normal">{{item.phone}}</p>
+                  </td>
+                  <td>
+                    <div class="row">
+                      <div class="col-md-3">
+                        {% if user_permissions.can_delete_customers %}
+                          {% if item.is_send %}
+                            <!-- Если приглашение отправлено - показываем кнопку закрытия доступа -->
+                            <a href="{% url 'customer:close_cabinet_access' item.id %}" 
+                               class="btn btn-sm btn-warning btn-delete-client"
+                               title="Закрыть доступ к личному кабинету"
+                               onclick="return confirm('Вы уверены, что хотите закрыть доступ к личному кабинету для {{ item.full_name }}? Это удалит учетную запись пользователя.');">
+                              <i class="ti ti-lock fs-5"></i>
+                            </a>
+                          {% else %}
+                            <!-- Если приглашение не отправлено - показываем кнопку удаления -->
+                            <a href="{% url 'customer:cutsumer_delete' item.id %}" 
+                               class="btn btn-sm btn-danger btn-delete-client"
+                               title="Удалить клиента"
+                               onclick="return confirm('Вы уверены, что хотите удалить клиента {{ item.full_name }}?');">
+                              <i class="ti ti-trash fs-5"></i>
+                            </a>
+                          {% endif %}
+                        {% endif %}
+                        {% if user_permissions.can_edit_customers %}
+                          <a  class="btn btn-sm btn-primary" href="{% url 'customer:custumer_update' item.id %}">
+                            <i class="ti ti-edit fs-5"></i>
+                          </a>
+                          {% if item.user %}
+                            <!-- Кнопка повторной отправки данных для входа -->
+                            <a href="{% url 'customer:resend_client_credentials' item.id %}" 
+                               class="btn btn-sm btn-success d-inline-flex align-items-center justify-content-center"
+                               title="Повторная отправка данных для входа"
+                               onclick="return confirm('Будет сгенерирован новый пароль и отправлен на {{ item.user.email }}. Продолжить?');">
+                              <i class="ti ti-send fs-5"></i>
+                            </a>
+                          {% elif item.is_send == False %}
+                            <!-- Кнопка первичной отправки данных -->
+                            <a href="{% url 'customer:send_client_credentials' item.id %}" 
+                               class="btn btn-sm btn-primary d-inline-flex align-items-center justify-content-center"
+                               title="Отправить данные для входа">
+                              <i class="ti ti-send fs-5"></i>
+                            </a>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}

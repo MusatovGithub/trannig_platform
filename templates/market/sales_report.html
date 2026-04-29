@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}<title>Отчет по продажам</title>{% endblock %}
+
+{% block content %}
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 border-bottom">
+    <div class="row">
+      <div class="col-lg-10">
+        <h4 class="card-title mb-0">Отчет по продажам</h4>
+      </div>
+      <div class="col-lg-2 text-end">
+        <div class="btn-group-vertical btn-group-sm d-lg-flex d-md-block" role="group">
+          <a href="{% url 'market:get_product_list' %}" class="btn btn-secondary btn-sm mb-1" title="Товары">
+            <i class="ti ti-package"></i> <span class="d-none d-md-inline">Товары</span>
+          </a>
+          <a href="{% url 'market:order_list' %}" class="btn btn-info btn-sm" title="Заказы">
+            <i class="ti ti-shopping-cart"></i> <span class="d-none d-md-inline">Заказы</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <form method="get" class="mb-4">
+      <div class="row align-items-end">
+        <div class="col-sm-4">
+          <label for="days" class="form-label">Период (дни)</label>
+          <select name="days" id="days" class="form-select">
+            <option value="7" {% if days == 7 %}selected{% endif %}>Последние 7 дней</option>
+            <option value="30" {% if days == 30 %}selected{% endif %}>Последние 30 дней</option>
+            <option value="90" {% if days == 90 %}selected{% endif %}>Последние 90 дней</option>
+            <option value="365" {% if days == 365 %}selected{% endif %}>Последний год</option>
+          </select>
+        </div>
+        <div class="col-sm-3">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="ti ti-refresh fs-4"></i>
+            Обновить
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card bg-primary text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4 class="card-title">{{ orders_stats.total_orders|default:0 }}</h4>
+                <p class="card-text">Завершенных заказов</p>
+              </div>
+              <div class="align-self-center">
+                <i class="ti ti-shopping-cart fs-1"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card bg-success text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h4 class="card-title">{{ orders_stats.total_amount|default:0 }}</h4>
+                <p class="card-text">Баллов заработано</p>
+              </div>
+              <div class="align-self-center">
+                <i class="ti ti-coin fs-1"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Топ товаров</h5>
+          </div>
+          <div class="card-body">
+            {% if top_products %}
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Товар</th>
+                    <th>Продано</th>
+                    <th>Выручка</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for product in top_products %}
+                  <tr>
+                    <td>
+                      <strong>{{ product.product__name }}</strong>
+                    </td>
+                    <td>
+                      <span class="badge bg-primary">{{ product.total_sold }} шт.</span>
+                    </td>
+                    <td>
+                      <strong>{{ product.total_revenue }} баллов</strong>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+              <i class="ti ti-info-circle fs-1 mb-3"></i>
+              <p class="mb-0">Нет данных о продажах за выбранный период</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Статистика по статусам</h5>
+          </div>
+          <div class="card-body">
+            {% if status_stats %}
+            <div class="list-group list-group-flush">
+              {% for stat in status_stats %}
+              <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                <span>
+                  {% if stat.status == 'PENDING' %}
+                    <i class="ti ti-clock text-warning me-2"></i>Ожидают подтверждения
+                  {% elif stat.status == 'CONFIRMED' %}
+                    <i class="ti ti-check text-info me-2"></i>Подтверждены
+                  {% elif stat.status == 'PROCESSING' %}
+                    <i class="ti ti-loader text-primary me-2"></i>В обработке
+                  {% elif stat.status == 'COMPLETED' %}
+                    <i class="ti ti-check-circle text-success me-2"></i>Выполнены
+                  {% elif stat.status == 'CANCELLED' %}
+                    <i class="ti ti-x-circle text-danger me-2"></i>Отменены
+                  {% endif %}
+                </span>
+                <span class="badge bg-secondary rounded-pill">{{ stat.count }}</span>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+              <i class="ti ti-info-circle fs-1 mb-3"></i>
+              <p class="mb-0">Нет данных о заказах за выбранный период</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <div class="alert alert-info">
+        <i class="ti ti-info-circle me-2"></i>
+        <strong>Период отчета:</strong> с {{ start_date|date:"d.m.Y" }} по {{ "now"|date:"d.m.Y" }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

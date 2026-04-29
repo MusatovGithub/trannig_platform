@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% load market_filters %}
+{% block content %}
+<style>
+  @media (min-width: 992px) {
+    .product-card-img-desktop-fit {
+      object-fit: contain !important;
+      background-color: #f8f9fa;
+    }
+
+    .product-detail-image-desktop-fit {
+      max-height: 360px;
+      width: auto;
+      object-fit: contain;
+    }
+  }
+</style>
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 border-bottom">
+    <div class="row">
+      <div class="col-lg-8">
+        <h4 class="card-title mb-0"><i class="bi bi-shop"></i> Магазин</h4>
+      </div>
+      <div class="col-lg-4 text-end">
+        <div class="btn-group" role="group">
+          <a href="{% url 'customer:get_cart' %}" class="btn btn-outline-primary btn-sm">
+            <i class="ti ti-shopping-cart"></i> Корзина
+          </a>
+          <a href="{% url 'customer:get_my_orders' %}" class="btn btn-outline-warning btn-sm">
+            <i class="ti ti-shopping-cart"></i> Заказы
+          </a>
+          <a href="{% url 'customer:get_my_purchases' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="ti ti-package"></i> Покупки
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="get" class="mb-4">
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Поиск по названию" value="{{ search }}">
+            <span class="input-group-text"><i class="ti ti-search"></i></span>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-search"></i> Искать
+          </button>
+          <a href="{% url 'customer:get_marketplace' %}" class="btn btn-secondary">
+            <i class="ti ti-refresh"></i> Сбросить
+          </a>
+        </div>
+      </div>
+    </form>
+    <div class="row g-4">
+      {% for product in page_obj %}
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm position-relative product-card"
+             tabindex="0"
+             aria-label="Подробнее: {{ product.name|escape }}"
+             data-product-id="{{ product.id }}"
+             data-product-name="{{ product.name|escape }}">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top product-card-img-desktop-fit" alt="{{ product.name|escape }}" style="object-fit:cover; height:180px;">
+          {% else %}
+            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height:180px;">
+              <span class="text-muted">Нет фото</span>
+            </div>
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-2">{{ product.name }}</h5>
+            <p class="card-text mb-3 fw-bold">{{ product.price }} баллов</p>
+            {% include 'includes/collapsible_text.html' with text=product.description css_class='card-text mb-3' max_length=150 %}
+            {% if product.sport_category %}
+              <div class="mb-2">
+                <small class="text-muted" title="{{ product.sport_category.name }}">
+                  <i class="bi bi-shield-check"></i>
+                  Требуется разряд: {{ product.sport_category.get_short_name }}
+                </small>
+              </div>
+            {% endif %}
+            <div class="product-card-actions mt-auto w-100">
+            {% if not product|is_available_for_customer:request.user.client_profile %}
+              <button type="button" class="btn btn-secondary w-100" disabled>
+                <i class="bi bi-lock"></i> Недоступно
+              </button>
+            {% elif request.user.client_profile.balance < product.price %}
+              <button type="button" class="btn btn-warning w-100" disabled>
+                <i class="bi bi-exclamation-triangle"></i> Недостаточно баллов
+              </button>
+            {% else %}
+              <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm add-to-cart-btn" data-product="{{ product.id }}" title="Добавить в корзину">
+                  <i class="ti ti-shopping-cart-plus"></i>
+                </button>
+                <button type="button" class="btn btn-primary buy-btn" data-product="{{ product.id }}">
+                  <i class="bi bi-cart-plus"></i> Купить
+                </button>
+              </div>
+            {% endif %}
+            </div>
+          </div>
+        </div>
+        <template id="product-detail-{{ product.id }}">
+          <div class="product-detail-modal-body">
+            <div class="row g-3 g-md-4">
+              <div class="col-12 col-md-5 text-center">
+                {% if product.image %}
+                  <a href="{{ product.image.url }}" target="_blank" rel="noopener noreferrer" class="d-inline-block product-detail-image-link rounded shadow-sm" title="Открыть изображение в полном размере">
+                    <img src="{{ product.image.url }}" class="img-fluid rounded product-detail-image product-detail-image-desktop-fit" alt="{{ product.name|escape }}">
+                  </a>
+                  <p class="small text-muted mt-2 mb-0">Нажмите на фото — откроется файл в полном размере.</p>
+                {% else %}
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center py-5 px-3">
+                    <span class="text-muted">Нет фото</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="col-12 col-md-7">
+                <p class="fw-bold text-primary fs-5 mb-2">{{ product.price }} баллов</p>
+                {% if product.sport_category %}
+                  <p class="mb-3">
+                    <span class="badge bg-primary" title="{{ product.sport_category.name|escape }}">
+                      <i class="ti ti-shield-check me-1"></i>{{ product.sport_category.get_short_name }}
+                    </span>
+                    <span class="text-muted small ms-1">{{ product.sport_category.name }}</span>
+                  </p>
+                {% endif %}
+                {% if product.description %}
+                  <div class="text-body small mb-0" style="white-space: pre-wrap;">{{ product.description }}</div>
+                {% else %}
+                  <p class="text-muted small mb-0">Описание не указано.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info text-center mb-0">Нет товаров</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Назад">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">&laquo;</span>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?{% if search %}search={{ search }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Вперёд">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">&raquo;</span>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</div>
+
+<div class="modal fade" id="marketplaceProductDetailModal" tabindex="-1" aria-labelledby="marketplaceProductDetailModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg modal-fullscreen-sm-down">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-break" id="marketplaceProductDetailModalTitle">Товар</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body" id="marketplaceProductDetailModalBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary w-100 w-sm-auto" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно подтверждения покупки -->
+<div class="modal fade" id="buyConfirmModal" tabindex="-1" aria-labelledby="buyConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg">
+      <div class="modal-header bg-gradient" style="background: linear-gradient(90deg, #ffe259 0%, #ffa751 100%);">
+        <h5 class="modal-title" id="buyConfirmModalLabel">
+          <i class="bi bi-cart-check-fill text-success me-2"></i> Подтвердите покупку
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body d-flex flex-column align-items-center">
+        <img id="buyProductImg" src="" alt="product" class="rounded mb-3" style="width:120px; height:120px; object-fit:cover; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <h5 id="buyProductName" class="mb-2"></h5>
+        <div class="mb-2">
+          <span class="badge bg-primary fs-6"><i class="bi bi-coin"></i> <span id="buyProductPrice"></span> баллов</span>
+        </div>
+        <div class="mb-2 text-muted">
+          Ваш баланс: <span class="fw-bold">{{ request.user.client_profile.balance }}</span> баллов
+        </div>
+        <div id="buyError" class="alert alert-danger d-none w-100 text-center"></div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-success" id="buyConfirmBtn">
+          <i class="bi bi-bag-check"></i> Купить
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  let selectedProductId = null;
+
+  (function () {
+    function openMarketplaceProductDetail(card) {
+      var id = card.getAttribute('data-product-id');
+      var tpl = document.getElementById('product-detail-' + id);
+      var modalEl = document.getElementById('marketplaceProductDetailModal');
+      var modalBody = document.getElementById('marketplaceProductDetailModalBody');
+      var titleEl = document.getElementById('marketplaceProductDetailModalTitle');
+      if (!tpl || !modalEl || !modalBody) return;
+      modalBody.innerHTML = '';
+      modalBody.appendChild(tpl.content.cloneNode(true));
+      if (titleEl) {
+        titleEl.textContent = card.getAttribute('data-product-name') || 'Товар';
+      }
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+
+    document.querySelectorAll('.product-card[data-product-id]').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('.product-card-actions')) return;
+        if (e.target.closest('a[href]')) return;
+        if (e.target.closest('button')) return;
+        openMarketplaceProductDetail(card);
+      });
+      card.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        if (e.target.closest('a, button')) return;
+        e.preventDefault();
+        openMarketplaceProductDetail(card);
+      });
+    });
+  })();
+
+  // Обработчик для кнопки "Добавить в корзину"
+  document.querySelectorAll('.add-to-cart-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const productId = btn.getAttribute('data-product');
+      addToCart(productId, btn);
+    });
+  });
+
+  // Обработчик для кнопки "Купить"
+  document.querySelectorAll('.buy-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      // Получаем данные товара
+      selectedProductId = btn.getAttribute('data-product');
+      const card = btn.closest('.card');
+      document.getElementById('buyProductName').textContent = card.querySelector('.card-title').textContent;
+      document.getElementById('buyProductPrice').textContent = card.querySelector('.card-text').textContent.replace(/\D/g, '');
+      const img = card.querySelector('.card-img-top');
+      document.getElementById('buyProductImg').src = img && img.tagName === 'IMG' ? img.src : '';
+      document.getElementById('buyError').classList.add('d-none');
+      // Открываем модалку
+      var modal = new bootstrap.Modal(document.getElementById('buyConfirmModal'));
+      modal.show();
+    });
+  });
+
+  function addToCart(productId, button) {
+    button.disabled = true;
+    button.innerHTML = '<i class="ti ti-loader"></i>';
+    
+    fetch('{% url "customer:add_to_cart" 0 %}'.replace('0', productId), {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        button.innerHTML = '<i class="ti ti-check"></i>';
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-success');
+        setTimeout(() => {
+          button.disabled = false;
+          button.innerHTML = '<i class="ti ti-shopping-cart-plus"></i>';
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-primary');
+        }, 2000);
+      } else {
+        alert('Ошибка: ' + data.error);
+        button.disabled = false;
+        button.innerHTML = '<i class="ti ti-shopping-cart-plus"></i>';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Произошла ошибка при добавлении в корзину');
+      button.disabled = false;
+      button.innerHTML = '<i class="ti ti-shopping-cart-plus"></i>';
+    });
+  }
+
+  document.getElementById('buyConfirmBtn').addEventListener('click', function() {
+    if (!selectedProductId) return;
+    fetch('buy/' + selectedProductId + '/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(json => {
+      if (json.success) {
+        document.getElementById('buyError').classList.add('d-none');
+        document.getElementById('buyConfirmBtn').disabled = true;
+        document.getElementById('buyConfirmBtn').innerHTML = '<i class="bi bi-check-circle"></i> Куплено!';
+        setTimeout(() => {
+          // Перенаправляем на страницу заказов после успешной покупки
+          window.location.href = '{% url "customer:get_my_orders" %}';
+        }, 1200);
+      } else {
+        document.getElementById('buyError').textContent = json.error || 'Ошибка';
+        document.getElementById('buyError').classList.remove('d-none');
+      }
+    });
+  });
+</script>
+{% include 'includes/collapsible_text_script.html' %}
+{% endblock %}

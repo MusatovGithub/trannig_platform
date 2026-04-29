@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок страницы -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="mb-0">История абонементов и посещений</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'supervisor:home_client' %}">Главная</a></li>
+                        <li class="breadcrumb-item active">История абонементов</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row">
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Всего абонементов</p>
+                            <h4 class="mb-0">{{ stats.total_subscriptions }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-primary align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-card font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Активные</p>
+                            <h4 class="mb-0">{{ stats.active_subscriptions }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-success align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-check-circle font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Истекшие</p>
+                            <h4 class="mb-0">{{ stats.expired_subscriptions }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-warning align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-time font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Посещений</p>
+                            <h4 class="mb-0">{{ stats.total_attendances }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-info align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-calendar-check font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Оплачено</p>
+                            <h4 class="mb-0">{{ stats.total_paid|floatformat:0 }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-success align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-money font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <p class="text-muted fw-medium">Долг</p>
+                            <h4 class="mb-0">{{ stats.total_unpaid|floatformat:0 }}</h4>
+                        </div>
+                        <div class="flex-shrink-0 align-self-center">
+                            <div class="mini-stat-icon avatar-sm rounded-circle bg-danger align-self-center">
+                                <span class="avatar-title">
+                                    <i class="bx bx-error font-size-24"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Период</label>
+                            <select name="period" class="form-select" onchange="handlePeriodChange(this)">
+                                <option value="all" {% if period == "all" %}selected{% endif %}>Все время</option>
+                                <option value="month" {% if period == "month" %}selected{% endif %}>Последний месяц</option>
+                                <option value="year" {% if period == "year" %}selected{% endif %}>Последний год</option>
+                                <option value="custom" {% if period == "custom" %}selected{% endif %}>Произвольный период</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Дата начала</label>
+                            <input type="date" name="date_from" class="form-control" value="{{ date_from|date:'Y-m-d' }}" 
+                                   {% if period != "custom" %}disabled{% endif %}>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Дата окончания</label>
+                            <input type="date" name="date_to" class="form-control" value="{{ date_to|date:'Y-m-d' }}"
+                                   {% if period != "custom" %}disabled{% endif %}>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">Применить</button>
+                            <a href="{% url 'customer:get_my_subscriptions_history' %}" class="btn btn-secondary">Сбросить</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладки -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs nav-tabs-custom" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="subscriptions-tab" data-bs-toggle="tab" data-bs-target="#subscriptions" type="button" role="tab">
+                                <i class="bx bx-card me-1"></i>Абонементы ({{ stats.total_subscriptions }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="attendances-tab" data-bs-toggle="tab" data-bs-target="#attendances" type="button" role="tab">
+                                <i class="bx bx-calendar-check me-1"></i>Посещения ({{ stats.total_attendances }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab">
+                                <i class="bx bx-money me-1"></i>Платежи ({{ stats.total_payments }})
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="myTabContent">
+                        <!-- Вкладка Абонементы -->
+                        <div class="tab-pane fade show active" id="subscriptions" role="tabpanel">
+                            {% if subscriptions %}
+                                <div class="table-responsive mb-4 border rounded-1">
+                                    <table class="table text-nowrap mb-0 align-middle">
+                                        <thead class="table">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Дата начала</th>
+                                                <th>Дата окончания</th>
+                                                <th>Группы</th>
+                                                <th>Занятий</th>
+                                                <th>Осталось</th>
+                                                <th>Статус</th>
+                                                <th>Стоимость</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for sub in subscriptions %}
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-light text-dark">#{{ sub.id }}</span>
+                                                </td>
+                                                <td>{{ sub.start_date|date:"d.m.Y" }}</td>
+                                                <td>{{ sub.end_date|date:"d.m.Y" }}</td>
+                                                <td>
+                                                    {% for group in sub.groups.all %}
+                                                        <span class="badge bg-primary me-1">{{ group.name }}</span>
+                                                    {% endfor %}
+                                                </td>
+                                                <td>
+                                                    {% if sub.unlimited %}
+                                                        <span class="badge bg-success">Безлимит</span>
+                                                    {% else %}
+                                                        {{ sub.number_classes|default:"—" }}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if sub.unlimited %}
+                                                        <span class="badge bg-success">Безлимит</span>
+                                                    {% else %}
+                                                        {% if sub.remained %}
+                                                            <span class="badge {% if sub.remained > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                                {{ sub.count_of_trainnig_left}}
+                                                            </span>
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if sub.start_date <= today and sub.end_date >= today and not sub.is_blok %}
+                                                        <span class="badge bg-success">Активен</span>
+                                                    {% elif sub.end_date < today %}
+                                                        <span class="badge bg-danger">Истек</span>
+                                                    {% elif sub.start_date > today %}
+                                                        <span class="badge bg-info">Ожидает</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Заблокирован</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if sub.total_cost %}
+                                                        <span class="fw-bold">{{ sub.total_cost|floatformat:0 }}</span>
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <div class="avatar-md mx-auto">
+                                        <div class="avatar-title bg-light text-primary rounded-circle font-size-24">
+                                            <i class="bx bx-card"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="mt-3">Нет абонементов</h5>
+                                    <p class="text-muted">За выбранный период абонементы не найдены</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Вкладка Посещения -->
+                        <div class="tab-pane fade" id="attendances" role="tabpanel">
+                            {% if attendances %}
+                                <div class="table-responsive mb-4 border rounded-1">
+                                    <table class="table text-nowrap mb-0 align-middle">
+                                        <thead class="table">
+                                            <tr>
+                                                <th>Дата</th>
+                                                <th>Время</th>
+                                                <th>Группа</th>
+                                                <th>Занятие</th>
+                                                <th>Тренер</th>
+                                                <th>Статус</th>
+                                                <th>Абонемент</th>
+                                                <th>Комментарий</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for attendance in attendances %}
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-light text-dark">
+                                                        {{ attendance.date|date:"d.m.Y" }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if attendance.class_time %}
+                                                        {{ attendance.class_time|time:"H:i" }}
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="fw-medium">
+                                                        {{ attendance.gr_class.groups_id.name|default:"Не указана" }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ attendance.gr_class.name|default:"Занятие" }}</td>
+                                                <td>
+                                                    {% if attendance.gr_class.employe %}
+                                                        {{ attendance.gr_class.employe.full_name }}
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if attendance.attendance_status == "attended_10" %}
+                                                        <span class="badge bg-success">Отлично (10)</span>
+                                                    {% elif attendance.attendance_status == "attended_5" %}
+                                                        <span class="badge bg-primary">Хорошо (5)</span>
+                                                    {% elif attendance.attendance_status == "attended_4" %}
+                                                        <span class="badge bg-info">Удовл. (4)</span>
+                                                    {% elif attendance.attendance_status == "attended_3" %}
+                                                        <span class="badge bg-warning">Посещение (3)</span>
+                                                    {% elif attendance.attendance_status == "attended_2" %}
+                                                        <span class="badge bg-secondary">Минимум (2)</span>
+                                                    {% elif attendance.attendance_status == "not_attended" %}
+                                                        <span class="badge bg-danger">Не был</span>
+                                                    {% else %}
+                                                        <span class="badge bg-light text-dark">Не оценено</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if attendance.used_subscription %}
+                                                        <span class="badge bg-light text-dark">
+                                                            #{{ attendance.used_subscription.id }}
+                                                        </span>
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if attendance.comment %}
+                                                        <span class="text-muted">{{ attendance.comment }}</span>
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <div class="avatar-md mx-auto">
+                                        <div class="avatar-title bg-light text-primary rounded-circle font-size-24">
+                                            <i class="bx bx-calendar-check"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="mt-3">Нет посещений</h5>
+                                    <p class="text-muted">За выбранный период посещения не найдены</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Вкладка Платежи -->
+                        <div class="tab-pane fade" id="payments" role="tabpanel">
+                            {% if payments %}
+                                <div class="table-responsive mb-4 border rounded-1">
+                                    <table class="table text-nowrap mb-0 align-middle">
+                                        <thead class="table">
+                                            <tr>
+                                                <th>Дата</th>
+                                                <th>Группа</th>
+                                                <th>Абонемент</th>
+                                                <th>Сумма</th>
+                                                <th>Касса</th>
+                                                <th>Статус</th>
+                                                <th>Кто принял</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for payment in payments %}
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-light text-dark">
+                                                        {{ payment.summ_date|date:"d.m.Y"|default:"—" }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if payment.groups %}
+                                                        <span class="fw-medium">{{ payment.groups.name }}</span>
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if payment.subscription %}
+                                                        <span class="badge bg-light text-dark">
+                                                            #{{ payment.subscription.id }}
+                                                        </span>
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="fw-bold">{{ payment.summ|floatformat:0|default:"—" }}</span>
+                                                </td>
+                                                <td>
+                                                    {% if payment.cashier %}
+                                                        {{ payment.cashier.name }}
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if payment.is_pay %}
+                                                        <span class="badge bg-success">Оплачено</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Не оплачено</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if payment.owner %}
+                                                        {{ payment.owner.get_full_name|default:payment.owner.username }}
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <div class="avatar-md mx-auto">
+                                        <div class="avatar-title bg-light text-primary rounded-circle font-size-24">
+                                            <i class="bx bx-money"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="mt-3">Нет платежей</h5>
+                                    <p class="text-muted">За выбранный период платежи не найдены</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Обработка изменения периода
+function handlePeriodChange(selectElement) {
+    const form = selectElement.form;
+    const dateFromInput = form.querySelector('input[name="date_from"]');
+    const dateToInput = form.querySelector('input[name="date_to"]');
+    
+    if (selectElement.value === 'custom') {
+        // Включаем поля дат для произвольного периода
+        dateFromInput.disabled = false;
+        dateToInput.disabled = false;
+        // Не отправляем форму автоматически, ждем заполнения дат
+        return;
+    } else {
+        // Отключаем поля дат и отправляем форму для предустановленных периодов
+        dateFromInput.disabled = true;
+        dateToInput.disabled = true;
+        form.submit();
+    }
+}
+
+// Включение/отключение полей дат при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    const periodSelect = document.querySelector('select[name="period"]');
+    const dateFromInput = document.querySelector('input[name="date_from"]');
+    const dateToInput = document.querySelector('input[name="date_to"]');
+    
+    function toggleDateInputs() {
+        const isCustom = periodSelect.value === 'custom';
+        dateFromInput.disabled = !isCustom;
+        dateToInput.disabled = !isCustom;
+    }
+    
+    toggleDateInputs();
+});
+</script>
+{% endblock %}

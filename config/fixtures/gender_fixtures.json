@@ -1,0 +1,16 @@
+[
+    {
+        "model": "authen.gender",
+        "pk": 1,
+        "fields": {
+            "name": "Мужской"
+        }
+    },
+    {
+        "model": "authen.gender",
+        "pk": 2,
+        "fields": {
+            "name": "Женский"
+        }
+    }
+]

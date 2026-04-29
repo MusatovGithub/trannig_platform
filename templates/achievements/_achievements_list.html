@@ -1,0 +1,58 @@
+{% for achievement in page_obj %}
+  <div class="col-md-6 col-lg-4 col-xl-3 mb-4 achievement-card">
+    <div class="card h-100 shadow-sm">
+      {% if achievement.image %}
+        <div class="achievement-img-wrap d-flex align-items-center justify-content-center bg-white" style="width:100%; height:180px; min-height:180px; max-height:180px; overflow:hidden;">
+          <img src="{{ achievement.image.url }}" alt="{{ achievement.name }}"
+              class="img-fluid"
+              style="max-width:100%; max-height:100%; object-fit:contain; object-position:center;">
+        </div>
+      {% else %}
+        <div class="achievement-img-wrap d-flex align-items-center justify-content-center bg-light" style="width:100%; height:180px; min-height:180px; max-height:180px;">
+          <i class="bi bi-award-fill fs-1 text-warning"></i>
+        </div>
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title mb-2 d-flex align-items-center">
+          <i class="bi bi-award-fill text-warning me-2"></i>
+          {{ achievement.name }}
+          {% if achievement.tag == "basic" %}
+            <span class="badge badge-basic ms-2">Базовый</span>
+          {% elif achievement.tag == "advanced" %}
+            <span class="badge badge-advanced ms-2">Продвинутый</span>
+          {% elif achievement.tag == "pro" %}
+            <span class="badge badge-pro ms-2">Профи</span>
+          {% elif achievement.tag == "water_element" %}
+            <span class="badge badge-water_element ms-2">Водная стихия</span>
+          {% elif achievement.tag == "swimming_skills" %}
+            <span class="badge badge-swimming_skills ms-2">Умею плавать</span>
+          {% elif achievement.tag == "champion_path" %}
+            <span class="badge badge-champion_path ms-2">Чемпионский путь</span>
+          {% elif achievement.tag == "team_captain" %}
+            <span class="badge badge-team_captain ms-2">Капитан команды</span>
+          {% elif achievement.tag == "land_champion" %}
+            <span class="badge badge-land_champion ms-2">Сухопутный чемпион</span>
+          {% elif achievement.tag == "media_champion" %}
+            <span class="badge badge-media_champion ms-2">Медиа-чемпион</span>
+          {% elif achievement.tag == "challenge_master" %}
+            <span class="badge badge-challenge_master ms-2">Челлендж-мастер</span>
+          {% endif %}
+        </h5>
+        {% if achievement.description %}
+          <p class="card-text">{{ achievement.description }}</p>
+        {% endif %}
+        <a href="{% url 'achievements:achievement_update' achievement.id %}" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-pencil"></i> Редактировать
+        </a>
+        {% if achievement.points > 0 %}
+          <div class="mt-2">
+            <span class="badge bg-warning text-dark">
+              <i class="bi bi-star-fill me-1"></i>
+              +{{ achievement.points }} баллов
+            </span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endfor %}

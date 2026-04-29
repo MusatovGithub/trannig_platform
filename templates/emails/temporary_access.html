@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Временный доступ</title>
+</head>
+<body style="margin:0;padding:0;background:#f6f7fb;font-family:Arial,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f6f7fb;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border-radius:10px;overflow:hidden;">
+          <tr>
+            <td style="padding:20px 24px;background:#0d6efd;color:#ffffff;">
+              <h1 style="margin:0;font-size:20px;font-weight:700;">Доступ к платформе</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              <p style="margin:0 0 12px 0;">Здравствуйте, {{ recipient_name }}!</p>
+              <p style="margin:0 0 12px 0;">
+                Для вас создан доступ в тренировочную платформу.
+              </p>
+              <p style="margin:0 0 12px 0;">
+                <strong>Логин:</strong> {{ login_email }}<br>
+                <strong>Временный пароль:</strong> {{ temporary_password }}
+              </p>
+              <p style="margin:0 0 16px 0;">
+                Временный пароль действует 8 часов. После входа необходимо сразу сменить пароль.
+              </p>
+              <p style="margin:0 0 10px 0;">
+                <a href="{{ login_link }}" style="color:#0d6efd;">Войти в систему</a>
+              </p>
+              <p style="margin:0 0 18px 0;">
+                <a href="{{ password_change_link }}" style="color:#0d6efd;">Сменить пароль после входа</a>
+              </p>
+              <p style="margin:0 0 8px 0;font-size:13px;color:#4b5563;">
+                Если вы не запрашивали доступ, проигнорируйте письмо или свяжитесь с нами: {{ support_email }}.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

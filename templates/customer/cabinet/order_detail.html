@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}<title>Заказ #{{ order.id }}</title>{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h4 class="card-title mb-0">Заказ #{{ order.id }}</h4>
+          <span class="badge bg-{{ order.get_status_color }} fs-6">{{ order.get_status_display }}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6 class="text-muted">Информация о заказе</h6>
+            <p class="mb-1"><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+            <p class="mb-1"><strong>Последнее обновление:</strong> {{ order.updated_at|date:"d.m.Y H:i" }}</p>
+            <p class="mb-0"><strong>Общая сумма:</strong> <span class="text-success fw-bold">{{ order.total_amount }} баллов</span></p>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted">Статус заказа</h6>
+            <div class="mb-2">
+              <span class="badge bg-{{ order.get_status_color }} fs-6">{{ order.get_status_display }}</span>
+            </div>
+            {% if order.status == 'PENDING' %}
+              <div class="alert alert-warning">
+                <i class="ti ti-clock me-2"></i>
+                Заказ ожидает подтверждения администратора
+              </div>
+            {% elif order.status == 'CONFIRMED' %}
+              <div class="alert alert-info">
+                <i class="ti ti-check me-2"></i>
+                Заказ подтвержден и готов к обработке
+              </div>
+            {% elif order.status == 'PROCESSING' %}
+              <div class="alert alert-primary">
+                <i class="ti ti-loader me-2"></i>
+                Заказ в процессе обработки
+              </div>
+            {% elif order.status == 'COMPLETED' %}
+              <div class="alert alert-success">
+                <i class="ti ti-check-circle me-2"></i>
+                Заказ успешно выполнен
+              </div>
+            {% elif order.status == 'CANCELLED' %}
+              <div class="alert alert-danger">
+                <i class="ti ti-x-circle me-2"></i>
+                Заказ отменен
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <h6 class="text-muted mb-3">Товары в заказе</h6>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Товар</th>
+                <th>Цена за единицу</th>
+                <th>Количество</th>
+                <th>Сумма</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.items.all %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    {% if item.product.image %}
+                      <img src="{{ item.product.image.url }}" class="rounded me-3" width="40" height="40" alt="{{ item.product.name }}" style="object-fit: cover;">
+                    {% else %}
+                      <div class="rounded bg-light me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="ti ti-package text-muted"></i>
+                      </div>
+                    {% endif %}
+                    <div>
+                      <div class="fw-bold">{{ item.product.name }}</div>
+                      {% if item.product.sport_category %}
+                        <small class="text-muted">
+                          <i class="ti ti-shield-check me-1"></i>{{ item.product.sport_category.get_short_name }}
+                        </small>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+                <td>{{ item.price }} баллов</td>
+                <td>
+                  <span class="badge bg-primary">{{ item.quantity }}</span>
+                </td>
+                <td>
+                  <strong>{{ item.total_price }} баллов</strong>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr class="table-success">
+                <th colspan="3">Итого:</th>
+                <th>{{ order.total_amount }} баллов</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {% if order.notes %}
+        <div class="mt-4">
+          <h6 class="text-muted">Примечания</h6>
+          <div class="alert alert-info">
+            {{ order.notes|linebreaks }}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Действия</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <a href="{% url 'customer:get_my_orders' %}" class="btn btn-secondary">
+            <i class="ti ti-arrow-left me-2"></i>Назад к заказам
+          </a>
+          <a href="{% url 'customer:get_marketplace' %}" class="btn btn-primary">
+            <i class="ti ti-shopping-cart me-2"></i>В магазин
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="card-title mb-0">История статусов</h5>
+      </div>
+      <div class="card-body">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker bg-{{ order.get_status_color }}"></div>
+            <div class="timeline-content">
+              <h6 class="timeline-title">{{ order.get_status_display }}</h6>
+              <p class="timeline-text text-muted">{{ order.updated_at|date:"d.m.Y H:i" }}</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-marker bg-secondary"></div>
+            <div class="timeline-content">
+              <h6 class="timeline-title">Заказ создан</h6>
+              <p class="timeline-text text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Информация</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12">
+            <p><strong>Номер заказа:</strong> #{{ order.id }}</p>
+            <p><strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+            <p><strong>Общая сумма:</strong> {{ order.total_amount }} баллов</p>
+            <p><strong>Количество товаров:</strong> {{ order.items.count }} шт.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

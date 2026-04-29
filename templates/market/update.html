@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}<title>Редактировать товар</title>{% endblock %}
+
+{% block content %}
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 border-bottom">
+    <div class="row">
+      <div class="col-lg-12">
+        <h4 class="card-title mb-0">Редактировать товар</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" autocomplete="off">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-7 mb-3">
+          <label class="form-label">Название товара</label>
+          <input type="text" name="name" class="form-control" maxlength="250" required
+                 value="{{ product.name }}" placeholder="Введите название">
+        </div>
+        <div class="col-md-5 mb-3">
+          <label class="form-label">Цена (кол-во Баллов)</label>
+          <input type="number" name="price" class="form-control" min="0" required
+                 value="{{ product.price }}" placeholder="Введите цену">
+        </div>
+        <div class="col-md-7 mb-3">
+          <label class="form-label">Описание</label>
+          <textarea class="form-control" name="description" maxlength="1000" rows="4" value="{{ product.description }}" placeholder="Введите описание">{{ product.description }}</textarea>
+        </div>
+        <div class="col-md-5 mb-3">
+          <label class="form-label">Ограничение по разряду</label>
+          <select name="sport_category" class="form-control">
+            <option value="">Без ограничений (доступно всем)</option>
+            {% for category in sport_categories %}
+              <option value="{{ category.id }}" {% if product.sport_category and product.sport_category.id == category.id %}selected{% endif %}>
+                {{ category.name }} (уровень {{ category.level }})
+              </option>
+            {% endfor %}
+          </select>
+          <small class="form-text text-muted">Если выбран разряд, товар смогут купить только клиенты с этим разрядом или выше</small>
+        </div>
+        <div class="col-md-7 mb-3">
+          <label class="form-label">Фото</label>
+          <input type="file" name="image" class="form-control" accept="image/*">
+          {% if product.image %}
+            <div class="mt-2">
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width:120px; max-height:120px; border-radius:6px;">
+              <span class="text-muted ms-2">Текущее фото</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'market:get_product_list' %}" class="btn btn-secondary">
+          <i class="ti ti-arrow-left"></i> Назад
+        </a>
+        <button type="submit" class="btn btn-success">
+          <i class="ti ti-check"></i> Сохранить
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

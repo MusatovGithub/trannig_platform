@@ -1,0 +1,83 @@
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: compose/prod/Dockerfile
+    command: /start
+    volumes:
+      - .:/app
+      - ./static_cdn:/app/static_cdn
+      - ./media:/app/media
+      - ./logs:/app/logs/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DJANGO_SECRET_KEY: django-insecure-7g8jyz6uvf)+tbps9v&w)r^n&939ftgle(qr2!0bo18)a1@w2
+      POSTGRES_USER: debug
+      POSTGRES_PASSWORD: debug_fduecn2025
+      POSTGRES_DB: debug
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      ALLOWED_HOSTS: "цунамис.рф,xn--80aqlcxhu.xn--p1ai,www.цунамис.рф,www.xn--80aqlcxhu.xn--p1ai"
+      CSRF_TRUSTED_ORIGINS: "https://цунамис.рф,https://xn--80aqlcxhu.xn--p1ai,https://www.цунамис.рф,https://www.xn--80aqlcxhu.xn--p1ai"
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
+      EMAIL_HOST: "smtp.beget.com"
+      EMAIL_HOST_USER: "info@xn--80aqlcxhu.xn--p1ai"
+      EMAIL_HOST_PASSWORD: "Gkfdfybt2026*"
+      EMAIL_PORT: 2525
+      REDIS_URL: "redis://redis:6379/1"
+      REDIS_URL_FOR_CACHE: "redis://redis:6379/0"
+      CELERY_FLOWER_USER: "Aleksey"
+      CELERY_FLOWER_PASSWORD: "debug_fduecn2025"
+
+  db:
+    image: postgres:17.0-alpine
+    environment:
+      POSTGRES_USER: debug
+      POSTGRES_PASSWORD: debug_fduecn2025
+      POSTGRES_DB: debug
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.4-alpine
+    volumes:
+      - redisdata:/data
+      - ./compose/prod/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
+  celery:
+    <<: *django
+    command: /start-celery
+    depends_on:
+      - db
+      - django
+      - redis
+    ports: []
+
+  celerybeat:
+    <<: *django
+    command: /start-celerybeat
+    depends_on:
+      - db
+      - django
+      - redis
+    ports: []
+
+  flower:
+    <<: *django
+    command: /start-flower
+    depends_on:
+      - db
+      - django
+      - redis
+    ports:
+      - "15555:5555"
+
+volumes:
+  redisdata:
+  pgdata:

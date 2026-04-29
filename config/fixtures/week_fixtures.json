@@ -1,0 +1,58 @@
+[
+    {
+        "model": "groups_custumer.week",
+        "pk": 1,
+        "fields": {
+            "name": "Понедельник",
+            "short_name": "Пн"
+        }
+    },
+    {
+        "model": "groups_custumer.week",
+        "pk": 2,
+        "fields": {
+            "name": "Вторник",
+            "short_name": "Вт"
+        }
+    },
+    {
+        "model": "groups_custumer.week",
+        "pk": 3,
+        "fields": {
+            "name": "Среда",
+            "short_name": "Ср"
+        }
+    },
+    {
+        "model": "groups_custumer.week",
+        "pk": 4,
+        "fields": {
+            "name": "Четверг",
+            "short_name": "Чт"
+        }
+    },
+    {
+        "model": "groups_custumer.week",
+        "pk": 5,
+        "fields": {
+            "name": "Пятница",
+            "short_name": "Пт"
+        }
+    },
+    {
+        "model": "groups_custumer.week",
+        "pk": 6,
+        "fields": {
+            "name": "Суббота",
+            "short_name": "Сб"
+        }
+    },
+    {
+        "model": "groups_custumer.week",
+        "pk": 7,
+        "fields": {
+            "name": "Воскресенье",
+            "short_name": "Вс"
+        }
+    }
+]

@@ -1,0 +1,49 @@
+[project]
+name = "tronline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ruff>=0.12.5",
+    "asgiref==3.8.1",
+    "diff-match-patch==20241021",
+    "Django==5.1.5",
+    "django-appconf==1.0.6",
+    "django-import-export==4.3.5",
+    "django-jazzmin==3.0.1",
+    "django-staticfiles==1.2.1",
+    "gunicorn==23.0.0",
+    "mysql-connector-python==9.2.0",
+    "packaging==24.2",
+    "pillow==11.1.0",
+    "postgres==4.0",
+    "psycopg2-binary==2.9.10",
+    "psycopg2-pool==1.2",
+    "sqlparse==0.5.3",
+    "tablib==3.8.0",
+    "tzdata==2024.2",
+    "celery>=5.4.0",
+    "django-celery-beat>=2.8.1",
+    "django-redis>=6.0.0",
+    "redis>=6.2.0",
+    "python-dotenv>=1.1.1",
+    "django-debug-toolbar>=6.0.0",
+    "flower>=2.0.1",
+]
+
+[tool.ruff]
+line-length = 79
+exclude = [
+    "venv",
+    ".git",
+    "__pycache__",
+    "static_cdn",
+]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

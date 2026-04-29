@@ -1,0 +1,148 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Группы</title> {% endblock %}
+
+{% block content %}
+
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+      <div class="row">
+        <div class="col-lg-10">
+          <h4 class="card-title mb-0">Группы</h4>
+        </div>
+        {% if user_permissions.can_create_groups %}
+          <div class="col-lg-2 text-end">
+            <a href="{% url 'groups_custumer:groups_create' %}" type="button" class="btn btn-success">Создать</a>
+          </div>
+        {% endif %}
+      </div>
+  
+    </div>
+  
+    <!-- ----------------------------------------- -->
+    <!-- 1. Фильтр -->
+    <!-- ----------------------------------------- -->
+  
+    <div class="card-body">
+        <form method="GET">
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Название</label>
+                  <input type="text" id="name_group" name="search" class="form-control" placeholder="Найти" value="{{ search_query }}"/>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Тренер</label>
+                  <select class="form-select" name="employe_id">
+                    <option value="">Все тренеры</option>
+                    {% for employe in employes %}
+                    <option 
+                    value="{{ employe.id }}" 
+                    {% if employe.id|stringformat:"s" == selected_employe_id|stringformat:"s" %}selected{% endif %}
+                  >
+                    {{ employe.full_name }}
+                  </option>
+                    {% endfor %}
+                  </select>
+              </div>
+            </div>
+  
+            <div class="col-sm-3 d-flex align-items-end">
+              <div class="mb-3 w-100">
+                <div class="d-flex flex-column flex-md-row gap-2 w-100">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-search fs-4"></i>
+                    Фильтровать
+                  </button>
+                  <a href="{% url 'groups_custumer:groups_all' %}" class="btn btn-secondary">
+                    <i class="ti ti-refresh fs-4"></i>
+                    Сбросить
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+    </div>
+  
+  
+  
+  
+  
+    <!-- ----------------------------------------- -->
+    <!-- 2. Таблица -->
+    <!-- ----------------------------------------- -->
+  
+    <div class="card-body p-4">
+  
+      <!-- Выполнить -->
+  
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+          <thead class="text-dark fs-4">
+            <tr>
+              <th>№</th>
+              <th>Название</th>
+              <th>Начало обучения</th>
+              <th>Ученики</th>
+              <th>Расписание</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for group in groups %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>
+                <a href="{% url 'groups_custumer:groups_detail' group.id %}">
+                  <h6 class="fs-4 fw-semibold mb-0">{{ group.name }}</h6>
+                </a>
+              </td>
+              <td>
+                <p class="mb-0 fw-normal">{{ group.strat_training }}</p>
+              </td>
+              <td>
+                <p>{{ group.custumer_count }}</p>
+              </td>
+              <td>
+                <ul>
+                  {% for schedule in group.groups.all %}
+                    <li>
+                      {{ schedule.week }}: 
+                      <span class="mb-1 badge rounded-pill text-bg-success">{{ schedule.strat_time }} - {{ schedule.end_time }}</span>
+                    </li>
+                  {% empty %}
+                    <li>Расписание не добавлено</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <div class="row">
+                  <div class="col-md-3">
+                    {% if user_permissions.can_edit_groups %}
+                      <a type="button" class="btn btn-sm btn-primary" href="{% url 'groups_custumer:groups_update' group.id %}">
+                        <i class="ti ti-edit fs-5"></i>
+                      </a>
+                    {% endif %}
+                    {% if user_permissions.can_delete_groups %}
+                      <a href="{% url 'groups_custumer:groups_delete' group.id %}" type="button" class="btn btn-sm btn-danger btn-delete-client">
+                        <i class="ti ti-trash fs-5"></i>
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+  
+      </div>
+    </div>
+  
+  </div>
+
+{% endblock %}

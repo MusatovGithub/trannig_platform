@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}<title>Новости</title>{% endblock %}
+
+{% block content %}
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 mt-2 border-bottom">
+    <div class="row">
+      <div class="col-12 col-lg-8">
+        <h4 class="card-title mb-0 d-flex align-items-center">
+          <iconify-icon icon="solar:news-bold" class="fs-3 text-primary me-2"></iconify-icon>
+          Новости
+        </h4>
+      </div>
+      <div class="col-12 col-lg-4 text-end mb-2 mb-lg-0">
+        <a href="{% url 'news:news_create' %}" class="btn btn-success w-100 w-sm-auto">
+          <i class="bi bi-plus-circle me-1"></i> Добавить новость
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div id="news-list" class="row">
+      {% include "news/_news_list.html" %}
+    </div>
+    {% if page_obj.has_next %}
+      <div class="text-center mt-3">
+        <button id="load-more-btn" class="btn btn-outline-primary" data-next-page="{{ page_obj.next_page_number }}">
+          Загрузить ещё
+        </button>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const loadMoreBtn = document.getElementById("load-more-btn");
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", function() {
+      const nextPage = this.getAttribute("data-next-page");
+      fetch(`?page=${nextPage}`, {
+        headers: {'x-requested-with': 'XMLHttpRequest'}
+      })
+      .then(response => response.text())
+      .then(html => {
+        // Вставляем новые новости в конец списка
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+        const newItems = tempDiv.querySelectorAll(".news-card");
+        const list = document.getElementById("news-list");
+        newItems.forEach(item => list.appendChild(item));
+        // Обновляем или скрываем кнопку
+        const newBtn = tempDiv.querySelector("#load-more-btn");
+        if (newBtn) {
+          this.setAttribute("data-next-page", newBtn.getAttribute("data-next-page"));
+        } else {
+          this.style.display = "none";
+        }
+      });
+    });
+  }
+});
+</script>
+{% include 'includes/collapsible_text_script.html' %}
+{% endblock %}

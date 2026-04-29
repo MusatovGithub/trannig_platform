@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load math_filters %}
+{% block title %}<title>{{ member.full_name }} - Участник команды</title>{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid mw-100">
+  <div class="row g-4">
+    <!-- Заголовок и навигация -->
+    <div class="col-12">
+      <div class="d-flex align-items-center mb-4">
+        <a href="{% url 'supervisor:home_client' %}" class="btn btn-outline-secondary me-3">
+          <i class="bi bi-arrow-left me-1"></i>Назад
+        </a>
+        <div>
+          <h2 class="mb-0">{{ member.full_name }}</h2>
+          <p class="text-muted mb-0">Участник команды</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Профиль участника -->
+    <div class="col-12 col-md-4">
+      <div class="card shadow-sm border-0 h-100" style="border-radius: 20px;">
+        <div class="card-body text-center">
+          <!-- Фото -->
+          <div class="mb-4">
+            {% if member.photo %}
+              <img src="{{ member.photo.url }}" alt="avatar" 
+                   class="rounded-circle mx-auto" style="width:120px; height:120px; object-fit:cover;">
+            {% else %}
+              <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" 
+                   style="width:120px; height:120px; background:#f0f4ff; color:#7b61ff;">
+                <i class="bi bi-person-fill" style="font-size:3rem;"></i>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Основная информация -->
+          <h4 class="fw-bold mb-2">{{ member.full_name }}</h4>
+          
+          {% if member.sport_category %}
+            <div class="mb-3">
+              <span class="badge px-3 py-2 rounded-pill" style="background: linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%); color: #fff; font-weight: 500;">
+                <i class="bi bi-trophy me-1"></i>
+                {{ member.sport_category.name }}
+              </span>
+            </div>
+          {% endif %}
+
+          <!-- Контактная информация -->
+          {% if member.phone %}
+            <div class="mb-2">
+              <i class="bi bi-telephone me-2 text-muted"></i>
+              <span class="text-muted">{{ member.phone }}</span>
+            </div>
+          {% endif %}
+
+          {% if member.email %}
+            <div class="mb-2">
+              <i class="bi bi-envelope me-2 text-muted"></i>
+              <span class="text-muted">{{ member.email }}</span>
+            </div>
+          {% endif %}
+
+          {% if member.birth_date %}
+            <div class="mb-2">
+              <i class="bi bi-calendar me-2 text-muted"></i>
+              <span class="text-muted">{{ member.birth_date|date:"d.m.Y" }}</span>
+            </div>
+          {% endif %}
+
+          <!-- Статистика -->
+          <div class="mt-4 pt-3 border-top">
+            <h6 class="fw-bold mb-3">Статистика</h6>
+            <div class="row g-2 text-center">
+              <div class="col-6">
+                <div class="fw-bold fs-5 text-primary">{{ stats.avg_score }}</div>
+                <div class="small text-muted">Средний балл</div>
+              </div>
+              <div class="col-6">
+                <div class="fw-bold fs-5 text-success">{{ stats.total_competitions }}</div>
+                <div class="small text-muted">Соревнований</div>
+              </div>
+              <div class="col-6">
+                <div class="fw-bold fs-5 text-warning">{{ stats.total_achievements }}</div>
+                <div class="small text-muted">Достижений</div>
+              </div>
+              <div class="col-6">
+                <div class="fw-bold fs-5 text-info">{{ stats.total_attendances }}</div>
+                <div class="small text-muted">Посещений</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="col-12 col-md-8">
+      <!-- Группы -->
+      {% if groups %}
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
+          <div class="card-header bg-transparent border-0 pb-0">
+            <h5 class="fw-bold mb-0">
+              <i class="bi bi-people me-2 text-primary"></i>Группы
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+              {% for group in groups %}
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
+                  {{ group.name }}
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Достижения -->
+      {% if achievements %}
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
+          <div class="card-header bg-transparent border-0 pb-0">
+            <h5 class="fw-bold mb-0">
+              <i class="bi bi-trophy me-2 text-warning"></i>Достижения
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3" id="achievements-container">
+              {% for achievement in achievements %}
+                <div class="col-12 col-md-6 achievement-item">
+                  <div class="d-flex align-items-center p-3 rounded-3" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);">
+                    <div class="me-3">
+                      <i class="bi bi-trophy-fill text-warning" style="font-size:1.5rem;"></i>
+                    </div>
+                    <div>
+                      <div class="fw-semibold text-black">{{ achievement.name }}</div>
+                      {% if achievement.description %}
+                        <div class="small text-muted">{{ achievement.description|truncatechars:50 }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            {% if member.achievements.count > 6 %}
+              <div class="text-center mt-3">
+                <button class="btn btn-outline-primary" id="load-more-achievements" data-member-id="{{ member.id }}" data-offset="6">
+                  <i class="bi bi-arrow-down-circle me-1"></i>Загрузить еще
+                </button>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Соревнования -->
+      <div class="card shadow-sm border-0 mb-4" style="border-radius: 20px;">
+        <div class="card-header bg-transparent border-0 pb-0">
+          <h5 class="fw-bold mb-0">
+            <i class="bi bi-flag me-2 text-info"></i>Соревнования
+          </h5>
+        </div>
+        <div class="card-body">
+          <div id="competitions-container">
+            <!-- Соревнования будут загружены через AJAX -->
+          </div>
+          <div class="text-center mt-3" id="load-more-competitions-container" style="display: none;">
+            <button class="btn btn-outline-primary" id="load-more-competitions" data-member-id="{{ member.id }}" data-offset="5">
+              <i class="bi bi-arrow-down-circle me-1"></i>Загрузить еще
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Если нет данных -->
+      {% if not achievements %}
+        <div class="card shadow-sm border-0" style="border-radius: 20px;">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-info-circle text-muted" style="font-size:3rem;"></i>
+            <h5 class="text-muted mt-3">Нет данных для отображения</h5>
+            <p class="text-muted">У этого участника пока нет достижений.</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для просмотра результатов соревнования -->
+<div class="modal fade" id="competitionResultsModal" tabindex="-1" aria-labelledby="competitionResultsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="competitionResultsModalLabel">Результаты соревнования</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="competition-info" class="mb-3">
+          <!-- Информация о соревновании -->
+        </div>
+        <div id="results-container">
+          <!-- Результаты будут загружены через AJAX -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Автоматическая загрузка первых 5 соревнований
+      const memberId = {{ member.id }};
+      loadCompetitions(memberId, 0, true);
+      
+      // Обработка загрузки достижений
+      const loadMoreAchievementsBtn = document.getElementById('load-more-achievements');
+      if (loadMoreAchievementsBtn) {
+          loadMoreAchievementsBtn.addEventListener('click', function() {
+              const memberId = this.dataset.memberId;
+              const offset = parseInt(this.dataset.offset);
+              
+              // Показываем индикатор загрузки
+              this.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Загрузка...';
+              this.disabled = true;
+              
+              const url = `/customer/cabinet/team_member/${memberId}/achievements/?offset=${offset}`;
+              
+              fetch(url, {
+                  method: 'GET',
+                  headers: {
+                      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                      'Content-Type': 'application/json',
+                  },
+              })
+                  .then(response => {
+                      if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                      }
+                      return response.json();
+                  })
+                  .then(data => {
+                      if (data.success && data.achievements.length > 0) {
+                          // Добавляем новые достижения
+                          const container = document.getElementById('achievements-container');
+                          data.achievements.forEach(achievement => {
+                              const achievementHtml = `
+                                  <div class="col-12 col-md-6 achievement-item">
+                                      <div class="d-flex align-items-center p-3 rounded-3" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);">
+                                          <div class="me-3">
+                                              <i class="bi bi-trophy-fill text-warning" style="font-size:1.5rem;"></i>
+                                          </div>
+                                          <div>
+                                              <div class="fw-semibold text-black">${achievement.name}</div>
+                                              ${achievement.description ? `<div class="small text-muted">${achievement.description.substring(0, 50)}${achievement.description.length > 50 ? '...' : ''}</div>` : ''}
+                                          </div>
+                                      </div>
+                                  </div>
+                              `;
+                              container.insertAdjacentHTML('beforeend', achievementHtml);
+                          });
+                          
+                          // Обновляем offset для следующей загрузки
+                          this.dataset.offset = offset + 5;
+                          
+                          // Если достижений меньше 5, скрываем кнопку
+                          if (data.achievements.length < 5) {
+                              this.style.display = 'none';
+                          }
+                          
+                          // Восстанавливаем кнопку
+                          this.innerHTML = '<i class="bi bi-arrow-down-circle me-1"></i>Загрузить еще';
+                          this.disabled = false;
+                      } else {
+                          // Скрываем кнопку, если больше нет достижений
+                          this.style.display = 'none';
+                      }
+                  })
+                  .catch(error => {
+                      console.error('Ошибка загрузки достижений:', error);
+                      this.innerHTML = '<i class="bi bi-arrow-down-circle me-1"></i>Загрузить еще';
+                      this.disabled = false;
+                      alert('Ошибка загрузки достижений: ' + error.message);
+                  });
+          });
+      }
+
+      // Обработка загрузки соревнований
+      const loadMoreCompetitionsBtn = document.getElementById('load-more-competitions');
+      if (loadMoreCompetitionsBtn) {
+          loadMoreCompetitionsBtn.addEventListener('click', function() {
+              const memberId = this.dataset.memberId;
+              const offset = parseInt(this.dataset.offset);
+              loadCompetitions(memberId, offset, false);
+          });
+      }
+  });
+
+  // Функция для загрузки соревнований
+  function loadCompetitions(memberId, offset, isInitialLoad) {
+      const container = document.getElementById('competitions-container');
+      const loadMoreBtn = document.getElementById('load-more-competitions');
+      const loadMoreContainer = document.getElementById('load-more-competitions-container');
+      
+      if (isInitialLoad) {
+          // Показываем индикатор загрузки в контейнере
+          container.innerHTML = '<div class="text-center"><i class="bi bi-arrow-clockwise me-1"></i>Загрузка соревнований...</div>';
+      } else {
+          // Показываем индикатор загрузки на кнопке
+          loadMoreBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Загрузка...';
+          loadMoreBtn.disabled = true;
+      }
+      
+      const url = `/customer/cabinet/team_member/${memberId}/competitions/?offset=${offset}`;
+      
+      fetch(url, {
+          method: 'GET',
+          headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+              'Content-Type': 'application/json',
+          },
+      })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+          })
+          .then(data => {
+              if (data.success && data.competitions.length > 0) {
+                  if (isInitialLoad) {
+                      // Очищаем контейнер и добавляем соревнования
+                      container.innerHTML = '';
+                  }
+                  
+                  // Добавляем новые соревнования
+                  data.competitions.forEach(competition => {
+                      const competitionHtml = `
+                          <div class="card mb-3 competition-item" style="border-radius: 15px;">
+                              <div class="card-body">
+                                  <div class="d-flex justify-content-between align-items-start">
+                                      <div>
+                                          <h6 class="fw-bold mb-1">${competition.name}</h6>
+                                          <div class="small text-muted">
+                                              <i class="bi bi-calendar me-1"></i>${competition.date}
+                                              ${competition.location ? `<i class="bi bi-geo-alt me-1 ms-2"></i>${competition.location}` : ''}
+                                          </div>
+                                      </div>
+                                      <button class="btn btn-outline-primary btn-sm" onclick="showCompetitionResults(${memberId}, ${competition.id})">
+                                          <i class="bi bi-eye me-1"></i>Результаты
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                      `;
+                      container.insertAdjacentHTML('beforeend', competitionHtml);
+                  });
+                  
+                  // Обновляем offset для следующей загрузки
+                  loadMoreBtn.dataset.offset = offset + 5;
+                  
+                  // Показываем кнопку "Загрузить еще" если есть еще соревнования
+                  if (data.competitions.length === 5) {
+                      loadMoreContainer.style.display = 'block';
+                  } else {
+                      loadMoreContainer.style.display = 'none';
+                  }
+                  
+                  // Восстанавливаем кнопку
+                  loadMoreBtn.innerHTML = '<i class="bi bi-arrow-down-circle me-1"></i>Загрузить еще';
+                  loadMoreBtn.disabled = false;
+              } else {
+                  if (isInitialLoad) {
+                      container.innerHTML = '<div class="text-center text-muted">Соревнования не найдены</div>';
+                  }
+                  loadMoreContainer.style.display = 'none';
+              }
+          })
+          .catch(error => {
+              console.error('Ошибка загрузки соревнований:', error);
+              if (isInitialLoad) {
+                  container.innerHTML = '<div class="text-center text-danger">Ошибка загрузки соревнований</div>';
+              } else {
+                  loadMoreBtn.innerHTML = '<i class="bi bi-arrow-down-circle me-1"></i>Загрузить еще';
+                  loadMoreBtn.disabled = false;
+              }
+              alert('Ошибка загрузки соревнований: ' + error.message);
+          });
+  }
+
+  // Функция для показа результатов соревнования
+  function showCompetitionResults(memberId, competitionId) {
+      const modal = new bootstrap.Modal(document.getElementById('competitionResultsModal'));
+      const competitionInfo = document.getElementById('competition-info');
+      const resultsContainer = document.getElementById('results-container');
+      
+      // Показываем индикатор загрузки
+      resultsContainer.innerHTML = '<div class="text-center"><i class="bi bi-arrow-clockwise me-1"></i>Загрузка результатов...</div>';
+      
+      const url = `/customer/cabinet/team_member/${memberId}/competitions/${competitionId}/results/`;
+      
+      fetch(url, {
+          method: 'GET',
+          headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+              'Content-Type': 'application/json',
+          },
+      })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+          })
+          .then(data => {
+              if (data.success) {
+                  // Показываем информацию о соревновании
+                  if (data.competition) {
+                      competitionInfo.innerHTML = `
+                          <div class="card bg-light">
+                              <div class="card-body">
+                                  <h6 class="fw-bold mb-1">${data.competition.name}</h6>
+                                  <div class="small text-muted">
+                                      <i class="bi bi-calendar me-1"></i>${data.competition.date}
+                                      ${data.competition.location ? `<i class="bi bi-geo-alt me-1 ms-2"></i>${data.competition.location}` : ''}
+                                  </div>
+                              </div>
+                          </div>
+                      `;
+                  }
+                  
+                  // Показываем результаты
+                  if (data.results && data.results.length > 0) {
+                      let resultsHtml = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Дисциплина</th><th>Дистанция</th><th>Стиль</th><th>Время</th><th>Место</th><th>Разряд</th></tr></thead><tbody>';
+                      
+                      data.results.forEach(result => {
+                          const placeBadge = result.place === 1 ? 
+                              '<span class="badge bg-warning text-dark"><i class="bi bi-trophy-fill me-1"></i>1 место</span>' :
+                              result.place === 2 ? 
+                              '<span class="badge bg-secondary"><i class="bi bi-award me-1"></i>2 место</span>' :
+                              result.place === 3 ? 
+                              '<span class="badge bg-danger"><i class="bi bi-award me-1"></i>3 место</span>' :
+                              `<span class="badge bg-primary">${result.place} место</span>`;
+                          
+                          resultsHtml += `
+                              <tr>
+                                  <td>${result.discipline || '—'}</td>
+                                  <td>${result.distance} м</td>
+                                  <td>${result.style || '—'}</td>
+                                  <td>${result.result_time || '—'}</td>
+                                  <td>${placeBadge}</td>
+                                  <td>${result.sport_category || '—'}</td>
+                              </tr>
+                          `;
+                      });
+                      
+                      resultsHtml += '</tbody></table></div>';
+                      resultsContainer.innerHTML = resultsHtml;
+                  } else {
+                      resultsContainer.innerHTML = '<div class="text-center text-muted">Результаты не найдены</div>';
+                  }
+              } else {
+                  resultsContainer.innerHTML = '<div class="text-center text-danger">Ошибка загрузки результатов</div>';
+              }
+          })
+          .catch(error => {
+              console.error('Ошибка загрузки результатов:', error);
+              resultsContainer.innerHTML = '<div class="text-center text-danger">Ошибка загрузки результатов: ' + error.message + '</div>';
+          });
+      
+      modal.show();
+  }
+</script>
+{% endblock %}

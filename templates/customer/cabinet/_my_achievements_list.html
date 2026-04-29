@@ -1,0 +1,154 @@
+{% load get_item %}
+
+{% comment %} Секция активных достижений {% endcomment %}
+{% if active_achievements %}
+<div class="col-12 mb-4">
+  <div class="achievement-section-header">
+    <h5 class="text-success">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      Активные достижения
+    </h5>
+  </div>
+</div>
+{% for achievement in active_achievements %}
+  <div class="col-md-6 col-lg-4 col-xl-3 mb-4 achievement-card">
+    <div class="card h-100 shadow-sm border-success border-2">
+      <div class="position-relative">
+        {% if achievement.image %}
+          <div class="achievement-img-wrap d-flex align-items-center justify-content-center bg-white" style="width:100%; height:180px; min-height:180px; max-height:180px; overflow:hidden;">
+            <img src="{{ achievement.image.url }}"
+                class="card-img-top"
+                alt="{{ achievement.name }}"
+                style="max-width:100%; max-height:100%; object-fit:contain; object-position:center;">
+          </div>
+        {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-light position-relative" style="height:180px;">
+            <i class="bi bi-award-fill fs-1 text-warning"></i>
+          </div>
+        {% endif %}
+        {% comment %} Бейдж "Активно" {% endcomment %}
+        <div class="position-absolute top-0 end-0 m-2">
+          <span class="badge bg-success">
+            <i class="bi bi-check-circle me-1"></i>Активно
+          </span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title mb-2 d-flex align-items-center">
+          <i class="bi bi-award-fill text-warning me-2"></i>
+          {{ achievement.name }}
+          {% if achievement.tag == "basic" %}
+            <span class="badge badge-basic ms-2">Базовый</span>
+          {% elif achievement.tag == "advanced" %}
+            <span class="badge badge-advanced ms-2">Продвинутый</span>
+          {% elif achievement.tag == "pro" %}
+            <span class="badge badge-pro ms-2">Профи</span>
+          {% elif achievement.tag == "water_element" %}
+            <span class="badge badge-water_element ms-2">Водная стихия</span>
+          {% elif achievement.tag == "swimming_skills" %}
+            <span class="badge badge-swimming_skills ms-2">Умею плавать</span>
+          {% elif achievement.tag == "champion_path" %}
+            <span class="badge badge-champion_path ms-2">Чемпионский путь</span>
+          {% elif achievement.tag == "team_captain" %}
+            <span class="badge badge-team_captain ms-2">Капитан команды</span>
+          {% elif achievement.tag == "land_champion" %}
+            <span class="badge badge-land_champion ms-2">Сухопутный чемпион</span>
+          {% elif achievement.tag == "media_champion" %}
+            <span class="badge badge-media_champion ms-2">Медиа-чемпион</span>
+          {% elif achievement.tag == "challenge_master" %}
+            <span class="badge badge-challenge_master ms-2">Челлендж-мастер</span>
+          {% endif %}
+        </h5>
+        {% if achievement.description %}
+          <p class="card-text">{{ achievement.description }}</p>
+        {% endif %}
+        {% comment %} Отображение баллов для активных достижений {% endcomment %}
+        {% if achievement.points > 0 %}
+          <div class="mt-2">
+            <span class="badge bg-success">
+              <i class="bi bi-check-circle-fill me-1"></i>
+              +{{ achievement.points }} баллов
+            </span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% endif %}
+
+{% comment %} Секция неактивных достижений {% endcomment %}
+{% if inactive_achievements %}
+<div class="col-12 mb-4 mt-4">
+  <div class="achievement-section-header">
+    <h5 class="text-muted">
+      <i class="bi bi-circle me-2"></i>
+      Неактивные достижения
+    </h5>
+    <p class="text-muted small mb-0">
+      <i class="bi bi-info-circle me-1"></i>
+      За выполнение этих достижений вы можете получить дополнительные баллы
+    </p>
+  </div>
+</div>
+{% for achievement in inactive_achievements %}
+  <div class="col-md-6 col-lg-4 col-xl-3 mb-4 achievement-card">
+    <div class="card h-100 shadow-sm">
+      <div class="position-relative">
+        {% if achievement.image %}
+          <div class="achievement-img-wrap d-flex align-items-center justify-content-center bg-white" style="width:100%; height:180px; min-height:180px; max-height:180px; overflow:hidden;">
+            <img src="{{ achievement.image.url }}"
+                class="card-img-top achievement-inactive"
+                alt="{{ achievement.name }}"
+                style="max-width:100%; max-height:100%; object-fit:contain; object-position:center;">
+          </div>
+          <div class="achievement-mask position-absolute top-0 start-0 w-100 h-100" style="background:rgba(180,180,180,0.55);"></div>
+        {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-light position-relative" style="height:180px;">
+            <i class="bi bi-award-fill fs-1 text-warning achievement-inactive"></i>
+            <div class="achievement-mask position-absolute top-0 start-0 w-100 h-100" style="background:rgba(180,180,180,0.55);"></div>
+          </div>
+        {% endif %}
+        {% comment %} Бейдж "Неактивно" {% endcomment %}
+        <div class="position-absolute top-0 end-0 m-2">
+          <span class="badge bg-secondary">
+            <i class="bi bi-circle me-1"></i>Неактивно
+          </span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title mb-2 d-flex align-items-center">
+          <i class="bi bi-award-fill text-muted me-2"></i>
+          {{ achievement.name }}
+          {% if achievement.tag == "basic" %}
+            <span class="badge badge-basic ms-2">Базовый</span>
+          {% elif achievement.tag == "advanced" %}
+            <span class="badge badge-advanced ms-2">Продвинутый</span>
+          {% elif achievement.tag == "pro" %}
+            <span class="badge badge-pro ms-2">Профи</span>
+          {% endif %}
+        </h5>
+        {% if achievement.description %}
+          <p class="card-text text-muted">{{ achievement.description }}</p>
+        {% endif %}
+        {% comment %} Отображение баллов для неактивных достижений {% endcomment %}
+        {% if achievement.points > 0 %}
+          <div class="mt-2">
+            <span class="badge bg-warning text-dark">
+              <i class="bi bi-star-fill me-1"></i>
+              +{{ achievement.points }} баллов
+            </span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% endif %}
+
+{% comment %} Если нет достижений {% endcomment %}
+{% if not active_achievements and not inactive_achievements %}
+  <div class="col-12">
+    <p>Достижений пока нет.</p>
+  </div>
+{% endif %}

@@ -1,0 +1,86 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Создать Представители</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Создать Представители</h4>
+                </div>
+  
+                <!-- Форма-->
+                <form action="" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div>
+                    <div class="card-body">
+                      <h4 class="card-title">Добавить родственника</h4>
+                      <p class="text-danger">{{error}}</p>
+                      <div class="row pt-3">
+  
+                        <!--ФИО-->
+                        <div class="col-md-6">
+                            <div class="mb-3 has-success">
+                              <label class="form-label">Тип родства</label>
+                              <select class="form-select" id="type" name="type">
+                                <option value="">Тип родства</option>
+                                {% for item in objects_list %}
+                                  <option value="{{item.id}}">{{item.name}}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          </div>
+                        <!--Телефон-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Ф.И.О</label>
+                            <input type="text" id="full_name" name="full_name" class="form-control international-inputmask" value="{{ form_data.full_name }}"/>
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+  
+                      <div class="row ">
+                        <!--Адрес-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="phone" id="phone" name="phone" class="form-control" value="{{ form_data.phone }}"/>
+                          </div>
+                        </div>
+                        <!--Эл. почта-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Место работы</label>
+                            <input type="text" id="work" name="work" class="form-control" value="{{ form_data.work }}"/>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+  
+                    <div class="form-actions">
+                      <div class="card-body border-top">
+                        <button type="submit" class="btn btn-primary" id="buttonSave">
+                          Сохранить
+                        </button>
+                        <a href="{% url 'customer:custumer_representatives_all' cutumer.id %}" class="btn bg-danger-subtle text-danger ms-6">
+                          Отмена
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+
+
+
+{% endblock %}

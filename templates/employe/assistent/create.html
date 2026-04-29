@@ -1,0 +1,93 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Создать Сотрудники</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Создать Сотрудники</h4>
+                </div>
+                <!-- Форма-->
+                <form action="" method="post">
+                  {% csrf_token %}
+                    <div class="card-body">
+                      <h4 class="card-title">Личная информация</h4>
+  
+                      <div class="row pt-3">
+                        <h3 class="text-danger">{{error}}</h3>
+                        <br>
+                        <!--ФИО-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Ф.И.О</label>
+                            <input type="text" id="full_name" name="full_name" class="form-control"/>
+                          </div>
+                        </div>
+                        <!--Телефон-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="text" id="phone" name="phone" class="form-control international-inputmask" inputmode="text" />
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Пол-->
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                            <label class="form-label">Пол</label>
+                            <select class="form-select" id="gender" name="gender">
+                              {% for item in gender %}
+                              <option value="{{item.id}}" selected>{{item.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                        <!--День рождения-->
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                            <label class="form-label">Роль</label>
+                            <select class="form-select" id="roll" name="roll">
+                              {% for item in roll %}
+                              <option value="{{item.id}}" selected>{{item.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                              <label class="form-label">Комментарий</label>
+                              <textarea name="decription" class="form-control" id="decription"></textarea>
+                            </div>
+                          </div>
+                      </div>
+  
+                    
+                  </div>
+                  <div class="form-actions">
+                    <div class="card-body border-top">
+                      <button type="submit" class="btn btn-primary" id="buttonSave">
+                        Сохранить
+                      </button>
+                      <a href="{% url 'employe:employe_list' %}" class="btn bg-danger-subtle text-danger ms-6">
+                        Отмена
+                      </a>
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+
+
+
+{% endblock %}

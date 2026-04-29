@@ -1,0 +1,190 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Сотрудники</title> {% endblock %}
+
+{% block content %}
+  
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 mt-2 border-bottom">
+    <div class="row">
+      <div class="col-12 col-lg-7">
+        <h4 class="card-title mb-0">Сотрудники</h4>
+      </div>
+      <div class="col-12 col-lg-3 text-end mb-2 mb-lg-0">
+        <a href="{% url 'employe:employe_create' %}" type="button" class="btn btn-success w-100 w-sm-auto">Добавить сотрудника</a>
+      </div>
+      <div class="col-12 col-lg-2 text-end">
+        <a href="{% url 'employe:employe_roll_create' %}" type="button" class="btn btn-success w-100 w-sm-auto">Создать роль</a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <ul class="nav nav-underline" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'employe:employe_list' %}">
+          <span>Сотрудники</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'employe:employe_roll' %}">
+          <span>Роль</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content tabcontent-border mt-4" id="myTabContent">
+      <div role="tabpanel" class="tab-pane fade show active" id="active" aria-labelledby="active-tab">
+        <form method="GET">
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="mb-3">
+                      <label class="form-label">Поиск</label>
+                      <input type="text" id="search" name="search"  class="form-control" placeholder="Введите слово" value="{{ search_query }}" />
+                  </div>
+                </div>
+      
+      
+                <div class="col-12">
+                  <div class="d-md-flex align-items-center">
+      
+                    <div class="ms-auto mt-3 mt-md-0">
+                      <button type="submit" class="btn btn-primary hstack gap-6">
+                        <i class="ti ti-search fs-4"></i>
+                        Фильтровать
+                      </button>
+                    </div>
+      
+                  </div>
+                </div>
+              </div>
+        </form>
+        
+          
+      
+          <div class="table-responsive mb-4 mt-4 border rounded-1">
+            <table class="table employe-table mb-0 align-middle">
+                <thead class="text-dark fs-4">
+                    <tr>
+                      <th>№</th>
+                      <th>ФИО</th>
+                      <th>Телефон</th>
+                      <th>E-mail</th>
+                      <th>Роль</th>
+                      <th>Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in employe_list %}
+                    <tr>
+                      <td>{{forloop.counter}}</td>
+                      <td class="employe-name-cell">
+                        <div class="d-flex align-items-center">
+                          {% if item.user.avatar and item.user.avatar.url %}
+                            <img src="{{ item.user.avatar.url }}" class="rounded-circle flex-shrink-0" width="40" height="40" />
+                          {% else %}
+                              <img src="{% static 'dash/images/profile/1.png' %}" class="rounded-circle flex-shrink-0" width="40" height="40" />
+                          {% endif %}
+                          <div class="ms-3 employe-name-text">
+                            <a href="{% url 'employe:employe_update' item.id %}"><h6 class="fw-semibold mb-0">{{item.full_name}}</h6></a>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <a href="{% url 'employe:employe_update' item.id %}" class="mb-0 fw-normal">{{item.phone}}</a>
+                      </td>
+                      <td>
+                        <a href="{% url 'employe:employe_update' item.id %}" class="mb-0 fw-normal">{{item.user.email}}</a>
+                      </td>
+                      <td>
+                        <a href="{% url 'employe:employe_update' item.id %}" class="mb-0 fw-normal">{{item.roll}}</a>
+                      </td>
+                      <td>
+          
+          
+                        <div class="row">
+                          {% if item.is_send == False %}
+                          <div class="col-md-3">
+                            <a href="{% url 'employe:employe_send_message' item.id %}" class="btn btn-sm btn-primary d-inline-flex align-items-center justify-content-center"><i class="ti ti-send fs-5"></i></a>
+                          </div>
+                          {% else %}
+                          <div class="col-md-3">
+                            <a href="{% url 'employe:employe_delete' item.id %}" class="btn mb-1 btn-danger rounded-circle round d-inline-flex align-items-center justify-content-center">
+                              <i class="ti ti-trash fs-5"></i>
+                            </a>
+                            <!-- <a type="button" class="btn btn-sm btn-primary" href="#">
+                              <i class="ti ti-edit fs-5"></i>
+                            </a> -->
+                        </div>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+            </table>
+          </div>
+
+      </div>
+
+    </div>
+  
+  </div>
+</div>
+
+<style>
+  /* Адаптивные стили для таблицы сотрудников */
+  
+  /* На десктопе сохраняем text-nowrap */
+  @media (min-width: 768px) {
+    .employe-table {
+      white-space: nowrap;
+    }
+  }
+  
+  /* На мобильных устройствах */
+  @media (max-width: 767px) {
+    /* Убираем text-nowrap, разрешаем перенос текста */
+    .employe-table {
+      white-space: normal !important;
+    }
+    
+    /* Ограничиваем ширину ячейки с именем и добавляем правый отступ */
+    .employe-name-cell {
+      max-width: 140px !important;
+      padding-right: 20px !important;
+      vertical-align: top;
+    }
+    
+    /* Уменьшаем размер текста и разрешаем перенос */
+    .employe-name-text {
+      max-width: 100%;
+      padding-right: 10px;
+    }
+    
+    .employe-name-text h6 {
+      font-size: 0.8rem !important; /* Ещё немного уменьшаем */
+      line-height: 1.3;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      margin-right: 5px;
+    }
+    
+    /* Изображение не сжимается */
+    .flex-shrink-0 {
+      flex-shrink: 0;
+    }
+    
+    /* Добавляем отступ для следующей колонки (телефон) */
+    .employe-table tbody td:nth-child(3) {
+      padding-left: 15px !important;
+      vertical-align: top;
+    }
+    
+    /* Уменьшаем размер текста в других ячейках для компактности */
+    .employe-table tbody td {
+      font-size: 0.85rem;
+    }
+  }
+</style>
+{% endblock %}

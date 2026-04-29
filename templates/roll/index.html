@@ -1,0 +1,69 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Роль</title> {% endblock %}
+
+{% block content %}
+  
+<div class="card w-100 position-relative overflow-hidden">
+
+  <div class="px-4 py-3 mt-2 border-bottom">
+    <div class="row">
+      <div class="col-12 col-lg-7">
+        <h4 class="card-title mb-0">Сотрудники</h4>
+      </div>
+      <div class="col-12 col-lg-3 text-end mb-2 mb-lg-0">
+        <a href="{% url 'employe:employe_create' %}" type="button" class="btn btn-success w-100 w-sm-auto">Добавить сотрудника</a>
+      </div>
+      <div class="col-12 col-lg-2 text-end">
+        <a href="{% url 'employe:employe_roll_create' %}" type="button" class="btn btn-success w-100 w-sm-auto">Создать роль</a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <ul class="nav nav-underline" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'employe:employe_list' %}">
+          <span>Сотрудники</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'employe:employe_roll' %}">
+          <span>Роль</span>
+        </a>
+      </li>
+    </ul>
+    <div class="tab-content tabcontent-border" id="myTabContent">
+      <div class="table-responsive mb-4 mt-3 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+          <thead class="text-dark fs-4 text-center">
+            <tr>
+              <th style="width: 5%;">id</th>
+              <th style="width: 75%;">Название</th>
+              <th style="width: 20%;">Действия</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {% for item in roll_list %}
+              <tr>
+                <td>
+                  {{forloop.counter}}
+                </td>
+                <td>
+                  <p class="mb-0 fw-normal">{{item.name}}</p>
+                </td>
+                <td>
+                  <a type="button" class="btn btn-sm btn-primary" href="{% url 'employe:employe_roll_update' item.id %}">
+                    <i class="ti ti-edit fs-5"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,737 @@
+{% extends base_template %}
+{% load static %}
+{% block title %}<title>{{ competition.name }} – Детали соревнования</title>{% endblock %}
+
+{% block content %}
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 border-bottom">
+    <div class="row">
+      <div class="col-lg-12">
+        <h4 class="card-title mb-0">{{ competition.name }} – Детальный просмотр соревнования</h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <!-- Информация о соревновании в виде таблицы -->
+    <table class="table table-bordered w-auto mb-4">
+      <tbody>
+        <tr>
+          <th>Название</th>
+          <td>{{ competition.name }}</td>
+        </tr>
+        <tr>
+          <th>Дата проведения</th>
+          <td>{{ competition.date|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+          <th>Место проведения</th>
+          <td>{{ competition.location }}</td>
+        </tr>
+        <tr>
+          <th>Статус</th>
+          <td>{{ competition.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Добавление участников -->
+    <h5>Добавить участника</h5>
+    <form id="add-participant-form" method="post" action="{% url 'competitions:add_customers_to_competition' competition.id %}" class="row g-2 mb-4">
+      {% csrf_token %}
+      <div class="col-auto flex-grow-1">
+        <input type="text" id="customer-search" class="form-control" placeholder="Поиск по ФИО или телефону...">
+        <input type="hidden" name="customers" id="selected-customer-id">
+        <div id="search-results" class="list-group position-absolute w-100" style="z-index:10;"></div>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-success" id="add-btn" disabled>
+          <i class="ti ti-user-plus"></i>
+        </button>
+      </div>
+    </form>
+
+    <!-- Таблица участников -->
+    <h5>Участники соревнования</h5>
+    <form method="post" action="{% url 'competitions:delete_customers_from_competition' competition.id %}">
+      {% csrf_token %}
+      <div class="table-responsive mb-3 border rounded-1">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th></th>
+              <th>ФИО</th>
+              <th>Телефон</th>
+              <th>Разряд</th>
+              <th>Группа</th>
+              <th>Результат</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for customer in competition_customers %}
+            <tr>
+              <td>
+                <input type="checkbox" name="customers" value="{{ customer.id }}">
+              </td>
+                             <td>{{ customer.full_name }}</td>
+              <td>{{ customer.phone }}</td>
+              <td>
+                {% if customer.sport_category %}
+                  <span class="badge bg-success">{{ customer.sport_category.name }}</span>
+                {% else %}
+                  <span class="text-muted">Без разряда</span>
+                {% endif %}
+              </td>
+              <td>
+                {% for group in customer.groups.all %}
+                  <span class="badge bg-info">{{ group.name }}</span>
+                {% empty %}
+                  <span class="text-muted">—</span>
+                {% endfor %}
+              </td>
+              <td>
+                 <div class="btn-group" role="group">
+                   <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resultModal{{ customer.id }}">
+                     <i class="ti ti-plus"></i> Добавить
+                   </button>
+                   <button type="button" class="btn btn-sm btn-outline-info" data-customer-id="{{ customer.id }}" onclick="viewResults({{ competition.id }}, {{ customer.id }}, '{{ customer.full_name|escapejs }}')">
+                     <i class="ti ti-eye"></i> Просмотр
+                   </button>
+                 </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted">Участников пока нет</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button class="btn btn-danger" type="submit" {% if not competition_customers %}disabled{% endif %}>
+        <i class="ti ti-user-minus"></i> Удалить выбранных
+      </button>
+    </form>
+    <div class="mt-5">
+      <div class="d-flex align-items-center mb-3">
+        <h5 class="mb-0">Результаты соревнования</h5>
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary ms-auto"
+          id="competitionResultsReload"
+        >
+          <i class="ti ti-refresh"></i> Обновить
+        </button>
+      </div>
+      <div
+        id="competitionResultsRoot"
+        class="border rounded-1 p-3"
+        data-results-url="{% url 'competitions:get_competition_results_overview' competition.id %}"
+      >
+        <div class="text-center py-4">
+          <div class="spinner-border" role="status"></div>
+          <div>Загрузка результатов...</div>
+        </div>
+      </div>
+    </div>
+    {% for customer in competition_customers %}
+      <div class="modal fade" id="resultModal{{ customer.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <form class="modal-content competition-result-form" data-customer="{{ customer.id }}">
+            <div class="modal-header">
+                             <h5 class="modal-title">Результат для {{ customer.full_name }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+              <div class="modal-body">
+                <div class="mb-2">
+                  <label class="form-label">Дисциплина</label>
+                  <input type="text" name="discipline" class="form-control" placeholder="Например: Плавание вольный стиль">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Дистанция (м)</label>
+                  <input type="number" name="distance" class="form-control" step="0.01" min="0" required placeholder="Например, 50.0">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Бассейн</label>
+                  <select name="style" class="form-control">
+                    <option value="">Выберите бассейн</option>
+                    {% for choice in style_choices %}
+                      <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              <div class="mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="is_disqualified" id="is_disqualified_{{ customer.id }}" onchange="toggleDisqualificationFields({{ customer.id }})">
+                  <label class="form-check-label" for="is_disqualified_{{ customer.id }}">
+                    <strong>Дисквалифицирован</strong>
+                  </label>
+                </div>
+              </div>
+              
+              <div id="time_place_fields_{{ customer.id }}">
+                <div class="mb-2">
+                  <label class="form-label">Время (мм:сс:ммм)</label>
+                  <input type="text" name="result_time" class="form-control time-input" 
+                         placeholder="05:32:125" maxlength="10"
+                         pattern="[0-9]{1,2}:[0-5][0-9]:[0-9]{3}">
+                  <div class="form-text">Формат: минуты:секунды:миллисекунды (например, 05:32:125)</div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Место</label>
+                  <input type="number" name="place" class="form-control" min="1">
+                </div>
+              </div>
+              
+              <div id="disqualification_fields_{{ customer.id }}" class="d-none disqualification-fields">
+                <div class="mb-2">
+                  <label class="form-label">Причина дисквалификации</label>
+                  <textarea name="disqualification_comment" class="form-control" rows="3" placeholder="Укажите причину дисквалификации..."></textarea>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Присвоить разряд</label>
+                <select name="assign_rank" class="form-select">
+                  <option value="0">Не присваивать</option>
+                  {% for category in sport_categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="alert alert-danger d-none" id="result-error-{{ customer.id }}"></div>
+              <div class="alert alert-success d-none" id="result-success-{{ customer.id }}">Сохранено!</div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Сохранить</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+    
+    <!-- Модальное окно для просмотра и редактирования результатов -->
+    <div class="modal fade" id="viewResultsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-md-down">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Результаты участника: <span id="viewResultsCustomerName"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="resultsList" class="mb-3">
+              <!-- Здесь будут отображаться результаты -->
+            </div>
+            <div id="editResultForm" class="d-none">
+              <h6>Редактирование результата</h6>
+              <form id="editResultFormElement">
+                                 <input type="hidden" id="editResultId" name="result_id">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="mb-2">
+                        <label class="form-label">Дисциплина</label>
+                        <input type="text" id="editDiscipline" name="discipline" class="form-control" placeholder="Например: Плавание вольный стиль">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-2">
+                        <label class="form-label">Дистанция (м)</label>
+                        <input type="number" id="editDistance" name="distance" class="form-control" step="0.01" min="0" required>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-2">
+                        <label class="form-label">Бассейн</label>
+                        <select id="editStyle" name="style" class="form-control">
+                          <option value="">Выберите бассейн</option>
+                          {% for choice in style_choices %}
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="editIsDisqualified" name="is_disqualified" onchange="toggleEditDisqualificationFields()">
+                    <label class="form-check-label" for="editIsDisqualified">
+                      <strong>Дисквалифицирован</strong>
+                    </label>
+                  </div>
+                </div>
+                
+                <div id="edit_time_place_fields">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="mb-2">
+                        <label class="form-label">Время (мм:сс:ммм)</label>
+                        <input type="text" id="editResultTime" name="result_time" class="form-control time-input" 
+                               placeholder="05:32:125" maxlength="10"
+                               pattern="[0-9]{1,2}:[0-5][0-9]:[0-9]{3}">
+                        <div class="form-text">Формат: минуты:секунды:миллисекунды (например, 05:32:125)</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-2">
+                        <label class="form-label">Место</label>
+                        <input type="number" id="editPlace" name="place" class="form-control" min="1">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-2">
+                        <label class="form-label">Присвоить разряд</label>
+                        <select id="editAssignRank" name="assign_rank" class="form-select">
+                          <option value="0">Не присваивать</option>
+                          <!-- Опции будут добавлены динамически -->
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div id="edit_disqualification_fields" class="d-none disqualification-fields">
+                  <div class="mb-2">
+                    <label class="form-label">Причина дисквалификации</label>
+                    <textarea id="editDisqualificationComment" name="disqualification_comment" class="form-control" rows="3" placeholder="Укажите причину дисквалификации..."></textarea>
+                  </div>
+                </div>
+                <div class="alert alert-danger d-none" id="editResultError"></div>
+                <div class="alert alert-success d-none" id="editResultSuccess">Сохранено!</div>
+              </form>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success d-none" id="saveEditBtn" onclick="saveEditResult()">Сохранить изменения</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-4">
+      <a href="{% url 'competitions:competitions_list' %}" class="btn btn-secondary">
+        <i class="ti ti-arrow-left"></i> Назад к списку
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Подготовим массив клиентов для поиска на JS (чтобы не делать AJAX)
+  const allCustomers = [
+    {% for customer in all_customers %}
+      {% if customer.id not in competition_customer_ids %}
+        {
+          id: "{{ customer.id }}",
+          name: "{{ customer.full_name|escapejs }}",
+          phone: "{{ customer.phone|default:''|escapejs }}"
+        },
+      {% endif %}
+    {% endfor %}
+  ];
+  const searchInput = document.getElementById('customer-search');
+  const resultsBox = document.getElementById('search-results');
+  const selectedIdInput = document.getElementById('selected-customer-id');
+  const addBtn = document.getElementById('add-btn');
+
+  searchInput.addEventListener('input', function () {
+    const val = this.value.trim().toLowerCase();
+    resultsBox.innerHTML = '';
+    if (val.length < 2) {
+      addBtn.disabled = true;
+      selectedIdInput.value = '';
+      return;
+    }
+    const filtered = allCustomers.filter(
+      c => c.name.toLowerCase().includes(val) || (c.phone && c.phone.includes(val))
+    );
+    if (!filtered.length) {
+      resultsBox.innerHTML = '<div class="list-group-item text-muted">Ничего не найдено</div>';
+      addBtn.disabled = true;
+      selectedIdInput.value = '';
+      return;
+    }
+    filtered.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'list-group-item list-group-item-action';
+      div.textContent = `${c.name}${c.phone ? ' (' + c.phone + ')' : ''}`;
+      div.onclick = function () {
+        searchInput.value = c.name + (c.phone ? ' (' + c.phone + ')' : '');
+        selectedIdInput.value = c.id;
+        resultsBox.innerHTML = '';
+        addBtn.disabled = false;
+      };
+      resultsBox.appendChild(div);
+    });
+    addBtn.disabled = true;
+    selectedIdInput.value = '';
+  });
+
+  // Очищать выбранного, если изменили строку поиска вручную
+  searchInput.addEventListener('change', function () {
+    if (!selectedIdInput.value) addBtn.disabled = true;
+  });
+
+  // Не отправлять форму без выбранного клиента
+  document.getElementById('add-participant-form').addEventListener('submit', function(e) {
+    if (!selectedIdInput.value) {
+      e.preventDefault();
+      addBtn.disabled = true;
+    }
+  });
+  document.querySelectorAll('.competition-result-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var customerId = form.getAttribute('data-customer');
+      var competitionId = "{{ competition.id }}";
+      var url = "{% url 'competitions:save_competition_result' 11111 22222 %}";
+      url = url.replace('11111', competitionId).replace('22222', customerId);
+      var data = new FormData(form);
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: data
+      })
+      .then(response => response.json())
+      .then(json => {
+        var err = document.getElementById('result-error-' + customerId);
+        var ok = document.getElementById('result-success-' + customerId);
+        err.classList.add('d-none');
+        ok.classList.add('d-none');
+        if (json.success) {
+          ok.classList.remove('d-none');
+          setTimeout(() => {
+            ok.classList.add('d-none');
+            var modal = bootstrap.Modal.getInstance(document.getElementById('resultModal' + customerId));
+            modal.hide();
+          }, 1200);
+        } else {
+          err.textContent = json.error || "Ошибка";
+          err.classList.remove('d-none');
+        }
+      });
+    });
+  });
+   
+   // Маска ввода времени в формате мм:сс:ммм
+   document.addEventListener('input', function(e) {
+     if (e.target.classList.contains('time-input')) {
+       let input = e.target;
+       let val = input.value.replace(/[^0-9]/g, ''); // только цифры
+       if (val.length > 7) val = val.slice(0, 7); // максимум 7 цифр (мм сс ммм)
+       
+       let formatted = '';
+       if (val.length > 0) {
+         formatted += val.slice(0, Math.min(2, val.length)); // минуты (до 2 цифр)
+       }
+       if (val.length > 2) {
+         formatted += ':' + val.slice(2, Math.min(4, val.length)); // секунды
+       }
+       if (val.length > 4) {
+         formatted += ':' + val.slice(4, 7); // миллисекунды (до 3 цифр)
+       }
+       
+       input.value = formatted;
+     }
+   });
+   
+   // Глобальные переменные для работы с результатами
+   let currentResults = [];
+   let currentSportCategories = [];
+   
+   // Функция для просмотра результатов участника
+   function viewResults(competitionId, customerId, customerName) {
+     document.getElementById('viewResultsCustomerName').textContent = customerName;
+     document.getElementById('resultsList').innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><div>Загрузка результатов...</div></div>';
+     
+     fetch(`{% url 'competitions:get_competition_results' 11111 22222 %}`.replace('11111', competitionId).replace('22222', customerId))
+       .then(response => response.json())
+       .then(data => {
+         if (data.success) {
+           currentResults = data.results;
+           currentSportCategories = data.sport_categories;
+           displayResults(data.results);
+           populateSportCategories(data.sport_categories, data.current_rank);
+         } else {
+           document.getElementById('resultsList').innerHTML = '<div class="alert alert-danger">Ошибка загрузки результатов</div>';
+         }
+       })
+       .catch(error => {
+         console.error('Error:', error);
+         document.getElementById('resultsList').innerHTML = '<div class="alert alert-danger">Ошибка загрузки результатов</div>';
+       });
+     
+     // Показываем модальное окно
+     const modal = new bootstrap.Modal(document.getElementById('viewResultsModal'));
+     modal.show();
+   }
+   
+   // Функция для отображения списка результатов
+   function displayResults(results) {
+     const resultsList = document.getElementById('resultsList');
+     
+     if (results.length === 0) {
+       resultsList.innerHTML = '<div class="alert alert-info">У участника пока нет результатов в этом соревновании</div>';
+       return;
+     }
+     
+      let html = '<h6>Результаты участника:</h6><div class="table-responsive mb-4 border rounded-1"><table class="table table-hover text-nowrap mb-0 align-middle">';
+      html += '<thead class="text-dark fs-4"><tr><th>Дистанция</th><th >Дисциплина</th><th >Бассейн</th><th >Время/Статус</th><th >Место</th><th >Разряд</th><th >Действия</th></tr></thead><tbody>';
+     
+     results.forEach((result, index) => {
+       const timeOrStatus = result.is_disqualified ? 
+         '<span class="badge bg-danger">Дисквалифицирован</span>' : 
+         (result.result_time || '—');
+       const place = result.is_disqualified ? 
+         '<span class="text-muted">—</span>' : 
+         result.place;
+               
+       html += `<tr>
+          <td>${result.distance}м</td>
+          <td>${result.discipline || '-'}</td>
+          <td>${result.style || '-'}</td>
+          <td>${timeOrStatus}</td>
+          <td>${place}</td>
+          <td>${result.sport_category ? '<span class="badge bg-success">' + result.sport_category + '</span>' : '<span class="text-muted">—</span>'}</td>
+          <td>
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-outline-primary" onclick="editResult(${index})" title="Редактировать">
+                <i class="ti ti-edit"></i>
+              </button>
+              <button class="btn btn-outline-danger" onclick="deleteResult(${result.id})" title="Удалить">
+                <i class="ti ti-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+     });
+     
+     html += '</tbody></table></div>';
+     resultsList.innerHTML = html;
+   }
+   
+   // Функция для заполнения списка спортивных разрядов
+   function populateSportCategories(categories, currentRank) {
+     const select = document.getElementById('editAssignRank');
+     select.innerHTML = '<option value="0">Не присваивать</option>';
+     
+     categories.forEach(category => {
+       const option = document.createElement('option');
+       option.value = category.id;
+       option.textContent = category.name;
+       if (currentRank && category.id == currentRank) {
+         option.selected = true;
+       }
+       select.appendChild(option);
+     });
+   }
+   
+   // Функция для редактирования результата
+   function editResult(resultIndex) {
+     const result = currentResults[resultIndex];
+     
+     // Заполняем форму данными результата
+     document.getElementById('editResultId').value = result.id;
+     document.getElementById('editDistance').value = result.distance;
+     document.getElementById('editDiscipline').value = result.discipline;
+     document.getElementById('editStyle').value = result.style;
+     document.getElementById('editResultTime').value = result.result_time || '';
+     document.getElementById('editPlace').value = result.place;
+     
+     // Заполняем поля дисквалификации
+     document.getElementById('editIsDisqualified').checked = result.is_disqualified || false;
+     document.getElementById('editDisqualificationComment').value = result.disqualification_comment || '';
+     
+     // Переключаем поля в зависимости от статуса дисквалификации
+     toggleEditDisqualificationFields();
+     
+     // Устанавливаем разряд, если он есть
+     const assignRankSelect = document.getElementById('editAssignRank');
+     if (result.sport_category) {
+       // Находим опцию с соответствующим названием разряда
+       for (let option of assignRankSelect.options) {
+         if (option.textContent === result.sport_category) {
+           option.selected = true;
+           break;
+         }
+       }
+     } else {
+       // Если разряда нет, выбираем "Не присваивать"
+       assignRankSelect.value = "0";
+     }
+     
+     // Показываем форму редактирования
+     document.getElementById('resultsList').classList.add('d-none');
+     document.getElementById('editResultForm').classList.remove('d-none');
+     document.getElementById('saveEditBtn').classList.remove('d-none');
+     
+     // Скрываем сообщения об ошибках/успехе
+     document.getElementById('editResultError').classList.add('d-none');
+     document.getElementById('editResultSuccess').classList.add('d-none');
+   }
+   
+   // Функция для скрытия формы редактирования
+   function hideEditForm() {
+     document.getElementById('resultsList').classList.remove('d-none');
+     document.getElementById('editResultForm').classList.add('d-none');
+     document.getElementById('saveEditBtn').classList.add('d-none');
+   }
+   
+       // Функция для сохранения отредактированного результата
+    function saveEditResult() {
+      const formData = new FormData(document.getElementById('editResultFormElement'));
+      const resultId = document.getElementById('editResultId').value;
+      
+      fetch(`{% url 'competitions:update_competition_result' 11111 %}`.replace('11111', resultId), {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('editResultSuccess').classList.remove('d-none');
+          setTimeout(() => {
+            // Возвращаемся к списку результатов
+            hideEditForm();
+            // Обновляем список результатов
+            const competitionId = {{ competition.id }};
+            const customerId = document.querySelector('[data-bs-target="#viewResultsModal"]').getAttribute('data-customer-id');
+            viewResults(competitionId, customerId, document.getElementById('viewResultsCustomerName').textContent);
+          }, 1000);
+        } else {
+          document.getElementById('editResultError').textContent = data.error || 'Ошибка сохранения';
+          document.getElementById('editResultError').classList.remove('d-none');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('editResultError').textContent = 'Ошибка сохранения';
+        document.getElementById('editResultError').classList.remove('d-none');
+      });
+    }
+   
+       // Функция для удаления результата
+    function deleteResult(resultId) {
+      if (!confirm('Вы уверены, что хотите удалить этот результат?')) {
+        return;
+      }
+      
+      fetch(`{% url 'competitions:delete_competition_result' 11111 %}`.replace('11111', resultId), {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Обновляем список результатов
+          const competitionId = {{ competition.id }};
+          const customerId = document.querySelector('[data-bs-target="#viewResultsModal"]').getAttribute('data-customer-id');
+          viewResults(competitionId, customerId, document.getElementById('viewResultsCustomerName').textContent);
+        } else {
+          alert('Ошибка удаления: ' + (data.error || 'Неизвестная ошибка'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        // Даже если произошла ошибка, попробуем обновить список
+        const competitionId = {{ competition.id }};
+        const customerId = document.querySelector('[data-bs-target="#viewResultsModal"]').getAttribute('data-customer-id');
+        viewResults(competitionId, customerId, document.getElementById('viewResultsCustomerName').textContent);
+      });
+    }
+    
+    // Функция для переключения полей дисквалификации в форме добавления
+    function toggleDisqualificationFields(customerId) {
+      const isDisqualified = document.getElementById('is_disqualified_' + customerId).checked;
+      const timePlaceFields = document.getElementById('time_place_fields_' + customerId);
+      const disqualificationFields = document.getElementById('disqualification_fields_' + customerId);
+      
+      if (isDisqualified) {
+        timePlaceFields.style.display = 'none';
+        disqualificationFields.classList.remove('d-none');
+        // Очищаем поля времени и места
+        timePlaceFields.querySelector('input[name="result_time"]').value = '';
+        timePlaceFields.querySelector('input[name="place"]').value = '';
+      } else {
+        timePlaceFields.style.display = 'block';
+        disqualificationFields.classList.add('d-none');
+        // Очищаем поле комментария
+        disqualificationFields.querySelector('textarea[name="disqualification_comment"]').value = '';
+      }
+    }
+    
+    // Функция для переключения полей дисквалификации в форме редактирования
+    function toggleEditDisqualificationFields() {
+      const isDisqualified = document.getElementById('editIsDisqualified').checked;
+      const timePlaceFields = document.getElementById('edit_time_place_fields');
+      const disqualificationFields = document.getElementById('edit_disqualification_fields');
+      
+      if (isDisqualified) {
+        timePlaceFields.style.display = 'none';
+        disqualificationFields.classList.remove('d-none');
+        // Очищаем поля времени и места
+        document.getElementById('editResultTime').value = '';
+        document.getElementById('editResultMs').value = '0';
+        document.getElementById('editPlace').value = '';
+      } else {
+        timePlaceFields.style.display = 'block';
+        disqualificationFields.classList.add('d-none');
+        // Очищаем поле комментария
+        document.getElementById('editDisqualificationComment').value = '';
+      }
+    }
+    
+    // Исправляем прокрутку на мобильных устройствах
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('viewResultsModal');
+      const modalDialog = modal.querySelector('.modal-dialog');
+      
+      // Функция для управления классом прокрутки
+      function updateScrollClass() {
+        if (window.innerWidth <= 767) {
+          // На мобильных устройствах убираем modal-dialog-scrollable
+          modalDialog.classList.remove('modal-dialog-scrollable');
+        } else {
+          // На десктопе возвращаем modal-dialog-scrollable
+          if (!modalDialog.classList.contains('modal-dialog-scrollable')) {
+            modalDialog.classList.add('modal-dialog-scrollable');
+          }
+        }
+      }
+      
+      // Применяем при загрузке
+      updateScrollClass();
+      
+      // Применяем при изменении размера окна
+      window.addEventListener('resize', updateScrollClass);
+      
+      // Применяем при открытии модального окна
+      modal.addEventListener('show.bs.modal', function() {
+        updateScrollClass();
+        // Небольшая задержка для применения стилей
+        setTimeout(() => {
+          if (window.innerWidth <= 767) {
+            const modalBody = modal.querySelector('.modal-body');
+            modalBody.style.overflowY = 'auto';
+          }
+        }, 100);
+      });
+    });
+</script>
+<script src="{% static 'dash/js/competition_results_overview.js' %}"></script>
+{% endblock %}

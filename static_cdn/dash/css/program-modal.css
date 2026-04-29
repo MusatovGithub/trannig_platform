@@ -1,0 +1,111 @@
+/* Принудительные стили для переноса текста комментариев */
+.comments-cell {
+  max-width: 200px !important;
+  word-wrap: break-word !important;
+  white-space: normal !important;
+  line-height: 1.4 !important;
+  padding: 0.75rem 0.5rem !important;
+  text-align: left !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+  min-width: 120px !important;
+  overflow-wrap: break-word !important;
+  white-space: pre-wrap !important;
+}
+
+/* Убираем text-nowrap для таблицы программы */
+.program-table {
+  table-layout: auto !important;
+}
+
+.program-table td {
+  white-space: normal !important;
+}
+
+/* Высокий z-index для модальных окон */
+.modal.fade[id*="bs-example-modal-xlg"] {
+  z-index: 9999 !important;
+}
+
+.modal.fade[id*="bs-example-modal-xlg"] .modal-dialog {
+  z-index: 10000 !important;
+}
+
+.modal.fade[id*="bs-example-modal-xlg"] .modal-content {
+  z-index: 10001 !important;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .comments-cell {
+    max-width: 150px !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .comments-cell {
+    max-width: 120px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Улучшаем прокрутку модальных окон программы на мобильных устройствах */
+@media (max-width: 767px) {
+  .program-modal.modal.show {
+    padding-right: 0 !important;
+  }
+  
+  .program-modal .modal-dialog {
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+  }
+  
+  .program-modal .modal-content {
+    height: 100vh;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .program-modal .modal-header {
+    flex-shrink: 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .program-modal .modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+    position: relative;
+    padding: 15px;
+    /* Для поддержки старых браузеров */
+    min-height: 0;
+  }
+  
+  .program-modal .modal-footer {
+    flex-shrink: 0;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  .program-modal .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+}
+
+/* Убираем серый фон у заголовков таблиц */
+.program-modal thead {
+  background-color: white !important;
+}
+
+.program-modal thead th {
+  background-color: white !important;
+  border-bottom: 2px solid #dee2e6;
+}
+

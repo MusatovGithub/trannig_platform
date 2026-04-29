@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+<title>Достижение: {{ achievement.name }}</title>
+{% endblock %}
+
+{% block content %}
+<div class="card w-100 position-relative overflow-hidden">
+  <div class="px-4 py-3 mt-2 border-bottom">
+    <h4 class="card-title mb-0 d-flex align-items-center">
+      <i class="bi bi-award-fill text-warning me-2"></i>
+      Редактировать достижение
+    </h4>
+  </div>
+  <form method="post" enctype="multipart/form-data" class="p-4">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="name" class="form-label">Название</label>
+        <input type="text" class="form-control" id="name" name="name" required maxlength="100" value="{{ achievement.name }}">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="image" class="form-label">Картинка</label>
+        {% if achievement.image %}
+          <div class="mb-2">
+            <img src="{{ achievement.image.url }}" alt="{{ achievement.name }}" class="img-thumbnail" style="max-height:120px;">
+          </div>
+        {% endif %}
+        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+        <small class="form-text text-muted">Оставьте пустым, чтобы не менять картинку.</small>
+      </div>
+      <div class="col-12 mb-3">
+        <label for="description" class="form-label">Описание</label>
+        <textarea class="form-control" id="description" name="description" rows="3">{{ achievement.description }}</textarea>
+      </div>
+      <div class="col-12 mb-3">
+        <label for="text" class="form-label">Тэг</label>
+        <select class="form-select" id="tag" name="tag" required>
+          <option value="" disabled {% if not achievement.tag %}selected{% endif %} selected>Выберите тэг</option>
+          {% for value, label in tag_choices %}
+            <option value="{{ value }}" {% if achievement.tag == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 mb-3">
+        <label for="points" class="form-label">Баллы</label>
+        <input type="number" class="form-control" id="points" name="points" required placeholder="Введите баллы" value="{{ achievement.points }}">
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save me-1"></i> Сохранить изменения
+      </button>
+      <a href="{% url 'achievements:achievement_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Назад
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

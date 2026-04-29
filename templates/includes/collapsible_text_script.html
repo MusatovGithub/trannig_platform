@@ -1,0 +1,28 @@
+{% comment %}Подключать один раз на странице с блоками collapsible_text{% endcomment %}
+<script>
+(function () {
+  if (window.__collapsibleTextInit) return;
+  window.__collapsibleTextInit = true;
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.collapsible-text-btn');
+    if (!btn) return;
+    var root = btn.closest('.collapsible-text');
+    if (!root) return;
+    var prev = root.querySelector('.collapsible-text-preview');
+    var full = root.querySelector('.collapsible-text-full');
+    if (!prev || !full) return;
+    var collapsed = full.classList.contains('d-none');
+    if (collapsed) {
+      full.classList.remove('d-none');
+      prev.classList.add('d-none');
+      btn.textContent = 'Свернуть';
+      btn.setAttribute('aria-expanded', 'true');
+    } else {
+      full.classList.add('d-none');
+      prev.classList.remove('d-none');
+      btn.textContent = 'Показать ещё';
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+</script>

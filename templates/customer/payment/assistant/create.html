@@ -1,0 +1,209 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Оплата занятия</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Оплата занятия</h4>
+                </div>
+  
+                <!-- Форма-->
+                <form action="" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div>
+                    <div class="card-body">
+                      <h4 class="card-title">Оплата занятия</h4>
+                      <p class="text-danger">{{error}}</p>
+                      <div class="row pt-3">
+                          <div class="col-md-6">
+                            <div class="mb-3 mt-3 ml-3">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input primary" type="radio" name="duration_type" id="primary-radio" value="subscription" checked/>
+                                    <label class="form-check-label" for="primary-radio">Списать с абонемента</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input primary" type="radio" name="duration_type" id="primary2-radio" value="payment"/>
+                                    <label class="form-check-label" for="primary2-radio">Оплатить </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input primary" type="radio" name="duration_type" id="primary3-radio" value="free" />
+                                    <label class="form-check-label" for="primary3-radio">Простить</label>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      <div class="row pt-3" id="payment" style="display: none;">
+                        
+                        <!--ФИО-->
+                        <div class="col-md-12 mt-2">
+                            <div class="mb-3 has-success">
+                              <label class="form-label" help_text="Чтобы выбрать сразу несколько занятий зажмите ctrl на клавиатуре">Посещений</label>
+                              <small class="form-text text-muted d-block mb-2" style="font-size: 0.875rem;">
+                                <i class="ti ti-info-circle me-1"></i>Чтобы выбрать сразу несколько занятий зажмите ctrl на клавиатуре
+                              </small>
+                              <select class="select2 form-select" id="payment" name="payment" multiple>
+                                {% for item in payment %}
+                                  <option value="{{item.id}}">{{item.date}} - {{item.gr_class.name}}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                        </div>
+                        <!--Телефон-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Сумма платежа</label>
+                            <input type="number" id="summ" name="summ" class="form-control international-inputmask" value="{{ form_data.summ }}"/>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3 has-success">
+                                <label class="form-label">Касса</label>
+                                <select class="form-select" id="cashier" name="cashier">
+                                    <option value="">----</option>
+                                  {% for item in cashier %}
+                                    <option value="{{item.id}}">{{item.name}}</option>
+                                  {% endfor %}
+                                </select>
+                            </div>
+                      </div>
+                      <div class="col-md-12">
+                        <div class="mb-3">
+                          <label class="form-label">Дата платежа</label>
+                          <div class="input-group date">
+                              
+                            <input type="text" class="form-control datepicker" name="summ_date" placeholder="дд.мм.гггг" />
+      
+                            <span class="input-group-addon input-group-text">
+                              <i class="ti ti-calendar fs-5"></i>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      </div>
+
+                      <div class="row pt-3" id="subscription" style="display: flex;">
+                          <div class="col-md-12 mt-2">
+                            <div class="mb-3 has-success">
+                              <label class="form-label" help_text="Чтобы выбрать сразу несколько занятий зажмите ctrl на клавиатуре">Посещений</label>
+                              <small class="form-text text-muted d-block mb-2" style="font-size: 0.875rem;">
+                                <i class="ti ti-info-circle me-1"></i>Чтобы выбрать сразу несколько занятий зажмите ctrl на клавиатуре
+                              </small>
+                              <select class="select2 form-select" id="payment2" name="payment2" multiple>
+                                {% for item in payment %}
+                                  <option value="{{item.id}}">{{item.date}} - {{item.gr_class.name}}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 mt-2">
+                            <div class="mb-3 has-success">
+                              <label class="form-label">Абонемент</label>
+                              <select class="form-select" id="subscriptionSelect" name="subscriptionSelect">
+                                {% for item in subscription %}
+                                    <option value="{{ item.id }}" 
+                                            data-classes="{{ item.number_classes|default:0 }}" 
+                                            data-remained="{{ item.remained|default:0 }}"
+                                            data-unlimited="{{ item.unlimited|yesno:'True,False' }}"
+                                            data-start_date="{{ item.start_date|date:'d.m.Y' }}"
+                                            data-end_date="{{ item.end_date|date:'d.m.Y' }}">
+                                      {% if item.unlimited %}
+                                        (Безлимитный абонемент) - {{item.start_date|date:'d.m.Y'}} - {{item.end_date|date:'d.m.Y'}}
+                                      {% else %}
+                                        (остаток {{ item.number_classes|default:0 }} - {{ item.remained|default:0 }} занятий) - {{item.start_date|date:'d.m.Y'}} - {{item.end_date|date:'d.m.Y'}}
+                                      {% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="row pt-3" id="free" style="display: none;">
+                        <div class="col-md-12 mt-2">
+                          <div class="mb-3 has-success">
+                            <label class="form-label" help_text="Чтобы выбрать сразу несколько занятий зажмите ctrl на клавиатуре">Посещений</label>
+                            <small class="form-text text-muted d-block mb-2" style="font-size: 0.875rem;">
+                              <i class="ti ti-info-circle me-1"></i>Чтобы выбрать сразу несколько занятий зажмите ctrl на клавиатуре
+                            </small>
+                            <select class="select2 form-select" id="payment3" name="payment3" multiple>
+                              {% for item in payment %}
+                                <option value="{{item.id}}">{{item.date}} - {{item.gr_class.name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                      </div>
+  
+                    </div>
+  
+                    
+                  </div>
+                  <div class="form-actions">
+                    <div class="card-body border-top">
+                      <button type="submit" class="btn btn-primary" id="buttonSave">
+                        Сохранить
+                      </button>
+                      <!-- <a href="" class="btn bg-danger-subtle text-danger ms-6">
+                        Отмена
+                      </a> -->
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+  <script>
+     document.addEventListener("DOMContentLoaded", function() {
+        let selectBox = document.getElementById("subscriptionSelect");
+
+        function updateOptionText() {
+            let options = selectBox.options;
+            for (let i = 0; i < options.length; i++) {
+                let numberClasses = parseInt(options[i].getAttribute("data-classes")) || 0;
+                let remained = parseInt(options[i].getAttribute("data-remained")) || 0;
+                let isUnlimited = options[i].getAttribute("data-unlimited") === "True";
+                
+                if (isUnlimited) {
+                    options[i].text = `(Безлимитный абонемент) - ${options[i].getAttribute("data-start_date")} - ${options[i].getAttribute("data-end_date")}`;
+                } else {
+                    options[i].text = `(Остаток ${numberClasses - remained} занятий) - ${options[i].getAttribute("data-start_date")} - ${options[i].getAttribute("data-end_date")}`;
+                }
+            }
+        }
+
+        updateOptionText();
+        selectBox.addEventListener("change", updateOptionText);
+    });
+    // Function to handle radio button changes
+    document.querySelectorAll('input[name="duration_type"]').forEach((radio) => {
+        radio.addEventListener('change', function() {
+            const selectedValue = this.value;
+
+            // Hide all sections first
+            document.getElementById('payment').style.display = 'none';
+            document.getElementById('subscription').style.display = 'none';
+            document.getElementById('free').style.display = 'none';
+
+            // Show the selected section
+            if (selectedValue === 'payment') {
+                document.getElementById('payment').style.display = 'flex';
+            } else if (selectedValue === 'subscription') {
+                document.getElementById('subscription').style.display = 'flex';
+            } else if (selectedValue === 'free') {
+                document.getElementById('free').style.display = 'flex';
+            }
+        });
+    });
+</script>
+
+
+{% endblock %}

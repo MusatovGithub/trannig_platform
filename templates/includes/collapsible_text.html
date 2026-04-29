@@ -1,0 +1,23 @@
+{% comment %}
+  Усечённый текст с кнопкой «Показать ещё» / «Свернуть».
+  Параметры:
+    text — строка (обязательно)
+    max_length — лимит символов до усечения (по умолчанию 150)
+    css_class — классы обёртки вокруг текста (например card-text mb-3)
+  На странице один раз подключите includes/collapsible_text_script.html.
+{% endcomment %}
+{% with lim=max_length|default:150 %}
+{% if text %}
+<div class="collapsible-text">
+  <div class="{{ css_class }}">
+    <span class="collapsible-text-preview">{{ text|truncatechars:lim }}</span>
+    <span class="collapsible-text-full d-none">{{ text }}</span>
+  </div>
+  {% if text|length > lim %}
+  <button type="button" class="btn btn-link btn-sm p-0 collapsible-text-btn" aria-expanded="false">
+    Показать ещё
+  </button>
+  {% endif %}
+</div>
+{% endif %}
+{% endwith %}

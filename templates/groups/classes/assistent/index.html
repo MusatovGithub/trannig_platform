@@ -1,0 +1,287 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Занятия</title> {% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'dash/css/program-modal.css' %}">
+<script src="{% static 'dash/js/program-modal.js' %}"></script>
+
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+      <div class="row">
+        <div class="col-lg-10">
+          <h4 class="card-title mb-0">Занятия</h4>
+        </div>
+        {% if user_permissions.can_create_classes %}
+          <div class="col-lg-2 text-end">
+            <a href="{% url 'group_classe:group_classess_create' %}" type="button" class="btn btn-success">Создать</a>
+          </div>
+        {% endif %}
+      </div>
+  
+    </div>
+  
+    <!-- ----------------------------------------- -->
+    <!-- 1. Фильтр -->
+    <!-- ----------------------------------------- -->
+  
+    <div class="card-body">
+        <form method="GET">
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="mb-3">
+                  <label class="form-label">Выберите дату</label>
+                  <div class="input-group date">       
+                    <input type="text" class="form-control mydatepicker" name="date" placeholder="дд.мм.гггг"/>
+                    <span class="input-group-addon input-group-text">
+                      <i class="ti ti-calendar fs-5"></i>
+                    </span>
+                  </div>
+              </div>
+            </div>
+  
+            <div class="col-sm-3 d-flex align-items-end">
+              <div class="mb-3 w-100">
+                <div class="d-flex flex-column flex-md-row gap-2 w-100">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-search fs-4"></i>
+                    Фильтровать
+                  </button>
+                  <a href="{% url 'group_classe:group_classess' %}" class="btn btn-secondary">
+                    <i class="ti ti-refresh fs-4"></i>
+                    Сбросить
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+    </div>
+  
+  
+  
+  
+  
+    <!-- ----------------------------------------- -->
+    <!-- 2. Таблица -->
+    <!-- ----------------------------------------- -->
+  
+    <div class="card-body p-4">
+  
+      
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-3">
+            <!-- Oldingi oy tugmasi -->
+            <a href="?date={{ previous_date }}" class="btn btn-sm btn-primary">← Предыдущий</a>
+
+            <!-- Joriy oy va yil -->
+            <h4 class="mb-0">
+              {% if current_month == 1 %}Январь
+              {% elif current_month == 2 %}Февраль
+              {% elif current_month == 3 %}Март
+              {% elif current_month == 4 %}Апрель
+              {% elif current_month == 5 %}Май
+              {% elif current_month == 6 %}Июнь
+              {% elif current_month == 7 %}Июль
+              {% elif current_month == 8 %}Август
+              {% elif current_month == 9 %}Сентябрь
+              {% elif current_month == 10 %}Октябрь
+              {% elif current_month == 11 %}Ноябрь
+              {% elif current_month == 12 %}Декабрь
+              {% endif %}
+              {{ current_day }}, {{ current_year }}
+          </h4>
+
+            <!-- Keyingi oy tugmasi -->
+            <a href="?date={{ next_date }}" class="btn btn-sm btn-primary">Следующий →</a>
+        </div>
+  
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+          <thead class="text-dark fs-4">
+            <tr>
+              <th>№</th>
+              <th>Название</th>
+              <th>Группа</th>
+              <th>Дату</th>
+              <th>Начало</th>
+              <th>Окончание</th>
+              <th>Программа </th>
+              {% if user_permissions.can_edit_classes or user_permissions.can_delete_classes %}
+                <th>Действия</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in classess %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>
+                <h6 class="fs-4 fw-semibold mb-0">{{ item.name }}</h6>
+              </td>
+              <td>
+                <a href="{% url 'groups_custumer:groups_detail_with_date' item.groups_id.id item.date|date:'Y-m-d' %}">
+                  <h6 class="fs-4 fw-semibold mb-0">{{ item.groups_id }}</h6>
+                </a>
+              </td>
+              <td>
+                <p class="mb-0 fw-normal">{{ item.date }}</p>
+              </td>
+              <td>
+                <p class="mb-0 fw-normal">{{ item.strat }}</p>
+              </td>
+              <td>
+                <p class="mb-0 fw-normal">{{ item.end }}</p>
+              </td>
+              <td>
+                <div class="row">
+                  <div class="col-md-3">
+                      <a type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#bs-example-modal-xlg{{item.id}}">
+                        <i class="ti ti-eye fs-5"></i>
+                      </a>
+                      {% include 'groups/classes/includes/program_modal.html' with modal_id="bs-example-modal-xlg" class_object=item item_id=item.id modal_title="Программа занятия" show_edit_button=user_permissions.can_edit_program edit_url_id=item.id table_class="mb-0 align-middle program-table" table_wrapper_class="table-responsive mb-0" %}
+                  </div>
+                  {% if user_permissions.can_create_program %}
+                    <div class="col-md-3">
+                      <a type="button" class="btn btn-sm btn-success add-program-btn" data-class-id="{{ item.id }}" data-bs-toggle="modal" data-bs-target="#addProgramModal" style="min-width:40px; min-height:32px; display:inline-flex; align-items:center; justify-content:center;">
+                        <i class="ti ti-plus fs-5"></i>
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </td>
+              {% if user_permissions.can_edit_classes or user_permissions.can_delete_classes %}
+              <td>
+                <div class="row">
+                  {% if user_permissions.can_edit_classes %}
+                    <div class="col-md-3">
+                      <a type="button" class="btn btn-sm btn-primary" href="{% url 'group_classe:group_classess_update' item.id %}">
+                        <i class="ti ti-edit fs-5"></i>
+                      </a>
+                    </div>
+                  {% endif %}
+                  {% if user_permissions.can_delete_classes %}
+                    <div class="col-md-3">
+                      <a type="button" class="btn btn-sm btn-danger" href="{% url 'group_classe:group_classess_detele' item.id %}">
+                        <i class="ti ti-trash fs-5"></i>
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+  
+      </div>
+    </div>
+  
+  </div>
+<!-- Модальное окно -->
+<div class="modal fade" id="addProgramModal" tabindex="-1" aria-labelledby="addProgramModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="programForm" method="post">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="addProgramModalLabel">Добавить программу занятия</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <div id="program-fields">
+            <div class="row programm-row mb-3">
+              <div class="col-md-4">
+                <label class="form-label required">Этапы <span class="text-danger">*</span></label>
+                <input type="text" name="stages" class="form-control" required>
+                <div class="invalid-feedback">Заполните этап.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label required">Дистанция (м) <span class="text-danger">*</span></label>
+                <input type="text" name="distance" class="form-control" required pattern="^\d+(\.\d+)?$" inputmode="decimal" placeholder="100.0">
+                <div class="invalid-feedback">Введите дистанцию в метрах через точку, например: 100.0</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Стиль</label>
+                <input type="text" name="style" class="form-control">
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Отдых</label>
+                <input type="text" name="rest" class="form-control">
+              </div>
+              <div class="col-md-8 mt-2">
+                <label class="form-label">Комментарий</label>
+                <textarea name="comment" class="form-control"></textarea>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" id="addRowBtn">
+            <i class="ti ti-plus"></i> Добавить строку
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.add-program-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var classId = btn.getAttribute('data-class-id');
+        var form = document.getElementById('programForm');
+        form.action = '/classes/programm/add/' + classId + '/';
+      });
+    });
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    // Добавление новой строки программы
+    document.getElementById('addRowBtn').onclick = function() {
+      let row = document.querySelector('.programm-row').cloneNode(true);
+      row.querySelectorAll('input, textarea').forEach(el => el.value = '');
+      document.getElementById('program-fields').appendChild(row);
+    };
+
+    // Валидация формы
+    document.getElementById('programForm').onsubmit = function(e) {
+      let valid = true;
+      this.querySelectorAll('.programm-row').forEach(function(row) {
+        // Этап
+        let stage = row.querySelector('input[name="stages"]');
+        if (!stage.value.trim()) {
+          stage.classList.add('is-invalid');
+          valid = false;
+        } else {
+          stage.classList.remove('is-invalid');
+        }
+        // Дистанция
+        let dist = row.querySelector('input[name="distance"]');
+        // Проверка: только цифры и точка, не запятая
+        let val = dist.value.trim();
+        if (!/^\d+(\.\d+)?$/.test(val)) {
+          dist.classList.add('is-invalid');
+          valid = false;
+        } else {
+          dist.classList.remove('is-invalid');
+        }
+      });
+      if (!valid) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Удаление строки (если нужно)
+    document.getElementById('program-fields').addEventListener('click', function(e) {
+      if (e.target.classList.contains('remove-row-btn')) {
+        let rows = document.querySelectorAll('.programm-row');
+        if (rows.length > 1) e.target.closest('.programm-row').remove();
+      }
+    });
+  });
+</script>
+{% endblock %}

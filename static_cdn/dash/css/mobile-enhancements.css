@@ -1,0 +1,713 @@
+/* =========================================== */
+/* ИСПРАВЛЕНИЕ МОБИЛЬНОГО СКРОЛЛА */
+/* =========================================== */
+
+/* Критически важные стили для исправления скролла на мобильных */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  #main-wrapper {
+    overflow: visible !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  .page-wrapper {
+    overflow: visible !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  .body-wrapper {
+    overflow: visible !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  /* Исправление для модальных окон */
+  .modal-open {
+    overflow: auto !important;
+    position: relative !important;
+  }
+}
+
+/* =========================================== */
+/* ДОПОЛНИТЕЛЬНЫЕ МОБИЛЬНЫЕ УЛУЧШЕНИЯ */
+/* =========================================== */
+
+/* Улучшенные стили для мобильных устройств */
+@media (max-width: 768px) {
+  /* Улучшенные стили для sidebar на мобильных */
+  .left-sidebar {
+    transition: transform 0.3s ease-in-out;
+    z-index: 1050 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    width: 280px !important;
+    transform: translateX(-100%);
+  }
+
+  .left-sidebar.show {
+    transform: translateX(0) !important;
+  }
+
+  /* Затемнение фона при открытом sidebar */
+  .dark-transparent {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1040 !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .dark-transparent.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Улучшенные стили для header на мобильных */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background: var(--bs-body-bg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Улучшенные стили для основного контента */
+  .page-wrapper {
+    margin-left: 0 !important;
+  }
+
+  /* Улучшенные стили для карточек */
+  .card {
+    margin-bottom: 1rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Улучшенные стили для кнопок действий */
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-group .btn {
+    border-radius: 0.5rem !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn-group .btn:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Улучшенные стили для форм */
+  .form-row {
+    margin: 0;
+  }
+
+  .form-row > div {
+    padding: 0.5rem 0;
+  }
+
+  /* Улучшенные стили для фильтров */
+  .filter-form {
+    background: var(--bs-body-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Улучшенные стили для навигации по месяцам */
+  .month-navigation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .month-navigation h4 {
+    order: 2;
+    margin: 0;
+    text-align: center;
+  }
+
+  .month-navigation .btn {
+    order: 1;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  /* Улучшенные стили для таблиц с фиксированными колонками */
+  .table-container {
+    position: relative;
+    overflow-x: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .table-fixed {
+    min-width: 100%;
+  }
+
+  /* Улучшенные стили для grade-pill в таблицах */
+  .table-fixed .grade-pill {
+    min-width: 24px;
+    height: 24px;
+    font-size: 10px;
+    padding: 0 6px;
+    margin: 2px;
+  }
+
+  /* Улучшенные стили для модальных окон */
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  .modal-content {
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal-header {
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 1rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modal-footer {
+    border-top: 1px solid var(--bs-border-color);
+    padding: 1rem;
+  }
+
+  /* Улучшенные стили для dropdown меню */
+  .dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 0.5rem;
+  }
+
+  .dropdown-item {
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    margin: 0.125rem;
+  }
+
+  .dropdown-item:hover {
+    background-color: var(--bs-primary);
+    color: white;
+  }
+
+  /* Улучшенные стили для алертов */
+  .alert {
+    border: none;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Улучшенные стили для пагинации */
+  .pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .page-link {
+    border-radius: 0.375rem;
+    border: 1px solid var(--bs-border-color);
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Улучшенные стили для табов */
+  .nav-tabs {
+    border-bottom: 2px solid var(--bs-border-color);
+  }
+
+  .nav-tabs .nav-link {
+    border: none;
+    border-radius: 0.5rem 0.5rem 0 0;
+    margin-right: 0.25rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-tabs .nav-link.active {
+    background-color: var(--bs-primary);
+    color: white;
+    border-bottom: 2px solid var(--bs-primary);
+  }
+
+  /* Улучшенные стили для списков */
+  .list-group {
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .list-group-item {
+    border: none;
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 1rem;
+  }
+
+  .list-group-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Улучшенные стили для прогресс баров */
+  .progress {
+    height: 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--bs-secondary-bg);
+  }
+
+  .progress-bar {
+    border-radius: 0.5rem;
+  }
+
+  /* Улучшенные стили для спиннеров */
+  .spinner-border {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .spinner-border-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* Улучшенные стили для иконок */
+  .fs-4 {
+    font-size: 1.25rem !important;
+  }
+
+  .fs-5 {
+    font-size: 1.125rem !important;
+  }
+
+  .fs-6 {
+    font-size: 1rem !important;
+  }
+
+  /* Улучшенные стили для отступов */
+  .p-4 {
+    padding: 1rem !important;
+  }
+
+  .px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .py-3 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  /* Улучшенные стили для margin */
+  .mb-4 {
+    margin-bottom: 1rem !important;
+  }
+
+  .mt-2 {
+    margin-top: 0.5rem !important;
+  }
+
+  /* Улучшенные стили для grid колонок */
+  .col-lg-12 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  .col-lg-10 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  .col-lg-2,
+  .col-lg-3 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-top: 0.5rem !important;
+  }
+
+  /* Улучшенные стили для flex контейнеров */
+  .d-flex.flex-column.flex-sm-row {
+    flex-direction: column !important;
+  }
+
+  .d-flex.flex-column.flex-sm-row .btn {
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Улучшенные стили для фильтров */
+  .achv-filter {
+    gap: 0.25rem !important;
+  }
+
+  .achv-filter-btn {
+    flex: 1 1 calc(50% - 0.125rem) !important;
+    min-width: auto !important;
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  /* Улучшенные стили для таблиц с фиксированными колонками */
+  .table-fixed th:nth-child(2),
+  .table-fixed td:nth-child(2) {
+    left: 50px !important; /* Уменьшенная ширина для мобильных */
+  }
+
+  /* Улучшенные тени для мобильных */
+  .table-fixed th:nth-child(2),
+  .table-fixed td:nth-child(2) {
+    box-shadow: 1px 0 3px rgba(0,0,0,0.1) !important;
+  }
+
+  .table-fixed th:last-child,
+  .table-fixed td:last-child {
+    box-shadow: -1px 0 3px rgba(0,0,0,0.1) !important;
+  }
+
+  /* Темная тема - улучшенные тени для мобильных */
+  [data-bs-theme="dark"] .table-fixed th:nth-child(2),
+  [data-bs-theme="dark"] .table-fixed td:nth-child(2) {
+    box-shadow: 1px 0 3px rgba(255,255,255,0.1) !important;
+  }
+
+  [data-bs-theme="dark"] .table-fixed th:last-child,
+  [data-bs-theme="dark"] .table-fixed td:last-child {
+    box-shadow: -1px 0 3px rgba(255,255,255,0.1) !important;
+  }
+
+  /* Улучшенные стили для индикатора скролла */
+  .scroll-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.8;
+    transition: opacity 0.5s ease;
+  }
+
+  /* Улучшенные стили для темной темы */
+  [data-bs-theme="dark"] .scroll-indicator {
+    background: rgba(255,255,255,0.2);
+    color: var(--bs-body-color);
+  }
+
+  /* Улучшенные стили для touch feedback */
+  .btn:active,
+  .grade-pill:active,
+  .nav-link:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+
+  /* Улучшенные стили для focus states */
+  .btn:focus,
+  .grade-pill:focus,
+  .nav-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  }
+
+  /* Улучшенные стили для disabled states */
+  .btn:disabled,
+  .grade-pill:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+/* Дополнительные улучшения для очень маленьких экранов */
+@media (max-width: 576px) {
+  /* Еще более компактные таблицы */
+  .table > :not(caption) > * > * {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .table thead th {
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.25rem !important;
+  }
+
+  /* Компактные кнопки */
+  .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    min-height: 40px !important;
+  }
+
+  .btn-sm {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    min-height: 32px !important;
+  }
+
+  /* Компактные grade-pill */
+  .grade-pill {
+    min-width: 24px !important;
+    height: 24px !important;
+    font-size: 10px !important;
+    padding: 0 6px !important;
+  }
+
+  /* Компактные модальные окна */
+  .modal-dialog {
+    margin: 0.25rem !important;
+    max-width: calc(100% - 0.5rem) !important;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 0.75rem !important;
+  }
+
+  /* Компактные карточки */
+  .card-body {
+    padding: 0.75rem !important;
+  }
+
+  /* Компактные отступы */
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+
+  .px-4 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .py-3 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  /* Компактные margin */
+  .mb-4 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .mt-2 {
+    margin-top: 0.375rem !important;
+  }
+
+  /* Компактные фильтры */
+  .achv-filter-btn {
+    flex: 1 1 calc(50% - 0.125rem) !important;
+    font-size: 0.8rem !important;
+    padding: 0.375rem 0.5rem !important;
+  }
+
+  /* Компактные sidebar */
+  .left-sidebar {
+    width: 100% !important;
+    max-width: 300px !important;
+  }
+
+  /* Компактные header элементы */
+  .topbar .navbar-nav {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .topbar .nav-link {
+    padding: 0.5rem !important;
+  }
+}
+
+/* Улучшенные стили для landscape ориентации на мобильных */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Уменьшенные отступы для landscape */
+  .card-body {
+    padding: 0.5rem !important;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 0.5rem !important;
+  }
+
+  /* Компактные таблицы для landscape */
+  .table > :not(caption) > * > * {
+    padding: 0.375rem 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .table thead th {
+    font-size: 0.75rem !important;
+    padding: 0.375rem 0.25rem !important;
+  }
+
+  /* Компактные кнопки для landscape */
+  .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    min-height: 36px !important;
+  }
+
+  /* Компактные grade-pill для landscape */
+  .grade-pill {
+    min-width: 20px !important;
+    height: 20px !important;
+    font-size: 9px !important;
+    padding: 0 4px !important;
+  }
+
+  /* Компактные sidebar для landscape */
+  .left-sidebar {
+    width: 250px !important;
+  }
+}
+
+/* Улучшенные стили для планшетов */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Оптимизированные размеры для планшетов */
+  .table > :not(caption) > * > * {
+    padding: 0.875rem 0.75rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .table thead th {
+    font-size: 0.9rem !important;
+    padding: 0.875rem 0.75rem !important;
+  }
+
+  .btn {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.95rem !important;
+    min-height: 42px !important;
+  }
+
+  .grade-pill {
+    min-width: 30px !important;
+    height: 30px !important;
+    font-size: 13px !important;
+    padding: 0 9px !important;
+  }
+
+  .modal-dialog {
+    margin: 1rem !important;
+    max-width: calc(100% - 2rem) !important;
+  }
+
+  /* Оптимизированные sidebar для планшетов */
+  .left-sidebar {
+    width: 280px !important;
+  }
+
+  .page-wrapper {
+    margin-left: 280px !important;
+  }
+}
+
+/* Улучшенные стили для предотвращения зума на iOS */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Улучшенные стили для accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Улучшенные стили для high contrast mode */
+@media (prefers-contrast: high) {
+  .table {
+    border: 2px solid !important;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid !important;
+  }
+
+  .btn {
+    border: 2px solid !important;
+  }
+
+  .modal-content {
+    border: 2px solid !important;
+  }
+
+  .card {
+    border: 2px solid !important;
+  }
+}
+
+/* Улучшенные стили для print */
+@media print {
+  .left-sidebar,
+  .topbar,
+  .btn,
+  .modal,
+  .dropdown-menu {
+    display: none !important;
+  }
+
+  .page-wrapper {
+    margin-left: 0 !important;
+  }
+
+  .table {
+    border-collapse: collapse !important;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #000 !important;
+    padding: 0.5rem !important;
+  }
+}

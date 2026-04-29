@@ -1,0 +1,157 @@
+{% extends  'base.html' %}
+{% load static %}
+{% block title %} <title>Занятие программа</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header text-bg-primary">
+        <h4 class="mb-0 text-white">Занятие программа</h4>
+      </div>
+
+      <form action="" method="post">
+        {% csrf_token %} 
+        <div class="card-body">
+            <p class="text-danger">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </p>
+    
+            <!-- Yangi formalar shu yerga qo‘shiladi -->
+
+            <div id="programm-container">
+                {% for item in class_programs %}
+                <div class="row pt-3 programm">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label" required>Этапы</label>
+                            <input type="text" name="stages" class="form-control" value="{{item.stages}}"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label" required>Дистанция</label>
+                            <input type="text" name="distance" class="form-control" value="{{item.distance}}"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Стиль</label>
+                            <input type="text" name="style" class="form-control" value="{{item.style}}"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Отдых</label>
+                            <input type="text" name="rest" class="form-control" value="{{item.rest}}"/>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label">Комментарий</label>
+                            <textarea name="comment" class="form-control">{% if item.comments %}{{item.comments}}{% endif %}</textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-12 text-end">
+                        <button type="button" class="btn btn-sm btn-danger remove-btn">
+                            <i class="ti ti-trash fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+    
+            <!-- "Qo‘shish" tugmasi pastda joylashgan -->
+            <div class="row mt-2">
+                <div class="col-lg-12 text-start">
+                    <button type="button" id="addProgram" class="btn btn-sm btn-primary">
+                        <i class="ti ti-plus fs-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    
+        <div class="form-actions">
+            <div class="card-body border-top">
+                <button type="submit" class="btn btn-primary" id="buttonSave">Сохранить</button>
+                <a href="{% url 'group_classe:group_classess' %}" class="btn bg-danger-subtle text-danger ms-6">Отмена</a>
+            </div>
+        </div>
+    </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("addProgram").addEventListener("click", function () {
+            let container = document.getElementById("programm-container");
+            let newProgramm = `
+                <div class="row pt-3 programm">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Этапы</label>
+                            <input type="text" name="stages" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Дистанция</label>
+                            <input type="text" name="distance" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Стиль</label>
+                            <input type="text" name="style" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Отдых</label>
+                            <input type="text" name="rest" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label">Комментарий</label>
+                            <textarea name="comment" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-12 text-end">
+                        <button type="button" class="btn btn-sm btn-danger remove-btn">
+                            <i class="ti ti-trash fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+    
+            // Yangi formani konteynerning yuqorisiga qo‘shamiz
+            container.insertAdjacentHTML("afterbegin", newProgramm);
+    
+            // O‘chirish tugmachalarini yangilaymiz
+            attachRemoveHandlers();
+        });
+    
+        // O‘chirish tugmachalari ishlashi uchun funksiya
+        function attachRemoveHandlers() {
+            document.querySelectorAll(".remove-btn").forEach(button => {
+                button.onclick = function () {
+                    this.closest(".programm").remove();
+                };
+            });
+        }
+    
+        attachRemoveHandlers();
+    });
+    </script>
+    
+{% endblock %}

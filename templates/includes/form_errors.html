@@ -1,0 +1,30 @@
+{% if error or field_errors %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="ti ti-alert-circle fs-5 me-2"></i>
+    <div>
+      {% if error %}
+        <div>{{ error }}</div>
+      {% endif %}
+      {% if field_errors %}
+        <ul class="mb-0 mt-2">
+          {% for field, errors in field_errors.items %}
+            <li>
+              <strong>{{ field }}:</strong>
+              {% if errors|length == 1 %}
+                {{ errors.0 }}
+              {% else %}
+                <ul>
+                  {% for error_msg in errors %}
+                    <li>{{ error_msg }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{% endif %}
+

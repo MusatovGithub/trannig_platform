@@ -1,0 +1,232 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Группы</title> {% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+              <!-- start Person Info -->
+              <div class="card">
+                <div class="card-header text-bg-primary">
+                  <h4 class="mb-0 text-white">Группы</h4>
+                </div>
+  
+                <!-- Форма-->
+                <form action="" method="post">
+                  {% csrf_token %} 
+                  <div>
+                    <div class="card-body">
+                      <h4 class="card-title">Информация</h4>
+                      <p class="text-danger">{{error}}</p>
+                      <div class="row pt-3">
+  
+                        <!--Название-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Название</label>
+                            <input type="text" id="name" name="name" class="form-control"/>
+                          </div>
+                        </div>
+                        <!--Вид спорта-->
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                            <label class="form-label">Вид спорта</label>
+                            <select class="form-select" id="sport_type" name="sport_type">
+                              <option value="">---</option>
+                              {% for type_sport in type_sports %}
+                                <option value="{{type_sport.id}}">{{type_sport.name}}</option>
+                              {%  endfor %}
+                            </select>
+                            <!-- <div class="col-md-6">
+                              <small class="text-muted">Добавить <a href="{% url 'groups_custumer:type_sport' %}" class="text-primary">новый вид спорта</a>.</small>
+                            </div> -->
+                          </div>
+                        </div>
+                      </div>
+  
+                      <div class="row">
+                        <!--Тренеры-->
+                        <div class="col-md-6">
+                          <div class="mb-3 has-success">
+                            <label class="form-label" help_text="Чтобы выбрать сразу несколько тренеров зажмите ctrl на клавиатуре">Тренеры</label>
+                            <small class="form-text text-muted d-block mb-2" style="font-size: 0.875rem;">
+                              <i class="ti ti-info-circle me-1"></i>Чтобы выбрать сразу несколько тренеров зажмите ctrl на клавиатуре
+                            </small>
+                            <select class="select2 form-select" id="coaches" name="coaches" multiple="multiple">
+                              {% for employe in employes %}
+                                <option value="{{employe.id}}">{{employe.full_name}}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                        <!--Начало обучения-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Начало обучения</label>
+                            <div class="input-group date">
+                              
+                              <input type="text" class="form-control mydatepicker" name="start_date" placeholder="дд.мм.гггг" />
+        
+                              <span class="input-group-addon input-group-text">
+                                <i class="ti ti-calendar fs-5"></i>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <!--Конец обучения-->
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">
+                              Конец обучения 
+                              <i class="ti ti-info-circle fs-5 text-muted" 
+                                 data-bs-toggle="tooltip" 
+                                 data-bs-placement="top" 
+                                 title="Необязательное поле. Если не указано, тренировки будут создаваться на 2 года вперед от даты начала обучения."
+                                 style="cursor: help;"></i>
+                            </label>
+                            <div class="input-group date">
+                              <input type="text" class="form-control mydatepicker" name="end_date" placeholder="дд.мм.гггг (необязательно)" />
+                              <span class="input-group-addon input-group-text">
+                                <i class="ti ti-calendar fs-5"></i>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+  
+                    <hr />
+                    <div class="card-body">
+                      <h4 class="card-title mb-4">Расписание</h4>
+  
+                      <div class="row">
+  
+                          <div class="email-repeater mb-3">
+                            <div data-repeater-list="repeater-group" id="repeater-group">
+                              <div data-repeater-item class="row mb-3 repeater-item">
+                                <div class="col-md-3">
+                                  <div class="mb-3">
+                                    <label class="form-label">Название</label>
+                                    <input type="text" id="name_schedule" name="name_schedule[]" class="form-control"/>
+                                  </div>
+                                </div>
+                                <div class="col-md-3">
+                                  <div class="mb-3 has-success">
+                                    <label class="form-label">Выберите день</label>
+                                    <select class="form-select" id="coaches" name="weeks[]">
+                                      <option value="">Выберите день</option>
+                                      {% for week in weeks %}
+                                        <option value="{{week.id}}">{{week.name}}</option>
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                  <div class="mb-3">
+                                    <label class="form-label">Время начала</label>
+                                    <input type="time" id="time_strat" name="time_strat" class="form-control"/>
+                                  </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                  <div class="mb-3">
+                                    <label class="form-label">Время окончания</label>
+                                    <input type="time" id="time_end" name="time_end" class="form-control"/>
+                                  </div>
+                                </div>
+  
+  
+                                <div class="col-md-2 mt-3 mt-md-0">
+                                  <button data-repeater-delete="" class="btn btn-danger" style="margin-top: 1.7rem !important;" type="button">
+                                    <i class="ti ti-circle-x fs-5 d-flex"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            <button type="button" id="add-button" class="btn btn-success hstack gap-6">
+                            Добавить еще
+                            <i class="ti ti-circle-plus ms-1 fs-5"></i>
+                          </button>
+                          </div>
+  
+                      </div>
+  
+  
+                    </div>
+  
+                    <div class="form-actions">
+                      <div class="card-body border-top">
+                        <button type="submit" class="btn btn-primary" id="buttonSave">
+                          Сохранить
+                        </button>
+                        <a href="{% url 'groups_custumer:groups_all' %}" class="btn bg-danger-subtle text-danger ms-6">
+                          Отмена
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+  
+              </div>
+              <!-- end Person Info -->
+            </div>
+  </div>
+  
+
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Инициализация Bootstrap tooltips
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+
+      const repeaterGroup = document.getElementById("repeater-group");
+      const addButton = document.getElementById("add-button");
+  
+      // Qo'shimcha select qo'shish
+      addButton.addEventListener("click", function () {
+        const repeaterItem = document.querySelector(".repeater-item");
+        if (repeaterItem) {
+          const newItem = repeaterItem.cloneNode(true);
+  
+          // Yangi select elementining qiymatini tozalash
+          const selectElement = newItem.querySelector("select");
+          if (selectElement) {
+            selectElement.value = ""; // Standart qiymatga qaytarish
+            selectElement.removeAttribute("id"); // idni olib tashlash
+            selectElement.setAttribute("name", "weeks[]"); // name atributini saqlash
+          }
+  
+          // Yangi elementni qo'shish
+          repeaterGroup.appendChild(newItem);
+  
+          // Yangi o'chirish tugmachasini boshqarish
+          const deleteButton = newItem.querySelector(".btn-danger");
+          deleteButton.addEventListener("click", function () {
+            // Yangi qo'shilgan elementni o'chirish
+            newItem.remove();
+          });
+        }
+      });
+  
+      // Mavjud elementlarni o'chirish
+      document.querySelectorAll(".btn-danger").forEach((button) => {
+        button.addEventListener("click", function (event) {
+          const item = event.target.closest(".repeater-item");
+          if (item) {
+            item.remove();
+          }
+        });
+      });
+    });
+  </script>
+  
+  
+
+
+
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends  'base2.html' %}
+{% load static %}
+{% block title %} <title>Шаблоны абонементов</title> {% endblock %}
+
+{% block content %}
+  
+<div class="card w-100 position-relative overflow-hidden">
+    <div class="px-4 py-3 border-bottom">
+        <div class="row">
+            <div class="col-lg-10">
+              <h4 class="card-title mb-0">Шаблоны абонементов</h4>
+            </div>
+            <div class="col-lg-2 text-end">
+              <a href="{% url 'customer:subscription_template_add' %}" type="button" class="btn btn-success">Создать</a>
+            </div>
+          </div>
+    </div>
+
+    <div class="card-body p-4">
+        <!-- Выполнить -->
+  
+      <div class="table-responsive mb-4 border rounded-1">
+        <table class="table text-nowrap mb-0 align-middle">
+            <thead class="text-dark fs-4">
+                <tr>
+                  <th>
+                    №
+                  </th>
+                  <th>Название</th>
+                  <th>Стоимость</th>
+                  <th>Кол-во занятий</th>
+                  <th>Срок действия</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in objects_list %}
+                <tr>
+                  <td>{{forloop.counter}}</td>
+                  <td>
+                    <p class="mb-0 fw-normal">{{item.name}}</p>
+                  </td>
+                  <td>
+                    <p class="mb-0 fw-normal">{{item.price}} руб</p>
+                  </td>
+                  <td>
+                    <p class="mb-0 fw-normal">
+                        {% if item.unlimited == True %}
+                            Безлимитный
+                        {% else %}
+                            {{item.number_classes}} пос.
+                        {% endif %}
+                    </p>
+                  </td>
+                  <td>
+                    <p class="mb-0 fw-normal">
+                        {{item.expired}}
+                        
+                        {% if item.is_day == True %}
+                            дн.
+                        {% elif item.is_week == True %}
+                            нед.
+                        {% elif item.is_month == True  %}
+                            мес.
+                        {% endif %}
+                    </p>
+                  </td>
+                  <td>
+      
+      
+                    <div class="row">
+                      <div class="col-md-3">
+                          <a  class="btn btn-sm btn-primary" href="{% url 'customer:subscription_template_update' item.id %}">
+                            <i class="ti ti-edit fs-5"></i>
+                          </a>
+                          <a href="{% url 'customer:subscription_template_delete' item.id %}" class="btn btn-sm btn-danger btn-delete-client">
+                            <i class="ti ti-trash fs-5"></i>
+                          </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}

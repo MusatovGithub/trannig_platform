@@ -1,0 +1,138 @@
+{% with render_mode=render_mode|default:'content' %}
+{% if render_mode == 'content' %}
+<div id="customer-subscription-modals-{{ customer.id }}"
+     data-customer-id="{{ customer.id }}">
+  {% for subscription in customer.subscriptions %}
+    <div class="modal fade"
+         id="with-grid-modal{{ subscription.id }}"
+         tabindex="-1"
+         aria-labelledby="subscription-modal-label-{{ subscription.id }}"
+         aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header d-flex align-items-center">
+            <h4 class="modal-title" id="subscription-modal-label-{{ subscription.id }}">
+              Информация об абонементе
+            </h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row mt-3">
+                <div class="col-lg-12 py-3">
+                  <ul class="list-group">
+                    <li class="list-group-item d-flex align-items-center">
+                      Клиент
+                      <span class="badge bg-light-primary text-primary ms-auto">{{ customer.full_name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                      Действует в группах
+                      <span class="badge bg-light-danger text-danger ms-auto">
+                        {% for gr in subscription.groups.all %}
+                          <a href="{% url 'groups_custumer:groups_detail' group.id %}"
+                             class="nav-link text-info">{{ gr.name }}</a>
+                        {% endfor %}
+                      </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                      Стоимость
+                      <span class="badge bg-light-success text-primary ms-auto">
+                        {% if subscription.is_free %}
+                          Бесплатно
+                        {% else %}
+                          {{ subscription.total_cost|default:"Не указана" }}
+                        {% endif %}
+                      </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                      {% if subscription.unlimited %}
+                        Количество посещений
+                        <span class="badge bg-light-success text-primary ms-auto">Безлимитный</span>
+                      {% else %}
+                        Остаток посещений
+                        <span class="badge bg-light-success text-primary ms-auto">
+                          {{ subscription.count_of_trainnig_left }} из {{ subscription.number_classes }}
+                        </span>
+                      {% endif %}
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                      <p class="mb-0">Выдал - {{ subscription.owner }}</p>
+                      <span class="badge bg-light-success text-primary ms-auto">
+                        {{ subscription.created_at }}
+                      </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                      Действует
+                      <span class="badge bg-light-success text-primary ms-auto">
+                        {{ subscription.start_date }} - {{ subscription.end_date }}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="card-body">
+                    <h5 class="card-title mb-4">Отмеченные посещения</h5>
+                    <ul class="timeline-widget mb-0 position-relative mb-n5"
+                        data-simplebar
+                        style="height: 397px;">
+                      {% for atten in subscription.filtered_attendance %}
+                        {% if atten.attendance_status in 'attended_2,attended_3,attended_4,attended_5,attended_10,not_attended' %}
+                          <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time mt-n1 text-muted flex-shrink-0 text-end">
+                              {{ atten.date }}
+                            </div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                              <span class="timeline-badge bg-primary flex-shrink-0 mt-2"></span>
+                              <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-12 text-muted mt-n1">
+                              {% if atten.attendance_status == 'attended_2' %}
+                                <a href="#" class="nav-link">Был (2)</a>
+                              {% elif atten.attendance_status == 'attended_3' %}
+                                <a href="#" class="nav-link">Был (3)</a>
+                              {% elif atten.attendance_status == 'attended_4' %}
+                                <a href="#" class="nav-link">Был (4)</a>
+                              {% elif atten.attendance_status == 'attended_5' %}
+                                <a href="#" class="nav-link">Был (5)</a>
+                              {% elif atten.attendance_status == 'attended_10' %}
+                                <a href="#" class="nav-link">Был (10)</a>
+                              {% elif atten.attendance_status == 'not_attended' %}
+                                <a href="#" class="nav-link">Не был</a>
+                              {% endif %}
+                              {{ atten.gr_class }}
+                            </div>
+                          </li>
+                        {% endif %}
+                      {% empty %}
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                          <div class="timeline-desc fs-12 text-muted mt-n1">
+                            Отмеченных посещений нет
+                          </div>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button"
+                    class="btn bg-danger-subtle text-danger waves-effect text-start"
+                    data-bs-dismiss="modal">
+              Закрыть
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div id="customer-subscription-modals-{{ customer.id }}" data-customer-id="{{ customer.id }}"></div>
+{% endif %}
+{% endwith %}
+

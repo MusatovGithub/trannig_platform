@@ -1,0 +1,108 @@
+{% load user_groups %}
+<!-- ---------------------------------- -->
+<!-- Dashboard -->
+<!-- ---------------------------------- -->
+<nav class="sidebar-nav scroll-sidebar" data-simplebar>
+    {% is_admin as user_is_admin %}
+    {% is_client as user_is_client %}
+    {% if user_is_admin %}
+    <ul class="sidebar-menu" id="sidebarnav">
+        <!-- ---------------------------------- -->
+        <!-- Dashboard -->
+        <!-- ---------------------------------- -->
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'supervisor' %}active{% endif %}" href="{% url 'supervisor:cabinet' %}" aria-expanded="false">
+              <iconify-icon icon="solar:home-bold" class=""></iconify-icon>
+              <span class="hide-menu">Главная</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'customer' %}active{% endif %}" href="{% url 'customer:customer_list' %}" aria-expanded="false">
+              <iconify-icon icon="solar:stretching-bold" class=""></iconify-icon>
+              <span class="hide-menu">Клиенты</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'groups_custumer' %}active{% endif %}" href="{% url 'groups_custumer:groups_all' %}" aria-expanded="false">
+              <iconify-icon icon="solar:users-group-rounded-bold-duotone" class=""></iconify-icon>
+              <span class="hide-menu">Группы</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'group_classe' %}active{% endif %}" href="{% url 'group_classe:group_classess' %}" aria-expanded="false">
+              <iconify-icon icon="solar:folder-favourite-star-bold" class=""></iconify-icon>
+              <span class="hide-menu">Занятия</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'employe' %}active{% endif %}" href="{% url 'employe:employe_list' %}" aria-expanded="false">
+              <iconify-icon icon="solar:shield-user-bold" class=""></iconify-icon>
+              <span class="hide-menu">Сотрудники</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'achievements' %}active{% endif %}" href="{% url 'achievements:achievement_list' %}" aria-expanded="false">
+              <iconify-icon icon="solar:medal-bold" class="bi bi-award-fill"></iconify-icon>
+              <span class="hide-menu">Достижения</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'news' %}active{% endif %}" href="{% url 'news:news_list' %}" aria-expanded="false">
+              <iconify-icon icon="bi:newspaper" class=""></iconify-icon>
+              <span class="hide-menu">Новости</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'competitions' %}active{% endif %}" href="{% url 'competitions:competitions_list' %}" aria-expanded="false">
+              <iconify-icon icon="solar:cup-bold" class=""></iconify-icon>
+              <span class="hide-menu">Соревнования</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'market' %}active{% endif %}" href="{% url 'market:get_product_list' %}" aria-expanded="false">
+              <iconify-icon icon="solar:shop-bold" class=""></iconify-icon>
+              <span class="hide-menu">Магазин</span>
+          </a>
+        </li>
+    </ul>
+    {% elif user_is_client %}
+      <ul class="sidebar-menu" id="sidebarnav">
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.namespace == 'client' %}active{% endif %}" href="{% url 'supervisor:home_client' %}" aria-expanded="false">
+              <iconify-icon icon="solar:home-bold"></iconify-icon>
+              <span class="hide-menu">Главная</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.url_name == 'my_achievements' %}active{% endif %}" href="{% url 'customer:my_achievements' %}" aria-expanded="false">
+              <iconify-icon icon="solar:medal-bold" class="bi bi-award-fill"></iconify-icon>
+              <span class="hide-menu">Мои достижения</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.url_name == 'get_client_diary' %}active{% endif %}" href="{% url 'customer:get_client_diary' %}" aria-expanded="false">
+              <iconify-icon icon="solar:book-2-bold"></iconify-icon>
+              <span class="hide-menu">Дневник</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.url_name == 'get_my_competitions' %}active{% endif %}" href="{% url 'customer:get_my_competitions' %}" aria-expanded="false">
+              <iconify-icon icon="solar:cup-bold"></iconify-icon>
+              <span class="hide-menu">Мои соревнования</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.url_name == 'get_marketplace' %}active{% endif %}" href="{% url 'customer:get_marketplace' %}">
+            <i class="bi bi-shop"></i>
+            <span class="hide-menu">Магазин</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link {% if request.resolver_match.url_name == 'get_my_purchases' %}active{% endif %}" href="{% url 'customer:get_my_purchases' %}">
+            <i class="bi bi-bag-check"></i>
+            <span class="hide-menu">Мои покупки</span>
+          </a>
+        </li>
+      </ul>
+  {% endif %}
+</nav>
